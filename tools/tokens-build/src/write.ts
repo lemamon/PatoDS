@@ -1,5 +1,5 @@
-// Escrita determinística (FR-015, SC-002): JSON canônico com chaves ordenadas por code point, LF,
-// sem timestamp nem caminho absoluto. Dois builds da mesma fonte produzem bytes idênticos.
+// Deterministic writing (FR-015, SC-002): canonical JSON with code-point-sorted keys, LF, no
+// timestamp and no absolute path. Two builds of the same source produce identical bytes.
 import { writeFile, mkdir } from 'node:fs/promises'
 import { dirname } from 'node:path'
 
