@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// CLI de checagens do repositório (tools-cli.md). Saída: 0 ok; 1 violação; 2 uso; 3 interno.
+// Repository checks CLI (tools-cli.md). Exit: 0 ok; 1 violation; 2 usage; 3 internal.
 import { parseArgs } from 'node:util'
 import { resolve } from 'node:path'
 import { scanRepo } from './scan.ts'
@@ -7,7 +7,7 @@ import { checkLayers } from './layers.ts'
 import { checkDeterminism, checkDrift } from './determinism.ts'
 
 function findRoot(): string {
-  // repo-checks roda em tools/repo-checks; a raiz tem pnpm-workspace.yaml.
+  // repo-checks runs in tools/repo-checks; the root has pnpm-workspace.yaml.
   return resolve(process.cwd(), '../..')
 }
 
