@@ -1,5 +1,5 @@
-// Adaptador em memória (fake) para testes, com injeção de falhas (design-sync.md). Nunca escreve
-// no repositório; implementa só a porta de leitura/escrita na "ferramenta".
+// In-memory (fake) adapter for tests, with fault injection (design-sync.md). Never writes to the
+// repository; implements only the read/write-to-"tool" port.
 import type { Capabilities, DesignToolPort, PlanOp, ToolVariable } from '../ports.ts'
 
 export interface Faults {
@@ -62,7 +62,7 @@ export class InMemoryDesignTool implements DesignToolPort {
     return this.caps.publish === 'api' ? 'published' : { manual: 'Publique a biblioteca manualmente.' }
   }
 
-  // Helpers de teste
+  // Test helpers
   seed(vars: ToolVariable[]): void {
     for (const v of vars) this.vars.set(v.name, { ...v })
   }
