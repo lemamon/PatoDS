@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-// CLI de sincronização (tools-cli.md). Saída: 0 ok; 1 divergência; 2 uso; 3 interno; 4 acesso;
-// 5 verificação. Só o adaptador "memory" roda aqui; o adaptador da ferramenta real é escrito após
-// a decisão do requerente (ADR-14).
+// Sync CLI (tools-cli.md). Exit: 0 ok; 1 divergence; 2 usage; 3 internal; 4 access; 5 verify.
+// Only the "memory" adapter runs here; the real tool adapter is written after the requester
+// decides on the tool (ADR-14).
 import { parseArgs } from 'node:util'
 import { readFileSync } from 'node:fs'
 import { resolve, join } from 'node:path'
@@ -37,7 +37,7 @@ async function main(): Promise<number> {
     process.stdout.write(JSON.stringify(out, null, 2) + '\n')
     return out.length ? 1 : 0
   }
-  // apply
+  // apply command
   const res = await sync(tool, desired)
   process.stdout.write(`sync: ${res.state}, ${res.plan.length} operações, ${res.restored.length} restauradas.\n`)
   return res.state === 'verified' ? 0 : 5
