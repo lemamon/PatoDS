@@ -53,6 +53,8 @@ export async function scanRepo(root: string): Promise<ScanFinding[]> {
   const out: ScanFinding[] = []
   for (const file of tracked) {
     if (matchesAllow(file, allow)) continue
+    // Arquivos de teste e fixtures não são distribuídos; o FR-001 vale para a fonte embarcada.
+    if (/(^|\/)(test|tests|fixtures|__tests__)\//.test(file) || /\.(test|spec)\.[tj]sx?$/.test(file)) continue
     if (!SCAN_EXT.test(file) && !file.endsWith('.tokens.json')) continue
     let text = ''
     try {
