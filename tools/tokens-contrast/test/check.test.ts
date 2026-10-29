@@ -62,8 +62,8 @@ describe('runContrastCheck (US4)', () => {
       },
     )
     const r = runContrastCheck(dir, TH)
-    // preto sobre (preto-60% sobre branco=#666): razão ~3.66. Se tivesse assumido o scrim como
-    // preto opaco, a razão seria 1 (preto sobre preto). A composição dá um valor intermediário.
+    // black over (black-60% over white=#666): ratio ~3.66. Had it assumed the scrim was opaque
+    // black, the ratio would be 1 (black on black). Compositing yields an intermediate value.
     const row = r.report.rows.find((x) => x.pair === 'scrim')!
     expect(row.ratio).toBeGreaterThan(3)
     expect(row.ratio).toBeLessThan(5)
