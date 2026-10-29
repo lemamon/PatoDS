@@ -295,12 +295,12 @@ primeiro e compõe o segundo sobre o fundo (spec US4).
 
 ### Testes (US4)
 
-- [ ] T055 [P] [US4] Fixtures de manifesto em `tools/tokens-contrast/fixtures/`: par reprovado, par
+- [x] T055 [P] [US4] Fixtures de manifesto em `tools/tokens-contrast/fixtures/`: par reprovado, par
   translúcido composto, pilha sem base opaca (V-16), conjunto de superfícies vazio num modo, token
   ausente numa permutação (V-14), par isento `wcag-inactive` abaixo do mínimo (reportado, não falha),
   grupo "any-of" com um lado aprovado e outro sem lado aprovado, limiares incoerentes (código 2),
   `emitted-mismatch`
-- [ ] T056 [P] [US4] Testes unitários em `tools/tokens-contrast/test/check.test.ts` da composição
+- [x] T056 [P] [US4] Testes unitários em `tools/tokens-contrast/test/check.test.ts` da composição
   (float e 8 bits por dobra, menor dos dois), isenção, grupo any-of e truncamento/ordem do relatório
   (FR-020, SC-002, QA-02)
 
@@ -310,15 +310,15 @@ primeiro e compõe o segundo sobre o fundo (spec US4).
   (`manifest.schema.json`, `surfaces.schema.json`) conforme contrast-manifest.md: `pairs[]` com `id`,
   `fg`, `bg` (pilha ou `@conjunto`), `state` do vocabulário versionado, `kind`, `group`, `exempt`;
   referências só a tokens semânticos públicos ou de componente (FR-019); dono de a11y no CODEOWNERS
-- [ ] T058 [US4] Criar `tools/tokens-contrast` (`@<prefixo>/tokens-contrast`, devDependency de
+- [x] T058 [US4] Criar `tools/tokens-contrast` (`@<prefixo>/tokens-contrast`, devDependency de
   `@<prefixo>/color` e dos manifestos de `@<prefixo>/tokens`): `bin` `tokens-contrast check`, códigos
   de saída 0–3
-- [ ] T059 [US4] Implementar o checker em `tools/tokens-contrast/src/check.ts`: para cada par e
+- [x] T059 [US4] Implementar o checker em `tools/tokens-contrast/src/check.ts`: para cada par e
   permutação, resolver via `tokens.manifest.json` (`color.emitted`), compor alfa sobre pilha opaca ou
   `@conjunto` expandido, aplicar o módulo WCAG de `@<prefixo>/color`, mínimos de
   `quality/thresholds.json`, isenção `wcag-inactive`, grupo any-of, `emitted-mismatch`; par reprovado
   falha o build (FR-020, FR-021 parte de dados, A11Y-09, SC-008)
-- [ ] T060 [US4] Emitir o relatório de contraste JSON e Markdown (ordenado por id, marca e modo, sem
+- [x] T060 [US4] Emitir o relatório de contraste JSON e Markdown (ordenado por id, marca e modo, sem
   timestamp, razões truncadas a 2 casas na tabela) e retê-lo como evidência (ACE-02)
 - [ ] T061 [P] [US4] Amostras em navegador real em `apps/tokens-example/tests/contrast.spec.ts`:
   renderizar um swatch por par e permutação do tarball, pintar a pilha opaca em ancestrais reais,
