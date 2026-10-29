@@ -18,7 +18,7 @@ async function lintCodes(code: string): Promise<string[]> {
 
 describe('patods/design-tokens', () => {
   beforeAll(() => {
-    // garante o manifesto gerado
+    // ensure the manifest is generated
     execFileSync('node', [join(PKG, '../../tools/tokens-build/src/cli.ts'), 'build'], { cwd: PKG, stdio: 'pipe' })
   })
 
