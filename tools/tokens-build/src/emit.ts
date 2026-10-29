@@ -1,4 +1,4 @@
-// Serialização de um valor DTCG resolvido para string CSS, por $type (css-output.md §11).
+// Serializes a resolved DTCG value to a CSS string, by $type (css-output.md §11).
 import { toEmittedSrgb, type DtcgColor } from '@patods/color'
 
 export class UnserializableValueError extends Error {
@@ -21,8 +21,8 @@ function fontFamily(v: any): string {
   return arr.map((f: string) => (/\s/.test(f) ? `"${f}"` : f)).join(', ')
 }
 
-/** Serializa o $value resolvido de um token. Lança UnserializableValueError para compostos
- * sem valor CSS único (typography composto, strokeStyle em objeto). */
+/** Serializes a token's resolved $value. Throws UnserializableValueError for composites
+ * without a single CSS value (composite typography, object-form strokeStyle). */
 export function emitValue(type: string, value: any, id: string): string {
   switch (type) {
     case 'color':
