@@ -270,14 +270,14 @@ regenerado), com as mesmas chaves semânticas e troca em runtime.
 **Independent Test**: adicionar a marca sintética `c` e conferir no diff que só mudaram arquivos de
 tokens; a checagem de chaves passa; a app alterna para `c` em runtime (spec US3).
 
-- [ ] T052 [P] [US3] Teste de integração em `tools/tokens-build/test/add-brand.test.ts`: copiar a
+- [x] T052 [P] [US3] Teste de integração em `tools/tokens-build/test/add-brand.test.ts`: copiar a
   fonte para worktree temporária, acrescentar o contexto `c` e `semantic/brand/c.tokens.json`,
   rodar `tokens-build build`, e afirmar que `git diff --name-only` toca só `packages/tokens/src/**` e
   `packages/tokens/api/tokens.api.json` (FR-009, SC-005)
 - [ ] T053 [P] [US3] Teste em navegador real em `apps/tokens-example/tests/add-brand.spec.ts`: com a
   marca `c` na worktree, a app alterna para `c` em runtime; valores mudam sem recarregar e sem
   alteração de código de componente (US3 cenário 3)
-- [ ] T054 [US3] Confirmar que a paridade de chaves (T031) e o diff aceitam a marca `c`: fixture em
+- [x] T054 [US3] Confirmar que a paridade de chaves (T031) e o diff aceitam a marca `c`: fixture em
   que `c` tem chave ausente ou excedente é bloqueada (US3 cenário 2); documentar os passos de
   "adicionar uma marca" em [quickstart.md](quickstart.md) se ainda não cobertos
 
