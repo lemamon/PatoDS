@@ -1,0 +1,72 @@
+# CI dos tokens (esqueleto). Todas as actions são fixadas por digest SHA (ENG-18).
+# Os SHAs abaixo são marcadores; a feature de CI e governança os fixa nos digests reais.
+name: tokens-ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tokens-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  TURBO_TELEMETRY_DISABLED: "1"
+  DO_NOT_TRACK: "1"
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # Piso (premissa vigente: Node em LTS) e mais recente (ENG-08).
+        node: ["22", "24"]
+    steps:
+      # actions/checkout@v5 — fixar por digest SHA na feature de CI
+      - uses: actions/checkout@<sha>
+      # actions/setup-node@v4 — fixar por digest SHA
+      - uses: actions/setup-node@<sha>
+        with:
+          node-version: ${{ matrix.node }}
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm check:layers
+      - run: pnpm check:scan
+      - run: pnpm tokens:validate
+      - run: pnpm tokens:build
+      - run: pnpm contrast:check
+      - run: pnpm lint:styles
+      - run: pnpm test
+      - run: pnpm test:types
+      - run: pnpm check:drift
+
+  e2e:
+    runs-on: ubuntu-latest
+    # No PR roda só Chromium; o noturno (workflow separado) roda todos os motores (QA-12).
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.1-noble@sha256:<digest>
+    steps:
+      - uses: actions/checkout@<sha>
+      - uses: actions/setup-node@<sha>
+        with:
+          node-version: "24"
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test:e2e -- --project=chromium
+
+  nightly-determinism:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@<sha>
+      - uses: actions/setup-node@<sha>
+        with:
+          node-version: "24"
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm check:determinism
