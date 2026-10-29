@@ -1,4 +1,4 @@
-// Determinismo (FR-015, SC-002) e drift (QA-08) do build de tokens.
+// Determinism (FR-015, SC-002) and drift (QA-08) of the token build.
 import { execFileSync } from 'node:child_process'
 import { readFileSync, readdirSync, statSync } from 'node:fs'
 import { createHash } from 'node:crypto'
@@ -70,10 +70,10 @@ export function checkDeterminism(root: string): CheckFinding[] {
 
 export function checkDrift(root: string): CheckFinding[] {
   const out: CheckFinding[] = []
-  // dist não pode ser versionado
+  // dist must not be tracked
   const trackedDist = execFileSync('git', ['ls-files', 'packages/tokens/dist'], { cwd: root, encoding: 'utf8' }).trim()
   if (trackedDist) out.push({ code: 'DRIFT-DIST-TRACKED', message: 'Arquivos gerados em dist/ estão versionados.' })
-  // api regenerado deve deixar o git limpo
+  // regenerated api report must leave git clean
   buildOnce(root, {})
   const dirty = execFileSync('git', ['status', '--porcelain', 'packages/tokens/api'], { cwd: root, encoding: 'utf8' }).trim()
   if (dirty) out.push({ code: 'DRIFT-API-STALE', message: `Relatório de API desatualizado (regenere e commit):\n${dirty}` })
