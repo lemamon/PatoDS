@@ -66,6 +66,32 @@ export function over(
   return [out[0]!, out[1]!, out[2]!]
 }
 
+/** Lê de volta uma string CSS emitida (#rgb, #rrggbb, #rrggbbaa ou rgb(r g b / a)) para
+ * componentes sRGB (0..1) e alfa. */
+export function parseEmitted(s: string): { rgb: [number, number, number]; alpha: number } {
+  const t = s.trim()
+  const hex = t.match(/^#([0-9a-f]{3,8})$/i)
+  if (hex) {
+    let h = hex[1]!
+    if (h.length === 3 || h.length === 4) h = h.split('').map((c) => c + c).join('')
+    const n = (i: number) => parseInt(h.slice(i, i + 2), 16) / 255
+    return { rgb: [n(0), n(2), n(4)], alpha: h.length === 8 ? n(6) : 1 }
+  }
+  const rgb = t.match(/^rgba?\(([^)]+)\)$/i)
+  if (rgb) {
+    const body = rgb[1]!.replace(/\//g, ' ').replace(/,/g, ' ')
+    const parts = body.split(/\s+/).filter(Boolean)
+    const num = (x: string) => (x.endsWith('%') ? parseFloat(x) / 100 : parseFloat(x))
+    const r = num(parts[0]!)
+    const g = num(parts[1]!)
+    const b = num(parts[2]!)
+    const a = parts[3] !== undefined ? num(parts[3]) : 1
+    const scale = r > 1 || g > 1 || b > 1 ? 255 : 1
+    return { rgb: [r / scale, g / scale, b / scale], alpha: a }
+  }
+  throw new Error(`Cor emitida não reconhecida: ${s}`)
+}
+
 /** Razão de contraste WCAG 2.x (sem arredondamento). */
 export function contrastRatio(l1: number, l2: number): number {
   const hi = Math.max(l1, l2)
