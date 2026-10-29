@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// CLI do tokens-build (tools-cli.md). Códigos de saída: 0 ok; 1 violação; 2 uso/config; 3 interno.
+// tokens-build CLI (tools-cli.md). Exit codes: 0 ok; 1 violation; 2 usage/config; 3 internal.
 import { parseArgs } from 'node:util'
 import { resolve } from 'node:path'
 import { loadTokens } from './adapter.ts'
@@ -39,7 +39,7 @@ async function main(): Promise<number> {
   try {
     load = await loadTokens(srcDir)
   } catch (err) {
-    // Erros do parser (V-01 schema, V-03 alias/ciclo) chegam aqui.
+    // Parser errors (V-01 schema, V-03 alias/cycle) land here.
     process.stderr.write(`erro  TKN-PARSE  ${(err as Error).message}\n`)
     return 1
   }
@@ -60,7 +60,7 @@ async function main(): Promise<number> {
     return findings.length > 0 ? 1 : 0
   }
 
-  // build
+  // build command
   if (findings.length > 0) {
     printFindings(findings, Boolean(values.json))
     process.stderr.write('build abortado: a validação falhou.\n')
