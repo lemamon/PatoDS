@@ -1,5 +1,5 @@
-# CI dos tokens (esqueleto). Todas as actions são fixadas por digest SHA (ENG-18).
-# Os SHAs abaixo são marcadores; a feature de CI e governança os fixa nos digests reais.
+# Tokens CI (skeleton). All actions are pinned by SHA digest (ENG-18).
+# The SHAs below are placeholders; the CI and governance feature pins the real digests.
 name: tokens-ci
 
 on:
@@ -24,12 +24,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Piso (premissa vigente: Node em LTS) e mais recente (ENG-08).
+        # Floor (current premise: Node on LTS) and latest (ENG-08).
         node: ["22", "24"]
     steps:
-      # actions/checkout@v5 — fixar por digest SHA na feature de CI
+      # actions/checkout@v5 - pin by SHA digest in the CI feature
       - uses: actions/checkout@<sha>
-      # actions/setup-node@v4 — fixar por digest SHA
+      # actions/setup-node@v4 - pin by SHA digest
       - uses: actions/setup-node@<sha>
         with:
           node-version: ${{ matrix.node }}
@@ -47,7 +47,7 @@ jobs:
 
   e2e:
     runs-on: ubuntu-latest
-    # No PR roda só Chromium; o noturno (workflow separado) roda todos os motores (QA-12).
+    # On PRs only Chromium runs; the nightly (separate workflow) runs all engines (QA-12).
     container:
       image: mcr.microsoft.com/playwright:v1.64.1-noble@sha256:<digest>
     steps:
