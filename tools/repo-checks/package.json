@@ -1,0 +1,22 @@
+{
+  "name": "@patods/repo-checks",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "bin": {
+    "repo-checks": "./src/cli.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "check:scan": "node ./src/cli.ts scan-tokens",
+    "check:layers": "node ./src/cli.ts layers",
+    "check:determinism": "node ./src/cli.ts determinism",
+    "check:drift": "node ./src/cli.ts drift"
+  },
+  "devDependencies": {
+    "typescript": "catalog:",
+    "vitest": "catalog:",
+    "@vitest/coverage-v8": "catalog:"
+  }
+}
