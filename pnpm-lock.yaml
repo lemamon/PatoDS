@@ -233,6 +233,9 @@ importers:
       '@patods/tokens-build':
         specifier: workspace:*
         version: link:../../tools/tokens-build
+      '@patods/tokens-contrast':
+        specifier: workspace:*
+        version: link:../../tools/tokens-contrast
 
   tools/color:
     dependencies:
@@ -276,6 +279,22 @@ importers:
       ajv:
         specifier: 'catalog:'
         version: 8.20.0
+    devDependencies:
+      '@vitest/coverage-v8':
+        specifier: 'catalog:'
+        version: 5.0.5(vitest@5.0.5)
+      typescript:
+        specifier: 'catalog:'
+        version: 6.0.3
+      vitest:
+        specifier: 'catalog:'
+        version: 5.0.5(@vitest/coverage-v8@5.0.5)(vite@8.3.5)
+
+  tools/tokens-contrast:
+    dependencies:
+      '@patods/color':
+        specifier: workspace:*
+        version: link:../color
     devDependencies:
       '@vitest/coverage-v8':
         specifier: 'catalog:'
