@@ -4,7 +4,7 @@ packages:
   - apps/*
   - tests/*
 
-# Supply chain (ENG-16, ENG-24): lockfile congelado, scripts de instalação só na allowlist.
+# Supply chain (ENG-16, ENG-24): frozen lockfile, install scripts only via the allowlist.
 minimumReleaseAge: 1440
 blockExoticSubdeps: true
 trustPolicy: no-downgrade
@@ -13,8 +13,8 @@ allowBuilds:
   esbuild: false
   fsevents: true
 
-# Versão única por dependência (ENG-08, ENG-25). O catálogo nomeado typescript7 cobre o eixo
-# "mais recente" da matriz; o compilador de emissão é o TypeScript 6.0.
+# Single version per dependency (ENG-08, ENG-25). The named typescript7 catalog covers the matrix
+# "latest" axis; the emitting compiler is TypeScript 6.0.
 catalogMode: strict
 catalog:
   "@terrazzo/parser": 2.9.0
