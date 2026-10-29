@@ -1,12 +1,12 @@
 {
-  "$comment": "Arquivo versionado de limiares do CI (QA-14). Alterável só com aprovação do requerente. Valores pendentes marcados.",
+  "$comment": "Versioned CI thresholds file (QA-14). Changeable only with the requester's approval. Pending values are marked.",
   "contrast": {
     "level": "WCAG22-AA",
     "text": 4.5,
     "nonText": 3
   },
   "bundle": {
-    "$comment": "Orçamento de bundle por cenário (QA-07). Valores em KB comprimidos, pendentes com o requerente.",
+    "$comment": "Bundle budget per scenario (QA-07). Values in gzipped KB, pending with the requester.",
     "perBrandCssGzipKb": null,
     "singleComponentGzipKb": null,
     "allComponentsGzipKb": null
