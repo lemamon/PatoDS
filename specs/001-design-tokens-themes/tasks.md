@@ -427,7 +427,7 @@ da decisão do requerente.
 
 **Purpose**: fechamento, rastreabilidade e requisitos transversais.
 
-- [ ] T077 [P] Escrever `packages/tokens/README.md` com propósito, instalação, uso mínimo e link para
+- [x] T077 [P] Escrever `packages/tokens/README.md` com propósito, instalação, uso mínimo e link para
   a documentação completa (DOC-08)
 - [ ] T078 [P] Gerar/escrever `docs/tokens/convencao-de-nomes.md` a partir do contrato
   [token-source.md](contracts/token-source.md) e ligar o check que compara os vocabulários do
