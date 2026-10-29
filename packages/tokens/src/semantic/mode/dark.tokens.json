@@ -1,0 +1,17 @@
+{
+  "$description": "Tokens semânticos de eixo modo, modo escuro (FR-033): aliam o token brand.* correspondente no modo dark.",
+  "color": {
+    "$type": "color",
+    "bg": {
+      "surface": { "$value": "{brand.color.bg.surface.dark}" },
+      "accent": { "$value": "{brand.color.bg.accent.dark}" }
+    },
+    "fg": {
+      "default": { "$value": "{brand.color.fg.default.dark}" },
+      "on-accent": { "$value": "{brand.color.fg.on-accent.dark}" }
+    },
+    "border": {
+      "default": { "$value": "{brand.color.border.default.dark}" }
+    }
+  }
+}
