@@ -1,5 +1,5 @@
-// Núcleo puro e determinístico da sincronização (DSN-01 a DSN-05, DSN-11). Opera sobre um estado
-// desejado abstrato e um snapshot da ferramenta; não conhece nenhuma ferramenta concreta.
+// Pure, deterministic sync core (DSN-01..DSN-05, DSN-11). Operates on an abstract desired state and
+// a tool snapshot; it knows no concrete tool.
 import { createHash } from 'node:crypto'
 import type { DesignToolPort, PlanOp, ToolVariable } from './ports.ts'
 
@@ -9,7 +9,7 @@ export interface DesiredVar {
   key: string
 }
 
-/** Estado desejado a partir do sync-manifest.json gerado pelo build (build-manifests.md §3). */
+/** Desired state from the build-generated sync-manifest.json (build-manifests.md §3). */
 export function readDesired(syncManifest: any): DesiredVar[] {
   return (syncManifest.variables ?? [])
     .map((v: any) => {
@@ -19,7 +19,7 @@ export function readDesired(syncManifest: any): DesiredVar[] {
     .sort((a: DesiredVar, b: DesiredVar) => a.name.localeCompare(b.name))
 }
 
-/** Plano idempotente: create → update → rename → delete, só em variáveis gerenciadas. */
+/** Idempotent plan: create -> update -> rename -> delete, only on managed variables. */
 export function diff(desired: DesiredVar[], snapshot: ToolVariable[]): PlanOp[] {
   const byName = new Map(snapshot.map((v) => [v.name, v]))
   const byKey = new Map(snapshot.filter((v) => v.key).map((v) => [v.key!, v]))
@@ -40,7 +40,7 @@ export function diff(desired: DesiredVar[], snapshot: ToolVariable[]): PlanOp[] 
       }
     }
   }
-  // deletes: variáveis gerenciadas que sobraram (edições manuais extras)
+  // deletes: leftover managed variables (extra manual edits)
   const keptByRename = new Set(ops.filter((o) => o.op === 'rename').map((o: any) => o.from))
   for (const v of snapshot) {
     if (!desiredNames.has(v.name) && !keptByRename.has(v.name)) ops.push({ op: 'delete', name: v.name })
@@ -65,7 +65,7 @@ export function fingerprint(kind: string, name: string, tool = 'memory'): string
   return createHash('sha256').update(`${kind}|${name}|${tool}`).digest('hex').slice(0, 16)
 }
 
-/** Divergências (DSN-11): cada op do plano vira um item rastreável deduplicado. */
+/** Divergences (DSN-11): each plan op becomes a deduplicated trackable item. */
 export function detect(plan: PlanOp[]): Divergence[] {
   return plan.map((o) => {
     const kind = o.op === 'update' ? 'value' : o.op
@@ -81,7 +81,7 @@ export interface SyncResult {
   error?: string
 }
 
-/** Aplica o plano e verifica relendo o snapshot (diff final deve ser vazio). */
+/** Applies the plan and verifies by re-reading the snapshot (final diff must be empty). */
 export async function sync(port: DesignToolPort, desired: DesiredVar[], opts: { dryRun?: boolean } = {}): Promise<SyncResult> {
   const before = await port.readSnapshot()
   const plan = diff(desired, before)
