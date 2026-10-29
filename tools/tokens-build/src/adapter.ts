@@ -1,7 +1,7 @@
-// Adaptador do motor de parsing (ADR-11): isola o PatoDS do @terrazzo/parser atrás de uma
-// fronteira fina. Lê a fonte DTCG 2025.10, resolve todas as permutações marca × modo e nunca
-// acessa a rede (FR-025, D1). Se o parser for trocado (ex.: Style Dictionary quando tiver
-// Resolver), só este arquivo muda.
+// Parsing-engine adapter (ADR-11): isolates PatoDS from @terrazzo/parser behind a thin boundary.
+// Reads the DTCG 2025.10 source, resolves every brand x mode permutation, and never touches the
+// network (FR-025, D1). Swapping the parser (e.g. Style Dictionary once it has a Resolver) only
+// changes this file.
 import { parse, defineConfig } from '@terrazzo/parser'
 import { readFile, readdir } from 'node:fs/promises'
 import { fileURLToPath, pathToFileURL } from 'node:url'
@@ -24,8 +24,8 @@ export interface LoadResult {
   tokens: Record<string, any>
   resolver: any
   permutations: Permutation[]
-  /** Classificação de cada id de token por camada/eixo, lida direto dos arquivos-fonte
-   * (o parser, em modo resolver, funde tudo e perde a origem por arquivo). */
+  /** Per-id layer/axis classification, read straight from the source files (in resolver mode the
+   * parser merges everything and loses the per-file origin). */
   decl: Map<string, DeclInfo>
 }
 
@@ -38,7 +38,7 @@ function bucketOf(rel: string): Bucket | undefined {
   return undefined
 }
 
-/** Achata um documento DTCG em ids de token (grupos são objetos sem `$value`). */
+/** Flattens a DTCG document into token ids (groups are objects without `$value`). */
 function flattenIds(node: any, prefix: string, out: string[]): void {
   if (node === null || typeof node !== 'object' || Array.isArray(node)) return
   if ('$value' in node) {
@@ -60,7 +60,7 @@ async function listTokenFiles(dir: string, base: string, acc: string[]): Promise
   return acc
 }
 
-/** Lê os arquivos-fonte e classifica cada id por camada/eixo. */
+/** Reads the source files and classifies each id by layer/axis. */
 async function classify(srcDir: string): Promise<Map<string, DeclInfo>> {
   const decl = new Map<string, DeclInfo>()
   const files = await listTokenFiles(srcDir, srcDir, [])
@@ -77,7 +77,7 @@ async function classify(srcDir: string): Promise<Map<string, DeclInfo>> {
   return decl
 }
 
-/** Carrega e resolve a fonte de tokens de `srcDir`, sem rede. */
+/** Loads and resolves the token source from `srcDir`, offline. */
 export async function loadTokens(srcDir: string): Promise<LoadResult> {
   const cwd = pathToFileURL(srcDir.endsWith('/') ? srcDir : srcDir + '/')
   const resolverUrl = new URL('tokens.resolver.json', cwd)
