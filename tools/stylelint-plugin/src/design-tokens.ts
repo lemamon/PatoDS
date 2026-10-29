@@ -1,6 +1,6 @@
-// Regra Stylelint patods/design-tokens (US5, FR-022/FR-023): barra token primitivo, token
-// brand-mode-source, token desconhecido, valor literal, fallback literal em var() e definição de
-// custom property em CSS de componente. Guiada pelo manifesto de tokens (build-manifests.md).
+// Stylelint rule patods/design-tokens (US5, FR-022/FR-023): blocks primitive tokens, brand-mode-source
+// tokens, unknown tokens, literal values, literal var() fallbacks, and custom-property definitions in
+// component CSS. Driven by the token manifest (build-manifests.md).
 import stylelint from 'stylelint'
 import { readFileSync } from 'node:fs'
 
@@ -44,7 +44,7 @@ function loadManifest(manifestPath: string): Map<string, Entry> {
 }
 
 function hasLiteral(text: string): boolean {
-  // remove spans var(...) antes de procurar literais fora de tokens
+  // strip var(...) spans before looking for literals outside tokens
   const stripped = text.replace(VAR_RE, ' ').replace(/\b(?:calc|min|max|clamp)\(/g, ' ')
   const cleaned = stripped.replace(/[(),/]/g, ' ')
   for (const part of cleaned.split(/\s+/).filter(Boolean)) {
