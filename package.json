@@ -1,0 +1,33 @@
+{
+  "name": "@patods/root",
+  "version": "0.0.0",
+  "private": true,
+  "packageManager": "pnpm@11.28.6",
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "11.28.6",
+      "onFail": "error"
+    }
+  },
+  "engines": {
+    "node": "^22.13.0 || ^24.0.0 || >=26.0.0"
+  },
+  "scripts": {
+    "tokens:validate": "turbo run tokens:validate",
+    "tokens:build": "turbo run tokens:build",
+    "contrast:check": "turbo run contrast:check",
+    "lint:styles": "turbo run lint:styles",
+    "test": "turbo run test",
+    "test:types": "turbo run test:types",
+    "test:e2e": "turbo run test:e2e",
+    "check:determinism": "turbo run check:determinism",
+    "check:drift": "turbo run check:drift",
+    "check:scan": "turbo run check:scan",
+    "check:layers": "turbo run check:layers",
+    "design-sync": "turbo run design-sync --"
+  },
+  "devDependencies": {
+    "turbo": "catalog:"
+  }
+}

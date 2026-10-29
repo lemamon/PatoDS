@@ -1,0 +1,40 @@
+packages:
+  - packages/*
+  - tools/*
+  - apps/*
+  - tests/*
+
+# Supply chain (ENG-16, ENG-24): lockfile congelado, scripts de instalação só na allowlist.
+minimumReleaseAge: 1440
+blockExoticSubdeps: true
+trustPolicy: no-downgrade
+strictDepBuilds: true
+allowBuilds:
+  esbuild: false
+  fsevents: true
+
+# Versão única por dependência (ENG-08, ENG-25). O catálogo nomeado typescript7 cobre o eixo
+# "mais recente" da matriz; o compilador de emissão é o TypeScript 6.0.
+catalogMode: strict
+catalog:
+  "@terrazzo/parser": 2.9.0
+  "@terrazzo/token-tools": 2.9.0
+  ajv: 8.20.0
+  colorjs.io: 0.7.1
+  stylelint: 17.16.0
+  postcss: 8.5.31
+  postcss-selector-parser: 7.1.0
+  "@csstools/css-tokenizer": 4.0.2
+  "@csstools/css-parser-algorithms": 4.0.2
+  vitest: 5.0.5
+  "@vitest/coverage-v8": 5.0.5
+  typescript: 6.0.3
+  "@playwright/test": 1.64.1
+  playwright: 1.64.1
+  expect-type: 1.4.0
+  publint: 0.3.25
+  turbo: 2.11.10
+  vite: 8.3.5
+catalogs:
+  typescript7:
+    typescript: 7.0.2
