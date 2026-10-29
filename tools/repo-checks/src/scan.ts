@@ -1,6 +1,6 @@
-// Varredura do FR-001: nenhum token definido fora da fonte única. Detecta custom properties
-// --patods-* declaradas, chamadas setProperty('--patods-…') e documentos DTCG ($value) fora de
-// packages/tokens/src e da allowlist versionada.
+// Varredura do FR-001: nenhum token definido fora da fonte única. Detecta custom properties no
+// prefixo do projeto declaradas, chamadas de setProperty com esse prefixo e documentos DTCG
+// ($value) fora de packages/tokens/src e da allowlist versionada.
 import { readFile } from 'node:fs/promises'
 import { execFileSync } from 'node:child_process'
 import { join } from 'node:path'
