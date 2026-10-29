@@ -341,21 +341,21 @@ esperados e zero falsos positivos (spec US5).
 
 ### Testes (US5)
 
-- [ ] T063 [P] [US5] Fixtures em `tools/stylelint-plugin/fixtures/valid/` (zero avisos) e
+- [x] T063 [P] [US5] Fixtures em `tools/stylelint-plugin/fixtures/valid/` (zero avisos) e
   `invalid/` (um `/* expect: <código>@<coluna> */` por caso) cobrindo os 9 subcódigos:
   `primitive-token`, `brand-mode-source-token`, `unknown-token` (com e sem prefixo), `literal-value`,
   `var-fallback-literal`, `token-definition`, `control-height`, `control-height-missing`,
   `unclassified-component` (lint-rules.md §3)
-- [ ] T064 [P] [US5] Harness de fixtures em `tools/stylelint-plugin/test/rule.test.ts` comparando
+- [x] T064 [P] [US5] Harness de fixtures em `tools/stylelint-plugin/test/rule.test.ts` comparando
   multiconjunto de `{arquivo, linha, coluna, código}`, exigindo que todo código tenha fixture inválida
   (FR-024, SC-009)
 
 ### Implementação (US5)
 
-- [ ] T065 [US5] Criar `tools/stylelint-plugin` (`@<prefixo>/stylelint-plugin`, devDependency de
+- [x] T065 [US5] Criar `tools/stylelint-plugin` (`@<prefixo>/stylelint-plugin`, devDependency de
   stylelint 17.16.x, `@csstools/*` 4.x, `postcss-selector-parser` 7.x; consome
   `@<prefixo>/tokens/meta/tokens.manifest.json`)
-- [ ] T066 [US5] Implementar a regra `<prefixo>/design-tokens` em
+- [x] T066 [US5] Implementar a regra `<prefixo>/design-tokens` em
   `tools/stylelint-plugin/src/design-tokens.ts`: mapa de propriedades governadas, allowlist de
   palavras-chave (`transparent`, `currentcolor`, `0`, `auto`, `none`, globais), os 9 subcódigos,
   registro de controles só de fixture, regra para `@media`/`@container` (lint-rules.md §3; FR-022,
