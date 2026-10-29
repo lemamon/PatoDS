@@ -39,7 +39,7 @@ function model(tokens: ModelToken[], permIds: string[] = ['a/light']): Model {
 
 const codes = (f: Finding[]) => f.map((x) => x.code)
 
-// Modelo-base válido mínimo cobrindo as 11 categorias com um semântico público cada.
+// Minimal valid base model covering the 11 categories with one public semantic token each.
 const CATS = ['color', 'typography', 'space', 'size', 'radius', 'border', 'shadow', 'motion', 'z-index', 'breakpoint', 'opacity']
 function validBase(): ModelToken[] {
   return CATS.map((c) => tok({ id: `${c}.ok`, category: c, layer: 'semantic', role: 'public', hasAlias: true }))
@@ -69,7 +69,7 @@ describe('validateModel', () => {
   })
 
   it('V-06: colisão de nome CSS', () => {
-    const m = model([...validBase(), tok({ id: 'color.ok', category: 'color' })]) // duplica color.ok
+    const m = model([...validBase(), tok({ id: 'color.ok', category: 'color' })]) // duplicates color.ok
     expect(codes(validateModel(m))).toContain('TKN-NAME-COLLISION')
   })
 
@@ -96,7 +96,7 @@ describe('validateModel', () => {
   it('V-13: chave semântica ausente numa permutação', () => {
     const base = validBase()
     const m = model(base)
-    m.load.permutations[0]!.set = {} // remove todas as chaves da permutação
+    m.load.permutations[0]!.set = {} // remove all keys from the permutation
     expect(codes(validateModel(m))).toContain('TKN-PARITY-MISSING')
   })
 })
