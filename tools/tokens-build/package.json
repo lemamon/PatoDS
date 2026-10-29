@@ -1,0 +1,27 @@
+{
+  "name": "@patods/tokens-build",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "bin": {
+    "tokens-build": "./src/cli.ts"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@patods/color": "workspace:*",
+    "@terrazzo/parser": "catalog:",
+    "@terrazzo/token-tools": "catalog:",
+    "ajv": "catalog:"
+  },
+  "devDependencies": {
+    "typescript": "catalog:",
+    "vitest": "catalog:",
+    "@vitest/coverage-v8": "catalog:"
+  }
+}
