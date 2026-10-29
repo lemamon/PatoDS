@@ -35,9 +35,11 @@
   ],
   "scripts": {
     "tokens:validate": "node ../../tools/tokens-build/src/cli.ts validate",
-    "tokens:build": "node ../../tools/tokens-build/src/cli.ts build"
+    "tokens:build": "node ../../tools/tokens-build/src/cli.ts build",
+    "contrast:check": "node ../../tools/tokens-contrast/src/cli.ts check"
   },
   "devDependencies": {
-    "@patods/tokens-build": "workspace:*"
+    "@patods/tokens-build": "workspace:*",
+    "@patods/tokens-contrast": "workspace:*"
   }
 }
