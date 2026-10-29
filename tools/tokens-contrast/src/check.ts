@@ -1,6 +1,6 @@
-// Checker de contraste (US4, A11Y-09): mede cada par do manifesto em todas as permutações, compondo
-// o alfa sobre a pilha de fundo antes da razão WCAG. Usa o valor emitido do tokens.manifest.json,
-// de modo que o medido é o emitido (contrast-manifest.md).
+// Contrast checker (US4, A11Y-09): measures every manifest pair across all permutations, compositing
+// alpha over the background stack before the WCAG ratio. Uses the emitted value from
+// tokens.manifest.json, so the measured value is the emitted one (contrast-manifest.md).
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { parseEmitted, srgbComponents, over, relativeLuminance, contrastRatio } from '@patods/color'
@@ -33,7 +33,7 @@ function emittedOf(tokensManifest: any, id: string, perm: string): string | unde
   return t?.color?.emitted?.[perm]
 }
 
-/** Compõe uma pilha de fundo (de baixo para cima) num sRGB opaco. */
+/** Composites a background stack (bottom-up) into an opaque sRGB color. */
 function composeBg(stack: string[], manifest: any, perm: string, round8: boolean): [number, number, number] | null {
   let bottom: [number, number, number] | null = null
   for (const id of stack) {
@@ -41,7 +41,7 @@ function composeBg(stack: string[], manifest: any, perm: string, round8: boolean
     if (!s) return null
     const c = parseEmitted(s)
     if (bottom === null) {
-      if (c.alpha < 1) return null // base precisa ser opaca
+      if (c.alpha < 1) return null // the base must be opaque
       bottom = c.rgb
     } else {
       bottom = over(c, bottom, round8)
