@@ -1,0 +1,33 @@
+{
+  "$comment": "Política de licenças (ENG-21). Dependência com licença fora desta lista ou desconhecida falha o check.",
+  "allowed": [
+    "MIT",
+    "ISC",
+    "Apache-2.0",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "MIT-0",
+    "CC0-1.0",
+    "Python-2.0",
+    "0BSD",
+    "BlueOak-1.0.0",
+    "Unlicense"
+  ],
+  "allowedDevOnly": [
+    "MPL-2.0"
+  ],
+  "aliases": {
+    "MIT License": "MIT",
+    "W3C Software and Document License": "W3C"
+  },
+  "overrides": {
+    "svg-tags": {
+      "license": "MIT",
+      "reason": "Declara MIT só pelo campo legado licenses[]; revisado contra o LICENSE do pacote."
+    }
+  },
+  "notes": {
+    "W3C": "Cobre a cópia versionada dos JSON Schemas do DTCG 2025.10 em packages/tokens/schemas; não distribuída no tarball.",
+    "MPL-2.0": "Aceita só como dependência de desenvolvimento não modificada (ex.: lightningcss via Vite, axe-core via Playwright)."
+  }
+}
