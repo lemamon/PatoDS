@@ -4,6 +4,7 @@ import { parseArgs } from 'node:util'
 import { resolve } from 'node:path'
 import { scanRepo } from './scan.ts'
 import { checkLayers } from './layers.ts'
+import { checkDeterminism, checkDrift } from './determinism.ts'
 
 function findRoot(): string {
   // repo-checks roda em tools/repo-checks; a raiz tem pnpm-workspace.yaml.
@@ -30,9 +31,17 @@ async function main(): Promise<number> {
     else for (const f of findings) process.stderr.write(`${f.pkg}  ${f.code}  ${f.message}\n`)
     return findings.length ? 1 : 0
   }
-  if (cmd === 'determinism' || cmd === 'drift') {
-    process.stderr.write(`${cmd}: implementado na fase US2.\n`)
-    return 2
+  if (cmd === 'determinism') {
+    const findings = checkDeterminism(root)
+    for (const f of findings) process.stderr.write(`${f.code}  ${f.message}\n`)
+    if (!findings.length) process.stdout.write('determinismo: saídas idênticas entre execuções.\n')
+    return findings.length ? 1 : 0
+  }
+  if (cmd === 'drift') {
+    const findings = checkDrift(root)
+    for (const f of findings) process.stderr.write(`${f.code}  ${f.message}\n`)
+    if (!findings.length) process.stdout.write('drift: nenhum artefato gerado versionado; relatório de API em dia.\n')
+    return findings.length ? 1 : 0
   }
   process.stderr.write('uso: repo-checks <scan-tokens|layers|determinism|drift> [--json] [--root <dir>]\n')
   return 2
