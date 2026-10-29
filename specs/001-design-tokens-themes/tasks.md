@@ -383,25 +383,25 @@ nenhuma rotina importa variáveis para o repositório (spec US6).
 
 ### Testes (US6)
 
-- [ ] T069 [P] [US6] Implementar `InMemoryDesignTool` em `tools/design-sync/src/adapters/memory.ts`
+- [x] T069 [P] [US6] Implementar `InMemoryDesignTool` em `tools/design-sync/src/adapters/memory.ts`
   com capacidades configuráveis e injeção de falhas (falhar após N operações, 429 com Retry-After,
   403, credencial expirada) e os auxiliares `simulateManualEdit`, `simulateRename`,
   `simulateExtraVariable`, `faults.failAfterOperations` (design-sync.md)
-- [ ] T070 [P] [US6] Implementar `describeDesignToolPortContract` em
+- [x] T070 [P] [US6] Implementar `describeDesignToolPortContract` em
   `tools/design-sync/test/port-contract.test.ts` (casos C-01 a C-18) e rodá-la contra o fake em todo
   PR (QA-02); `InMemoryTracker`, `InMemoryAlert` e `FakeClock`; marcas sintéticas A/B (QA-15)
 
 ### Implementação (US6)
 
-- [ ] T071 [US6] Criar `tools/design-sync` (`@<prefixo>/design-sync`, `private: true`, **sem
+- [x] T071 [US6] Criar `tools/design-sync` (`@<prefixo>/design-sync`, `private: true`, **sem
   dependências de runtime**; só `fetch`, `crypto`, `fs`, `util.parseArgs`) com `bin` `design-sync`
   (`plan`, `apply`, `detect`, `check-access`, `--adapter memory|<tool>`); códigos 0–5 (4 acesso, 5
   verify)
-- [ ] T072 [US6] Definir as portas em `tools/design-sync/src/ports.ts`: `DesignToolPort`
+- [x] T072 [US6] Definir as portas em `tools/design-sync/src/ports.ts`: `DesignToolPort`
   (`capabilities`, `checkAccess`, `readSnapshot`, `apply(plan,{dryRun})`, `requestPublish`),
   `TrackerPort`, `AlertPort`, **sem operação ferramenta → repositório** (garante FR-025 e US6 cenário
   6)
-- [ ] T073 [US6] Implementar o núcleo puro em `tools/design-sync/src/core/`: estado desejado do
+- [x] T073 [US6] Implementar o núcleo puro em `tools/design-sync/src/core/`: estado desejado do
   `sync-manifest.json`, topologia por eixo, diff e plano (renomeação por chave, recriar na troca de
   tipo, deletes por último só em coleções gerenciadas), classificação de divergência contra versão
   anterior e atual, log JSON canônico com envelope separado, impressão digital da divergência
