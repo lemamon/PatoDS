@@ -1,7 +1,6 @@
-// Validadores da fonte de tokens (US1). Reúne as regras V-01 a V-13 do data-model num módulo
-// seccionado (as tarefas T027-T031 previam arquivos rules/* separados; concentrados aqui por
-// coesão — ver nota no relatório). V-01 (schema DTCG) e V-03 (alias/ciclo) são garantidos pelo
-// parser no adaptador, que falha antes de chegar aqui.
+// Token source validators (US1). Rules V-01..V-13 from the data model, in one sectioned module.
+// V-01 (DTCG schema) and V-03 (alias/cycle) are enforced by the parser in the adapter, which fails
+// before reaching here.
 import { CATEGORIES, type Model, type ModelToken } from './model.ts'
 
 export interface Finding {
@@ -23,7 +22,7 @@ function toHex8(components: number[]): string {
   return `#${h(components[0] ?? 0)}${h(components[1] ?? 0)}${h(components[2] ?? 0)}`
 }
 
-/** V-02: literal só na camada primitiva. */
+/** V-02: literals only in the primitive layer. */
 function literals(m: Model, out: Finding[]): void {
   for (const t of m.tokens) {
     if (t.layer !== 'primitive' && !t.hasAlias) {
@@ -44,7 +43,7 @@ const LAYER_ALLOWED: Record<string, Set<string>> = {
   component: new Set(['primitive', 'semantic', 'component']),
 }
 
-/** V-04: direção de referência entre camadas. */
+/** V-04: cross-layer reference direction. */
 function direction(m: Model, out: Finding[]): void {
   for (const t of m.tokens) {
     const deps: string[] = t.raw?.dependencies ?? []
@@ -64,7 +63,7 @@ function direction(m: Model, out: Finding[]): void {
   }
 }
 
-/** V-06: nomenclatura (segmentos kebab ASCII, categoria conhecida, nome CSS único). */
+/** V-06: naming (kebab ASCII segments, known category, unique CSS name). */
 function naming(m: Model, out: Finding[]): void {
   const byCss = new Map<string, string>()
   for (const t of m.tokens) {
@@ -101,7 +100,7 @@ function naming(m: Model, out: Finding[]): void {
   }
 }
 
-/** V-07/V-08: forma do grupo brand.* (role brand-mode-source). */
+/** V-07/V-08: brand.* group form (brand-mode-source role). */
 function brandSource(m: Model, out: Finding[]): void {
   for (const t of m.tokens) {
     const underBrand = t.id.startsWith('brand.')
@@ -130,7 +129,7 @@ function brandSource(m: Model, out: Finding[]): void {
   }
 }
 
-/** V-10: hex informado em cor dentro do gamut deve bater com a quantização de 8 bits. */
+/** V-10: a supplied in-gamut hex must match the 8-bit quantization of the components. */
 function colorHex(m: Model, out: Finding[]): void {
   for (const t of m.tokens) {
     if (t.layer !== 'primitive' || t.type !== 'color') continue
@@ -150,7 +149,7 @@ function colorHex(m: Model, out: Finding[]): void {
   }
 }
 
-/** V-11: cada categoria tem ao menos um token semântico público. */
+/** V-11: each category has at least one public semantic token. */
 function coverage(m: Model, out: Finding[]): void {
   const covered = new Set<string>()
   for (const t of m.tokens) {
@@ -167,7 +166,7 @@ function coverage(m: Model, out: Finding[]): void {
   }
 }
 
-/** V-12: escala única de alturas de controle. */
+/** V-12: single control-height scale. */
 function controlScale(m: Model, out: Finding[]): void {
   for (const t of m.tokens) {
     const looksControl = t.id.startsWith('size.control.')
@@ -183,7 +182,7 @@ function controlScale(m: Model, out: Finding[]): void {
   }
 }
 
-/** V-13: mesmas chaves semânticas públicas em todas as permutações. */
+/** V-13: same public semantic keys across all permutations. */
 function parity(m: Model, out: Finding[]): void {
   const publicSemantic = m.tokens
     .filter((t) => t.role === 'public' && (t.layer === 'semantic' || t.layer === 'component'))
@@ -217,7 +216,7 @@ export function validateModel(m: Model): Finding[] {
   return out
 }
 
-/** Resumo de validação (cenário 4 da US1): contagem por categoria e escala de alturas. */
+/** Validation summary (US1 scenario 4): per-category counts and control-height scale. */
 export function validationSummary(m: Model): {
   categories: Record<string, { primitive: number; semantic: number; component: number }>
   controlScale: string[]
