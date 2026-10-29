@@ -1,6 +1,6 @@
-// Fronteiras de camada (ENG-01, check de manifesto): tokens → núcleo → frameworks; ferramentas
-// dependem da UI só como devDependency. Lê os package.json do workspace e valida as arestas de
-// dependência de produção por camada.
+// Layer boundaries (ENG-01, manifest check): tokens -> core -> frameworks; tools depend on the UI
+// only as a devDependency. Reads the workspace package.json files and validates production
+// dependency edges by layer.
 import { readFile, readdir } from 'node:fs/promises'
 import { join } from 'node:path'
 
@@ -68,7 +68,7 @@ export async function checkLayers(root: string): Promise<LayerFinding[]> {
         })
       }
     }
-    // Ferramentas não podem ter UI (camada tokens) como dependência de produção.
+    // Tools must not have the UI (tokens layer) as a production dependency.
     if (p.layer === 'tools') {
       for (const dep of Object.keys(prod)) {
         const target = byName.get(dep)
