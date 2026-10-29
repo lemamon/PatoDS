@@ -1,0 +1,17 @@
+{
+  "$description": "Tokens semânticos de eixo modo, modo claro (FR-033): aliam o token brand.* correspondente no modo light.",
+  "color": {
+    "$type": "color",
+    "bg": {
+      "surface": { "$value": "{brand.color.bg.surface.light}" },
+      "accent": { "$value": "{brand.color.bg.accent.light}" }
+    },
+    "fg": {
+      "default": { "$value": "{brand.color.fg.default.light}" },
+      "on-accent": { "$value": "{brand.color.fg.on-accent.light}" }
+    },
+    "border": {
+      "default": { "$value": "{brand.color.border.default.light}" }
+    }
+  }
+}
