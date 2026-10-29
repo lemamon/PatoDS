@@ -1,5 +1,5 @@
-// Gate do lint de estilos (US5). ignoreDisables impede que um disable inline burle o gate.
-// O plugin e as regras são adicionados na feature de lint (tools/stylelint-plugin).
+// Style lint gate (US5). ignoreDisables prevents an inline disable from bypassing the gate.
+// The plugin and rules live in the lint feature (tools/stylelint-plugin).
 export default {
   plugins: ['@patods/stylelint-plugin'],
   rules: {
