@@ -90,7 +90,7 @@ fronteiras de camada. **Nenhuma história começa antes disto.**
 - [x] T018 Implementar em `tools/tokens-build/src/resolver.ts` o carregamento via `@terrazzo/parser`
   com `req` próprio que rejeita `$ref` não `file:` (sem rede); expor `listPermutations()` e
   `apply()`; falhar (código 1) se a lista de permutações vier indefinida ou incompleta
-- [ ] T019 [P] Criar `tools/color` (`@<prefixo>/color`, folha, sem dependências do workspace) com
+- [x] T019 [P] Criar `tools/color` (`@<prefixo>/color`, folha, sem dependências do workspace) com
   `toEmittedSrgb()` (mapeamento CSS Color 4 método `css`, sRGB de 8 bits; alfa `rgb(r g b / a)` com
   três casas), módulo WCAG 2.2 (limiar 0,04045; coeficientes 0,2126/0,7152/0,0722; sem
   arredondamento; aprova com ≥) e composição source-over em sRGB gama, variante float e variante que
@@ -193,7 +193,7 @@ inexistente; dois builds byte a byte idênticos (spec US2).
 
 ### Testes (US2)
 
-- [ ] T037 [P] [US2] Testes unitários dos formatadores em
+- [x] T037 [P] [US2] Testes unitários dos formatadores em
   `tools/tokens-build/test/format-css.test.ts` e `format-esm.test.ts`: seletores, forma sem espaço
   entre toggles, `initial` literal, colocação por `placement`, saída ordenada (QA-02)
 - [ ] T038 [P] [US2] Criar `apps/tokens-example` (Vite 8 sem framework, `@<prefixo>/tokens-example`)
@@ -213,7 +213,7 @@ inexistente; dois builds byte a byte idênticos (spec US2).
 
 ### Implementação (US2)
 
-- [ ] T041 [US2] Implementar o formatador CSS em `tools/tokens-build/src/format/css.ts`: emitir
+- [x] T041 [US2] Implementar o formatador CSS em `tools/tokens-build/src/format/css.ts`: emitir
   `base.css` (declaração de camadas do `layers.json`, primitivos compartilhados em `:where(:root)`,
   toggles privados `--<prefixo>-_on-light`/`_on-dark` com `initial` literal, modo padrão, resolvedor
   `:where(:root, [data-<prefixo>-brand], [data-<prefixo>-mode])` com os tokens de eixo modo,
@@ -224,33 +224,33 @@ inexistente; dois builds byte a byte idênticos (spec US2).
   forma sem espaço, `initial` literal (bug WebKit 243247), todo alvo de `var()` declarado, token
   público só no resolvedor ou no escopo de marca, `css-layer` vs `layers.json`, `dist-parity`
   (css-output.md §13) — falha no build
-- [ ] T043 [P] [US2] Implementar o formatador ESM em `tools/tokens-build/src/format/esm.ts`: `index.js`
+- [x] T043 [P] [US2] Implementar o formatador ESM em `tools/tokens-build/src/format/esm.ts`: `index.js`
   com objeto congelado `tokens` por caminho + `.d.ts` com união `TokenName` e literais
   `var(--<prefixo>-…)`; `values.js` com `Readonly<Record<Brand, Record<Mode, Record<TokenName,
   string>>>>` + `.d.ts`; excluir o segmento privado `_` (esm-output.md, FR-016)
-- [ ] T044 [US2] Implementar o emissor de `dist/meta/tokens.manifest.json` em
+- [x] T044 [US2] Implementar o emissor de `dist/meta/tokens.manifest.json` em
   `tools/tokens-build/src/format/manifest.ts` conforme [contracts/build-manifests.md](contracts/build-manifests.md)
   §2 (por token: `cssName`, `layer`, `category`, `type`, `axis`, `role`, `placement`,
   `exclusiveBrand`, `aliasOf`, `aliasChains` por permutação, `scale`, `color.emitted`/`subRefs`,
   `source`), com garantias M-06 a M-08
-- [ ] T045 [P] [US2] Implementar o emissor de `dist/meta/sync-manifest.json` em
+- [x] T045 [P] [US2] Implementar o emissor de `dist/meta/sync-manifest.json` em
   `tools/tokens-build/src/format/sync-manifest.ts` (build-manifests.md §3, formato em
   [contracts/design-sync.md](contracts/design-sync.md)), do mesmo modelo resolvido
-- [ ] T046 [P] [US2] Implementar o emissor de `dist/meta/report.json` e `report.md` em
+- [x] T046 [P] [US2] Implementar o emissor de `dist/meta/report.json` e `report.md` em
   `tools/tokens-build/src/format/report.ts`: contagem por categoria e camada, escala de alturas por
   permutação, cores fora do gamut mapeadas, tamanho bruto e gzip de cada arquivo (build-manifests.md
   §4, FR-006, FR-008, QA-07)
-- [ ] T047 [P] [US2] Implementar o emissor do relatório de API em
+- [x] T047 [P] [US2] Implementar o emissor do relatório de API em
   `tools/tokens-build/src/format/api-report.ts` → `packages/tokens/api/tokens.api.json` (versionado),
   conforme esm-output.md §11 (superfície pública, classificação major/minor/patch do GOV-01)
-- [ ] T048 [US2] Implementar o writer determinístico em `tools/tokens-build/src/write.ts` (ordenação
+- [x] T048 [US2] Implementar o writer determinístico em `tools/tokens-build/src/write.ts` (ordenação
   por code point, LF, sem timestamp nem caminho absoluto; JSON canônico M-02) e ligar o pipeline
   `tokens-build build` que roda os formatadores T041 a T047
-- [ ] T049 [US2] Implementar `tools/repo-checks` subcomando `determinism`: dois builds a partir de
+- [x] T049 [US2] Implementar `tools/repo-checks` subcomando `determinism`: dois builds a partir de
   dois `git worktree` limpos, em caminhos, `TZ` e `LC_ALL` diferentes, com cache de tarefas
   desligado, empacotando com `pnpm pack`; comparar sha256 por arquivo e dos tarballs; variante entre
   Node piso e mais recente (FR-015, SC-002, ENG-08)
-- [ ] T050 [US2] Implementar `tools/repo-checks` subcomando `drift`: `dist/` no `.gitignore`; falhar
+- [x] T050 [US2] Implementar `tools/repo-checks` subcomando `drift`: `dist/` no `.gitignore`; falhar
   se `git ls-files` listar arquivo gerado; regenerar `api/tokens.api.json` e exigir
   `git diff --exit-code` (QA-08)
 - [ ] T051 [US2] Ligar `tokens:build`, `test:types`, `test:e2e` (Chromium no PR; todos os motores no
