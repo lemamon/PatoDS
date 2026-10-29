@@ -1,0 +1,25 @@
+# Donos por área (GOV-09). Merge exige aprovação de um dono.
+# Papéis provisórios; substituir pelos times reais quando definidos.
+
+# Tudo, por padrão
+*                                   @patods/maintainers
+
+# Fonte de tokens e temas
+/packages/tokens/src/               @patods/design-tokens
+/packages/tokens/schemas/           @patods/maintainers
+
+# Manifesto de contraste: dono de acessibilidade (A11Y-16, GOV-09)
+/packages/tokens/contrast/          @patods/accessibility
+
+# Limiares do CI: aprovação de pessoa indicada pelo requerente (QA-14)
+/quality/thresholds.json            @patods/requerente-approvers
+
+# Sincronização com a ferramenta de design: papel dono da sincronização (DSN-02)
+/tools/design-sync/                 @patods/design-sync-owners
+/.github/workflows/design-sync.yml  @patods/design-sync-owners
+
+# Ferramentas e CI
+/tools/                             @patods/maintainers
+/.github/                           @patods/maintainers
+/turbo.json                         @patods/maintainers
+/pnpm-workspace.yaml                @patods/maintainers
