@@ -1,0 +1,14 @@
+{
+  "$comment": "Arquivo versionado de limiares do CI (QA-14). Alterável só com aprovação do requerente. Valores pendentes marcados.",
+  "contrast": {
+    "level": "WCAG22-AA",
+    "text": 4.5,
+    "nonText": 3
+  },
+  "bundle": {
+    "$comment": "Orçamento de bundle por cenário (QA-07). Valores em KB comprimidos, pendentes com o requerente.",
+    "perBrandCssGzipKb": null,
+    "singleComponentGzipKb": null,
+    "allComponentsGzipKb": null
+  }
+}
