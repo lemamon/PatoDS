@@ -1,5 +1,5 @@
-// Orquestração do build (US2): gera CSS por marca (base + brand-<id>), ESM tipado (index + values),
-// manifestos (tokens, sync) e relatório, de forma determinística. Contratos: css-output.md,
+// Build orchestration (US2): generates per-brand CSS (base + brand-<id>), typed ESM (index +
+// values), manifests (tokens, sync) and report, deterministically. Contracts: css-output.md,
 // esm-output.md, build-manifests.md.
 import { readFile } from 'node:fs/promises'
 import { join, resolve } from 'node:path'
@@ -245,7 +245,7 @@ export async function runBuild(model: Model, srcDir: string): Promise<void> {
   await writeText(join(dist, 'esm/values.js'), vals.js)
   await writeText(join(dist, 'esm/values.d.ts'), vals.dts)
 
-  // Manifestos e relatório
+  // Manifests and report
   await writeText(join(dist, 'meta/tokens.manifest.json'), canonicalJson(renderTokensManifest(model, meta, applied)))
   await writeText(join(dist, 'meta/sync-manifest.json'), canonicalJson(renderSyncManifest(model, meta)))
   await writeText(join(dist, 'meta/report.json'), canonicalJson(renderReport(model, meta, files)))
