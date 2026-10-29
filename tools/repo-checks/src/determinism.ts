@@ -29,7 +29,7 @@ function hashTree(root: string, rels: string[]): string[] {
 }
 
 function buildOnce(root: string, env: Record<string, string>): void {
-  execFileSync('node', ['tools/tokens-build/src/cli.ts', 'build'], {
+  execFileSync('node', [join(root, 'tools/tokens-build/src/cli.ts'), 'build'], {
     cwd: join(root, 'packages/tokens'),
     env: { ...process.env, ...env },
     stdio: 'pipe',
