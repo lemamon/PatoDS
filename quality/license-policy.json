@@ -1,5 +1,5 @@
 {
-  "$comment": "Política de licenças (ENG-21). Dependência com licença fora desta lista ou desconhecida falha o check.",
+  "$comment": "License policy (ENG-21). A dependency whose license is unlisted or unknown fails the check.",
   "allowed": [
     "MIT",
     "ISC",
@@ -23,11 +23,11 @@
   "overrides": {
     "svg-tags": {
       "license": "MIT",
-      "reason": "Declara MIT só pelo campo legado licenses[]; revisado contra o LICENSE do pacote."
+      "reason": "Declares MIT only via the legacy licenses[] field; reviewed against the package LICENSE."
     }
   },
   "notes": {
-    "W3C": "Cobre a cópia versionada dos JSON Schemas do DTCG 2025.10 em packages/tokens/schemas; não distribuída no tarball.",
-    "MPL-2.0": "Aceita só como dependência de desenvolvimento não modificada (ex.: lightningcss via Vite, axe-core via Playwright)."
+    "W3C": "Covers the versioned copy of the DTCG 2025.10 JSON Schemas in packages/tokens/schemas; not shipped in the tarball.",
+    "MPL-2.0": "Accepted only as an unmodified dev dependency (e.g. lightningcss via Vite, axe-core via Playwright)."
   }
 }
