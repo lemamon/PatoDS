@@ -1,0 +1,43 @@
+{
+  "name": "@patods/tokens",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "UNLICENSED",
+  "sideEffects": ["**/*.css"],
+  "exports": {
+    ".": {
+      "types": "./dist/esm/index.d.ts",
+      "import": "./dist/esm/index.js"
+    },
+    "./values": {
+      "types": "./dist/esm/values.d.ts",
+      "import": "./dist/esm/values.js"
+    },
+    "./css/base.css": "./dist/css/base.css",
+    "./css/brand-a.css": "./dist/css/brand-a.css",
+    "./css/brand-b.css": "./dist/css/brand-b.css",
+    "./meta/tokens.manifest.json": "./dist/meta/tokens.manifest.json",
+    "./meta/sync-manifest.json": "./dist/meta/sync-manifest.json",
+    "./meta/report.json": "./dist/meta/report.json"
+  },
+  "files": [
+    "dist/css/base.css",
+    "dist/css/brand-*.css",
+    "dist/esm/index.js",
+    "dist/esm/index.d.ts",
+    "dist/esm/values.js",
+    "dist/esm/values.d.ts",
+    "dist/meta/*.json",
+    "dist/meta/report.md",
+    "api/tokens.api.json",
+    "README.md"
+  ],
+  "scripts": {
+    "tokens:validate": "node ../../tools/tokens-build/src/cli.ts validate",
+    "tokens:build": "node ../../tools/tokens-build/src/cli.ts build"
+  },
+  "devDependencies": {
+    "@patods/tokens-build": "workspace:*"
+  }
+}
