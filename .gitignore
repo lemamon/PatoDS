@@ -1,0 +1,11 @@
+node_modules/
+.ori/
+**/dist/
+.turbo/
+*.tsbuildinfo
+coverage/
+*.log
+.DS_Store
+.env*
+playwright-report/
+test-results/
