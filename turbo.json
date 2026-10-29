@@ -1,0 +1,84 @@
+{
+  "$schema": "https://turborepo.dev/schema.json",
+  "envMode": "strict",
+  "globalDependencies": [
+    ".node-version",
+    "pnpm-workspace.yaml",
+    "pnpm-lock.yaml",
+    "turbo.json",
+    "tsconfig.base.json",
+    "quality/**",
+    ".github/**"
+  ],
+  "tasks": {
+    "tokens:validate": {
+      "dependsOn": ["^build"],
+      "outputs": []
+    },
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**"]
+    },
+    "tokens:build": {
+      "dependsOn": ["^build", "tokens:validate"],
+      "outputs": ["dist/**", "api/**"]
+    },
+    "contrast:check": {
+      "dependsOn": ["tokens:build"],
+      "outputs": ["reports/**"]
+    },
+    "lint:styles": {
+      "dependsOn": ["^build"],
+      "outputs": []
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "outputs": ["coverage/**"]
+    },
+    "test:types": {
+      "dependsOn": ["tokens:build"],
+      "outputs": []
+    },
+    "test:e2e": {
+      "dependsOn": ["tokens:build", "contrast:check"],
+      "outputs": ["playwright-report/**"]
+    },
+    "check:determinism": {
+      "dependsOn": [],
+      "outputs": []
+    },
+    "check:drift": {
+      "dependsOn": ["tokens:build"],
+      "outputs": []
+    },
+    "check:scan": {
+      "outputs": []
+    },
+    "check:layers": {
+      "outputs": []
+    },
+    "design-sync": {
+      "cache": false,
+      "dependsOn": ["tokens:build"]
+    }
+  },
+  "boundaries": {
+    "tags": {
+      "tokens": {
+        "dependencies": {
+          "allow": ["tokens"]
+        }
+      },
+      "tools": {
+        "dependencies": {
+          "allow": ["tools", "tokens"]
+        }
+      },
+      "apps": {
+        "dependencies": {
+          "allow": ["apps"]
+        }
+      }
+    }
+  }
+}
