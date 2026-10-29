@@ -1,0 +1,25 @@
+{
+  "$comment": "Allowlist da varredura do FR-001 (repo-checks scan-tokens). Cada entrada aponta um caminho onde tokens/custom properties podem ser definidos, com justificativa.",
+  "allow": [
+    {
+      "path": "packages/tokens/src/**",
+      "reason": "Fonte única de tokens (DTCG). FR-001."
+    },
+    {
+      "path": "tools/tokens-build/fixtures/**",
+      "reason": "Fixtures de validação com violações propositais."
+    },
+    {
+      "path": "tools/stylelint-plugin/fixtures/**",
+      "reason": "Fixtures do lint de estilos."
+    },
+    {
+      "path": "tools/tokens-contrast/fixtures/**",
+      "reason": "Fixtures do checker de contraste."
+    },
+    {
+      "path": "tools/repo-checks/fixtures/**",
+      "reason": "Fixtures de autoteste do próprio scanner."
+    }
+  ]
+}
