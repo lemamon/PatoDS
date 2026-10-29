@@ -1,24 +1,24 @@
-# Donos por área (GOV-09). Merge exige aprovação de um dono.
-# Papéis provisórios; substituir pelos times reais quando definidos.
+# Owners by area (GOV-09). Merge requires an owner's approval.
+# Provisional roles; replace with the real teams once defined.
 
-# Tudo, por padrão
+# Everything, by default
 *                                   @patods/maintainers
 
-# Fonte de tokens e temas
+# Token source and themes
 /packages/tokens/src/               @patods/design-tokens
 /packages/tokens/schemas/           @patods/maintainers
 
-# Manifesto de contraste: dono de acessibilidade (A11Y-16, GOV-09)
+# Contrast manifest: accessibility owner (A11Y-16, GOV-09)
 /packages/tokens/contrast/          @patods/accessibility
 
-# Limiares do CI: aprovação de pessoa indicada pelo requerente (QA-14)
+# CI thresholds: approval by a person designated by the requester (QA-14)
 /quality/thresholds.json            @patods/requerente-approvers
 
-# Sincronização com a ferramenta de design: papel dono da sincronização (DSN-02)
+# Design-tool sync: the sync-owner role (DSN-02)
 /tools/design-sync/                 @patods/design-sync-owners
 /.github/workflows/design-sync.yml  @patods/design-sync-owners
 
-# Ferramentas e CI
+# Tooling and CI
 /tools/                             @patods/maintainers
 /.github/                           @patods/maintainers
 /turbo.json                         @patods/maintainers
