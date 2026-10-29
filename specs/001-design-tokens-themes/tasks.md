@@ -26,37 +26,37 @@ os contratos.
 
 **Objetivo**: inicializar o monorepo e a configuração compartilhada (ADR-09, ADR-12).
 
-- [ ] T001 Rodar `git init`, criar `.gitignore` (ignorar `node_modules/`, `**/dist/`, `.turbo/`,
+- [x] T001 Rodar `git init`, criar `.gitignore` (ignorar `node_modules/`, `**/dist/`, `.turbo/`,
   `*.tsbuildinfo`) e definir `main` como branch na raiz `/`
-- [ ] T002 Criar `package.json` na raiz com `"packageManager": "pnpm@11.28.x"` (versão exata),
+- [x] T002 Criar `package.json` na raiz com `"packageManager": "pnpm@11.28.x"` (versão exata),
   `devEngines.packageManager` com `pmOnFail: "error"`, `private: true`, e scripts que delegam ao
   turbo (`tokens:validate`, `tokens:build`, `contrast:check`, `lint:styles`, `test`, `test:types`,
   `test:e2e`, `check:determinism`, `check:drift`, `check:scan`, `check:layers`, `design-sync`)
-- [ ] T003 [P] Criar `pnpm-workspace.yaml` com `packages`, `tools`, `apps`, `tests`; `catalog` com
+- [x] T003 [P] Criar `pnpm-workspace.yaml` com `packages`, `tools`, `apps`, `tests`; `catalog` com
   versões exatas (terrazzo 2.9.0, ajv, colorjs.io 0.7.1, stylelint 17.16.x, vitest 5.0.x,
   @playwright/test 1.64.x, typescript 6.0.x e catálogo nomeado `typescript7` para 7.0.x);
   `catalogMode: strict`; `allowBuilds` (allowlist do ENG-24, só `fsevents`); `minimumReleaseAge:
   1440`; `blockExoticSubdeps: true`; `trustPolicy: no-downgrade`
-- [ ] T004 [P] Criar `.node-version` (24.x) e `.gitattributes` forçando `* text=auto eol=lf`
-- [ ] T005 [P] Criar `tsconfig.base.json` estrito (`strict`, `moduleResolution: "bundler"`,
+- [x] T004 [P] Criar `.node-version` (24.x) e `.gitattributes` forçando `* text=auto eol=lf`
+- [x] T005 [P] Criar `tsconfig.base.json` estrito (`strict`, `moduleResolution: "bundler"`,
   `verbatimModuleSyntax`, `noEmit` por padrão), alvo compatível com TS 6.0
-- [ ] T006 Criar `turbo.json` com as tarefas do T002, `envMode: "strict"`, `globalDependencies`
+- [x] T006 Criar `turbo.json` com as tarefas do T002, `envMode: "strict"`, `globalDependencies`
   (`.node-version`, `pnpm-workspace.yaml`, `pnpm-lock.yaml`, `turbo.json`, `tsconfig.base.json`,
   `.github/**`), telemetria desligada, e o esqueleto de `boundaries.tags` (preenchido no T022)
-- [ ] T007 [P] Criar `quality/thresholds.json` (QA-14) com a seção de contraste
+- [x] T007 [P] Criar `quality/thresholds.json` (QA-14) com a seção de contraste
   `{ "level": "WCAG22-AA", "text": 4.5, "nonText": 3 }` e espaço para orçamento de bundle do QA-07
   (valor pendente com o requerente)
-- [ ] T008 [P] Criar `quality/license-policy.json` (ENG-21) com as licenças permitidas (MIT, ISC,
+- [x] T008 [P] Criar `quality/license-policy.json` (ENG-21) com as licenças permitidas (MIT, ISC,
   Apache-2.0, BSD-2-Clause, BSD-3-Clause, MIT-0, CC0-1.0, Python-2.0), MPL-2.0 só como dependência de
   desenvolvimento não modificada, W3C para a cópia dos schemas DTCG, e override revisado de
   `svg-tags` (MIT pelo campo legado)
-- [ ] T009 [P] Criar `quality/scan-allowlist.json` (varredura do FR-001) com a fonte de tokens e as
+- [x] T009 [P] Criar `quality/scan-allowlist.json` (varredura do FR-001) com a fonte de tokens e as
   fixtures dos scanners, cada entrada com justificativa
-- [ ] T010 [P] Criar `.github/CODEOWNERS` com donos por área, incluindo o papel dono da
+- [x] T010 [P] Criar `.github/CODEOWNERS` com donos por área, incluindo o papel dono da
   sincronização (DSN-02) e o dono de acessibilidade do manifesto de contraste (GOV-09)
-- [ ] T011 [P] Criar `stylelint.config.mjs` na raiz (esqueleto do gate: `ignoreDisables: true`,
+- [x] T011 [P] Criar `stylelint.config.mjs` na raiz (esqueleto do gate: `ignoreDisables: true`,
   caminho do plugin, preenchido no T0 da US5)
-- [ ] T012 [P] Criar `.github/workflows/tokens-ci.yml` (esqueleto): `pnpm install --frozen-lockfile`,
+- [x] T012 [P] Criar `.github/workflows/tokens-ci.yml` (esqueleto): `pnpm install --frozen-lockfile`,
   todas as actions fixadas por digest SHA (ENG-18), matriz de Node piso (22 LTS) e mais recente,
   `TURBO_TELEMETRY_DISABLED=1`, separação PR (Chromium) e noturno (todos os motores)
 
@@ -69,25 +69,25 @@ os contratos.
 **Objetivo**: pacote de tokens, schemas, modelo interno do build, motor de cor, checks de repo e
 fronteiras de camada. **Nenhuma história começa antes disto.**
 
-- [ ] T013 Criar `packages/tokens/package.json` (`@<prefixo>/tokens`): `exports` `"."` →
+- [x] T013 Criar `packages/tokens/package.json` (`@<prefixo>/tokens`): `exports` `"."` →
   `dist/esm/index.js` (types `index.d.ts`), `"./values"` → `dist/esm/values.js`, `"./css/base.css"`,
   `"./css/brand-*.css"`, `"./meta/*"`; `sideEffects: ["**/*.css"]`; `files` allowlist (ENG-17);
   **zero dependências de runtime**; `license` `UNLICENSED` (marcador, ENG-22)
 - [ ] T014 [P] Copiar `format.json` e `resolver.json` do DTCG 2025.10 para
   `packages/tokens/schemas/dtcg-2025.10/`, com `SHA256SUMS` e `LICENSE-W3C.md`; registrar origem e
   licença W3C em `quality/license-policy.json` e nos avisos de terceiros
-- [ ] T015 [P] Criar `packages/tokens/src/layers.json` na forma `{ "order": ["<prefixo>.tokens"] }`
+- [x] T015 [P] Criar `packages/tokens/src/layers.json` na forma `{ "order": ["<prefixo>.tokens"] }`
   (fonte única da ordem das camadas, css-output L-03)
-- [ ] T016 Criar scaffold de `tools/tokens-build` (`@<prefixo>/tokens-build`, `private: true`):
+- [x] T016 Criar scaffold de `tools/tokens-build` (`@<prefixo>/tokens-build`, `private: true`):
   `package.json` com devDependency `@terrazzo/parser` e `@terrazzo/token-tools` 2.9.0 (alinhadas por
   `overrides` do pnpm), `ajv` exato e `@<prefixo>/color`; `bin` `tokens-build` com subcomandos
   `validate` e `build`; códigos de saída 0 ok, 1 violação, 2 uso/config, 3 interno; flag `--json`
   (tools-cli.md §1)
-- [ ] T017 Implementar em `tools/tokens-build/src/model.ts` o modelo interno de token (data-model,
+- [x] T017 Implementar em `tools/tokens-build/src/model.ts` o modelo interno de token (data-model,
   "Token": `path`, `cssName`, `layer`, `category`, `type`, `axis`, `role`, `values`, `source`) e o
   leitor com Ajv que valida contra os schemas DTCG versionados (V-01) e monta o índice
   `id → arquivo:linha:coluna` usado em toda mensagem de erro
-- [ ] T018 Implementar em `tools/tokens-build/src/resolver.ts` o carregamento via `@terrazzo/parser`
+- [x] T018 Implementar em `tools/tokens-build/src/resolver.ts` o carregamento via `@terrazzo/parser`
   com `req` próprio que rejeita `$ref` não `file:` (sem rede); expor `listPermutations()` e
   `apply()`; falhar (código 1) se a lista de permutações vier indefinida ou incompleta
 - [ ] T019 [P] Criar `tools/color` (`@<prefixo>/color`, folha, sem dependências do workspace) com
@@ -96,14 +96,14 @@ fronteiras de camada. **Nenhuma história começa antes disto.**
   arredondamento; aprova com ≥) e composição source-over em sRGB gama, variante float e variante que
   arredonda 8 bits a cada dobra; testes unitários com vetores de ouro (#767676/#fff = 4,54 passa,
   #777777/#fff = 4,48 falha, preto/branco = 21) — ADR-15, FR-020, QA-02
-- [ ] T020 [P] Criar scaffold de `tools/repo-checks` (`@<prefixo>/repo-checks`, sem dependências do
+- [x] T020 [P] Criar scaffold de `tools/repo-checks` (`@<prefixo>/repo-checks`, sem dependências do
   workspace): `bin` `repo-checks` com `determinism`, `drift`, `scan-tokens`, `layers`; códigos de
   saída 0–3; `--json`
-- [ ] T021 Implementar `tools/repo-checks` subcomando `layers`: check de manifesto pnpm
+- [x] T021 Implementar `tools/repo-checks` subcomando `layers`: check de manifesto pnpm
   (`pnpm ls -r --prod --json`) que falha com pacote de UI no fechamento `--prod` de pacote `tools`,
   com pacote sem exatamente uma tag de camada e com `@boundaries-ignore` fora de registro versionado;
   mais fixture de violação proposital em `.ts` por aresta proibida (ENG-01, ADR-12 check c)
-- [ ] T022 Preencher `turbo.json` `boundaries.tags`: tags `tokens`, `tools`, `apps` e as arestas
+- [x] T022 Preencher `turbo.json` `boundaries.tags`: tags `tokens`, `tools`, `apps` e as arestas
   permitidas do plan (`tokens -(dev)-> tools/tokens-build, tools/color`; `tools/tokens-build ->
   tools/color`; `apps -> tokens só via tarball`); `tools/color` e `tools/repo-checks` sem dependência
   do workspace (ADR-12 check a)
@@ -137,38 +137,38 @@ válidas passam, com relatório por categoria (spec US1).
   ausente/excedente numa permutação (V-13)
 - [ ] T025 [P] [US1] Criar fixtures válidas em `tools/tokens-build/fixtures/valid/` que passam com
   zero violações, cobrindo todas as 11 categorias e a escala de alturas
-- [ ] T026 [P] [US1] Testes unitários dos validadores em `tools/tokens-build/test/validate.test.ts`
+- [x] T026 [P] [US1] Testes unitários dos validadores em `tools/tokens-build/test/validate.test.ts`
   (Vitest), comparando o multiconjunto de `{arquivo, linha, coluna, código}` esperado e obtido (100%
   dos erros esperados, zero falsos positivos; FR-024, SC-009, QA-02)
 
 ### Implementação (US1)
 
-- [ ] T027 [US1] Implementar os validadores de camada e alias em
+- [x] T027 [US1] Implementar os validadores de camada e alias em
   `tools/tokens-build/src/rules/layer.ts`: literal só em `primitive` (V-02, FR-003); alias resolve e
   sem ciclo em todas as permutações (V-03, FR-004); direção de referência (V-04); `$ref` só em
   primitivo, `$root` proibido, `$extends` só com chaves (V-05) — códigos `TKN-*` da token-source.md
-- [ ] T028 [US1] Implementar o validador de nomenclatura em `tools/tokens-build/src/rules/naming.ts`:
+- [x] T028 [US1] Implementar o validador de nomenclatura em `tools/tokens-build/src/rules/naming.ts`:
   gramática de segmentos por categoria em ordem fixa, kebab ASCII, prefixo, colisão de nome CSS
   (V-06, FR-005, `TKN-NAME-*`)
-- [ ] T029 [US1] Implementar os validadores de eixo em `tools/tokens-build/src/rules/axis.ts`: eixo
+- [x] T029 [US1] Implementar os validadores de eixo em `tools/tokens-build/src/rules/axis.ts`: eixo
   coerente com os contextos (V-07); forma do grupo `brand.` para variação marca × modo, com as mesmas
   chaves em toda marca (V-08, FR-033); sets compartilhados sem valor de eixo (V-09, `TKN-AXIS-*`,
   `TKN-BRAND-SOURCE-*`)
-- [ ] T030 [US1] Implementar cobertura e escala em `tools/tokens-build/src/rules/coverage.ts`: ao
+- [x] T030 [US1] Implementar cobertura e escala em `tools/tokens-build/src/rules/coverage.ts`: ao
   menos um token semântico por categoria (V-11, FR-006); escala única de alturas fechada (V-12,
   FR-007, `TKN-CATEGORY-COVERAGE`, `TKN-CONTROL-SCALE`)
-- [ ] T031 [US1] Implementar a paridade de chaves em `tools/tokens-build/src/rules/parity.ts`:
+- [x] T031 [US1] Implementar a paridade de chaves em `tools/tokens-build/src/rules/parity.ts`:
   comparar o conjunto de chaves semânticas de todas as permutações e por contexto, apontando chave
   ausente ou excedente (V-13, FR-011, `TKN-PARITY-*`)
-- [ ] T032 [US1] Ligar as regras ao `tokens-build validate`, emitindo um resumo de validação JSON com
+- [x] T032 [US1] Ligar as regras ao `tokens-build validate`, emitindo um resumo de validação JSON com
   contagem por categoria e a escala de alturas por permutação (atende o cenário 4 da US1; relatório
   completo fica no build, FR-008)
-- [ ] T033 [P] [US1] Criar a fonte inicial em `packages/tokens/src/`: `tokens.resolver.json`
+- [x] T033 [P] [US1] Criar a fonte inicial em `packages/tokens/src/`: `tokens.resolver.json`
   (modificadores `brand` com contextos `a`/`b` e `mode` com `light`/`dark`, `default` `a` e `light`,
   `resolutionOrder`), `primitive/*.tokens.json`, `semantic/invariant.tokens.json`,
   `semantic/brand/{a,b}.tokens.json` (grupo `brand.`), `semantic/mode/{light,dark}.tokens.json`,
   `component/*.tokens.json`, cobrindo as 11 categorias e `size.control.*` com valores sintéticos
-- [ ] T034 [US1] Implementar `tools/repo-checks` subcomando `scan-tokens` (FR-001): varrer
+- [x] T034 [US1] Implementar `tools/repo-checks` subcomando `scan-tokens` (FR-001): varrer
   `git ls-files` por declaração de custom property com valor literal e qualquer nome em CSS, `<style>`
   de SFC e HTML fora da fonte, chaves `--<prefixo>-` e `setProperty` em TS/JS/JSON e documentos DTCG
   fora da fonte; respeitar `quality/scan-allowlist.json`; fixtures de autoteste em CSS, SFC, TSX e
