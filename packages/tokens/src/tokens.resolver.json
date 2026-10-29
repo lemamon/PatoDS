@@ -1,0 +1,33 @@
+{
+  "name": "PatoDS",
+  "version": "2025.10",
+  "description": "Resolvedor de tokens do PatoDS: marca e modo como modificadores ortogonais (FR-009, FR-010, FR-033).",
+  "sets": {
+    "primitive": { "sources": [{ "$ref": "./primitive.tokens.json" }] },
+    "invariant": { "sources": [{ "$ref": "./semantic/invariant.tokens.json" }] },
+    "component": { "sources": [{ "$ref": "./component/component.tokens.json" }] }
+  },
+  "modifiers": {
+    "brand": {
+      "default": "a",
+      "contexts": {
+        "a": [{ "$ref": "./semantic/brand/a.tokens.json" }],
+        "b": [{ "$ref": "./semantic/brand/b.tokens.json" }]
+      }
+    },
+    "mode": {
+      "default": "light",
+      "contexts": {
+        "light": [{ "$ref": "./semantic/mode/light.tokens.json" }],
+        "dark": [{ "$ref": "./semantic/mode/dark.tokens.json" }]
+      }
+    }
+  },
+  "resolutionOrder": [
+    { "$ref": "#/sets/primitive" },
+    { "$ref": "#/modifiers/brand" },
+    { "$ref": "#/sets/invariant" },
+    { "$ref": "#/modifiers/mode" },
+    { "$ref": "#/sets/component" }
+  ]
+}
