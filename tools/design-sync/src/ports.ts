@@ -1,10 +1,10 @@
-// Portas da sincronização (ADR-14, design-sync.md). Nenhuma operação lê da ferramenta para o
-// repositório (garante FR-025 e o cenário 6 da US6 por construção).
+// Sync ports (ADR-14, design-sync.md). No operation reads from the tool back into the repository
+// (guarantees FR-025 and US6 scenario 6 by construction).
 
 export interface ToolVariable {
   name: string
   value: string
-  /** chave do token guardada na ferramenta, para detectar renomeação manual. */
+  /** token key stored in the tool, used to detect a manual rename. */
   key?: string
 }
 
