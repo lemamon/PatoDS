@@ -1,0 +1,34 @@
+{
+  "$description": "Marca sintética B. Tokens brand.* (role brand-mode-source, FR-033): fonte de eixo marca com um valor por modo.",
+  "brand": {
+    "color": {
+      "$type": "color",
+      "bg": {
+        "surface": {
+          "light": { "$value": "{color.white}" },
+          "dark": { "$value": "{color.black}" }
+        },
+        "accent": {
+          "light": { "$value": "{color.neutral.900}" },
+          "dark": { "$value": "{color.neutral.100}" }
+        }
+      },
+      "fg": {
+        "default": {
+          "light": { "$value": "{color.neutral.900}" },
+          "dark": { "$value": "{color.neutral.100}" }
+        },
+        "on-accent": {
+          "light": { "$value": "{color.white}" },
+          "dark": { "$value": "{color.black}" }
+        }
+      },
+      "border": {
+        "default": {
+          "light": { "$value": "{color.neutral.300}" },
+          "dark": { "$value": "{color.neutral.600}" }
+        }
+      }
+    }
+  }
+}
