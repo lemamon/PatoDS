@@ -1,5 +1,5 @@
-// Modelo interno de token (data-model "Token"), derivado do resultado do adaptador. Independente
-// do motor de parsing: validadores e formatadores operam só sobre este modelo.
+// Internal token model (data-model "Token"), derived from the adapter result. Parser-agnostic:
+// validators and formatters operate only on this model.
 import type { LoadResult, Bucket } from './adapter.ts'
 
 export const PREFIX = 'patods'
@@ -76,7 +76,7 @@ export interface Model {
   load: LoadResult
 }
 
-/** Constrói o modelo a partir do resultado do adaptador. */
+/** Builds the model from the adapter result. */
 export function buildModel(load: LoadResult): Model {
   const tokens: ModelToken[] = []
   const byId = new Map<string, ModelToken>()
@@ -90,7 +90,7 @@ export function buildModel(load: LoadResult): Model {
       id,
       segments,
       cssName: `--${PREFIX}-${segments.join('-')}`,
-      // Para brand-mode-source (grupo reservado "brand."), a categoria é o 2º segmento (D7).
+      // For brand-mode-source (reserved "brand." group), the category is the 2nd segment (D7).
       category: (bucket === 'brand' ? segments[1] : segments[0]) ?? '',
       layer: BUCKET_LAYER[bucket],
       axis: BUCKET_AXIS[bucket],
