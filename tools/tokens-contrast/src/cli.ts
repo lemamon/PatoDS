@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// CLI do checker de contraste. Saída: 0 ok; 1 par reprovado; 2 uso/config; 3 interno.
+// Contrast checker CLI. Exit: 0 ok; 1 failing pair; 2 usage/config; 3 internal.
 import { parseArgs } from 'node:util'
 import { readFileSync } from 'node:fs'
 import { resolve, join } from 'node:path'
