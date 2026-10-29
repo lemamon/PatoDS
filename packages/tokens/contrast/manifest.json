@@ -1,0 +1,28 @@
+{
+  "$schema": "./manifest.schema.json",
+  "version": 1,
+  "pairs": [
+    {
+      "id": "text-default-on-surface",
+      "fg": "color.fg.default",
+      "bg": ["color.bg.surface"],
+      "state": "default",
+      "kind": "text"
+    },
+    {
+      "id": "text-on-accent",
+      "fg": "color.fg.on-accent",
+      "bg": ["color.bg.accent"],
+      "state": "default",
+      "kind": "text"
+    },
+    {
+      "id": "text-disabled-on-surface",
+      "fg": "color.border.default",
+      "bg": ["color.bg.surface"],
+      "state": "disabled",
+      "kind": "text",
+      "exempt": "wcag-inactive"
+    }
+  ]
+}
