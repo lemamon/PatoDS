@@ -1,6 +1,6 @@
-// Varredura do FR-001: nenhum token definido fora da fonte única. Detecta custom properties no
-// prefixo do projeto declaradas, chamadas de setProperty com esse prefixo e documentos DTCG
-// ($value) fora de packages/tokens/src e da allowlist versionada.
+// FR-001 scan: no token defined outside the single source. Detects declared custom properties in
+// the project prefix, setProperty calls using that prefix, and DTCG documents ($value) outside
+// packages/tokens/src and the versioned allowlist.
 import { readFile } from 'node:fs/promises'
 import { execFileSync } from 'node:child_process'
 import { join } from 'node:path'
@@ -16,7 +16,7 @@ export interface ScanFinding {
   message: string
 }
 
-/** Detecta definição de token fora da fonte no conteúdo de um arquivo. */
+/** Detects out-of-source token definitions in a file's content. */
 export function scanText(file: string, text: string): ScanFinding[] {
   const out: ScanFinding[] = []
   if (file.endsWith('.tokens.json')) {
@@ -42,7 +42,7 @@ function matchesAllow(file: string, allow: { path: string }[]): boolean {
   return false
 }
 
-/** Varre os arquivos versionados do repositório. */
+/** Scans the repository's tracked files. */
 export async function scanRepo(root: string): Promise<ScanFinding[]> {
   const allowFile = JSON.parse(await readFile(join(root, 'quality/scan-allowlist.json'), 'utf8'))
   const allow: { path: string }[] = allowFile.allow ?? []
@@ -53,7 +53,7 @@ export async function scanRepo(root: string): Promise<ScanFinding[]> {
   const out: ScanFinding[] = []
   for (const file of tracked) {
     if (matchesAllow(file, allow)) continue
-    // Arquivos de teste e fixtures não são distribuídos; o FR-001 vale para a fonte embarcada.
+    // Test and fixture files are not shipped; FR-001 applies to the shipped source.
     if (/(^|\/)(test|tests|fixtures|__tests__)\//.test(file) || /\.(test|spec)\.[tj]sx?$/.test(file)) continue
     if (!SCAN_EXT.test(file) && !file.endsWith('.tokens.json')) continue
     let text = ''
