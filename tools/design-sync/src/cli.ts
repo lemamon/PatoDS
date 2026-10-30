@@ -15,11 +15,11 @@ async function main(): Promise<number> {
   })
   const cmd = positionals[0]
   if (!['plan', 'apply', 'detect', 'check-access'].includes(cmd ?? '')) {
-    process.stderr.write('uso: design-sync <plan|apply|detect|check-access> [--adapter memory] [--pkg <dir>]\n')
+    process.stderr.write('usage: design-sync <plan|apply|detect|check-access> [--adapter memory] [--pkg <dir>]\n')
     return 2
   }
   if (values.adapter !== 'memory') {
-    process.stderr.write(`adaptador "${values.adapter}" indisponível: só "memory" até a decisão do requerente (ADR-14).\n`)
+    process.stderr.write(`adapter "${values.adapter}" unavailable: only "memory" until the requester decides (ADR-14).\n`)
     return 2
   }
   const pkgDir = resolve(values.pkg ?? '.')
@@ -39,14 +39,14 @@ async function main(): Promise<number> {
   }
   // apply command
   const res = await sync(tool, desired)
-  process.stdout.write(`sync: ${res.state}, ${res.plan.length} operações, ${res.restored.length} restauradas.\n`)
+  process.stdout.write(`sync: ${res.state}, ${res.plan.length} operations, ${res.restored.length} restored.\n`)
   return res.state === 'verified' ? 0 : 5
 }
 
 main().then(
   (c) => process.exit(c),
   (e) => {
-    process.stderr.write(`erro interno: ${e?.stack ?? e}\n`)
+    process.stderr.write(`internal error: ${e?.stack ?? e}\n`)
     process.exit(3)
   },
 )
