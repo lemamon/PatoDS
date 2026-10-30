@@ -7,25 +7,25 @@ import { checkLayers } from '../src/layers.ts'
 const fx = (n: string) => readFileSync(join(import.meta.dirname, '../fixtures', n), 'utf8')
 
 describe('scanText (FR-001)', () => {
-  it('detecta custom property --patods-* em CSS', () => {
+  it('detects custom property --patods-* in CSS', () => {
     expect(scanText('fixtures/bad.css', fx('bad.css')).map((f) => f.code)).toContain('FR001-CSS-VAR-DECL')
   })
-  it('detecta em <style> de SFC Vue', () => {
+  it('detects in <style> of a Vue SFC', () => {
     expect(scanText('fixtures/bad.vue', fx('bad.vue')).map((f) => f.code)).toContain('FR001-CSS-VAR-DECL')
   })
-  it('detecta setProperty em TSX', () => {
+  it('detects setProperty in TSX', () => {
     expect(scanText('fixtures/bad.tsx', fx('bad.tsx')).map((f) => f.code)).toContain('FR001-SETPROPERTY')
   })
-  it('detecta .tokens.json fora da fonte', () => {
+  it('detects .tokens.json outside the source', () => {
     expect(scanText('fixtures/stray.tokens.json', fx('stray.tokens.json')).map((f) => f.code)).toContain('FR001-DTCG-OUTSIDE-SOURCE')
   })
-  it('não sinaliza uso válido var(--patods-*)', () => {
+  it('does not flag valid usage var(--patods-*)', () => {
     expect(scanText('fixtures/ok.css', fx('ok.css'))).toEqual([])
   })
 })
 
 describe('checkLayers (ENG-01)', () => {
-  it('o repositório real não tem aresta de camada proibida', async () => {
+  it('the real repository has no forbidden layer edge', async () => {
     const root = join(import.meta.dirname, '../../..')
     expect(await checkLayers(root)).toEqual([])
   })
