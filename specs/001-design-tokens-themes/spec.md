@@ -1,4 +1,4 @@
-# Feature Specification: Design tokens e temas
+# Feature Specification: Design tokens and themes
 
 **Feature Branch**: `001-design-tokens-themes`
 
@@ -6,505 +6,506 @@
 
 **Status**: Draft
 
-**Input**: User description: "Feature 001 — Design tokens e temas do PatoDS (Fase 1). Fonte: docs/requisitos.md, seção \"Design tokens e temas\" e itens ligados. Escopo: fonte única de tokens em DTCG com três camadas (primitivo, semântico, componente) e validação no CI (TOK-01, TOK-02, TOK-04, TOK-09, TOK-10, TOK-13); geração determinística de CSS custom properties prefixadas e módulos ESM tipados com mapas por marca e modo (TOK-05, TOK-06); múltiplas marcas e modos claro/escuro como eixos independentes por atributos, aplicáveis a qualquer subárvore com escopos aninhados no nível de CSS (TOK-07, TOK-08, TOK-14); CSS de cada marca importável sem as outras (ENG-06); manifesto de pares de contraste conforme nível alvo (A11Y-09); lint de estilos que barra token primitivo, valor literal e altura de controle fora da escala (TOK-03, TOK-13, aplicado ao núcleo quando existir); sincronização com a ferramenta de design na direção da premissa vigente, com restauração de edição manual, nomes e hierarquia idênticos, marca e modo trocáveis e detecção de divergência de tokens (DSN-01 a DSN-05, DSN-11 na parte de tokens). TOK-12 é Desejável: só entra se contratado. Fora desta feature: componentes, Provedor de tema e seus testes React/Vue de tema aninhado e SSR (feature de componentes), documentação dos fundamentos (DOC-05, feature de docs), mapeamento de tokens legados (MIG-03). Prefixo ainda indefinido: usar <prefixo>. Respeitar a constituição v1.0.0."
+**Input**: User description: "Feature 001 — PatoDS Design tokens and themes (Phase 1). Source: docs/requisitos.md, the \"Design tokens and themes\" section and linked items. Scope: single token source in DTCG with three layers (primitive, semantic, component) and CI validation (TOK-01, TOK-02, TOK-04, TOK-09, TOK-10, TOK-13); deterministic generation of prefixed CSS custom properties and typed ESM modules with maps by brand and mode (TOK-05, TOK-06); multiple brands and light/dark modes as independent axes via attributes, applicable to any subtree with nested scopes at the CSS level (TOK-07, TOK-08, TOK-14); each brand's CSS importable without the others (ENG-06); manifest of contrast pairs per target level (A11Y-09); style lint that blocks primitive tokens, literal values, and control heights outside the scale (TOK-03, TOK-13, applied to the core once it exists); sync with the design tool in the direction of the current premise, with manual-edit restoration, identical names and hierarchy, swappable brand and mode, and token divergence detection (DSN-01 to DSN-05, DSN-11 for the token part). TOK-12 is Desirable: included only if contracted. Out of this feature: components, the theme Provider and its React/Vue nested-theme and SSR tests (components feature), fundamentals documentation (DOC-05, docs feature), legacy token mapping (MIG-03). Prefix still undefined: use <prefixo>. Comply with constitution v1.0.0."
 
-Fonte dos requisitos: [docs/requisitos.md](../../docs/requisitos.md). Os IDs entre parênteses
-(TOK-xx, DSN-xx etc.) referem-se a ele. Princípios aplicáveis da constituição: I, II, III, V, VII,
-IX, X e XI.
+Requirements source: [docs/requisitos.md](../../docs/requisitos.md). The IDs in parentheses
+(TOK-xx, DSN-xx, etc.) refer to it. Applicable constitution principles: I, II, III, V, VII,
+IX, X, and XI.
 
 ## Clarifications
 
 ### Session 2026-10-21
 
-Ajustes vindos da pesquisa do plano ([research.md](research.md)); nenhum decide premissa em aberto.
+Adjustments coming from the plan research ([research.md](research.md)); none decides an open premise.
 
-- Q: Como o CSS cumpre "só seletores dessa marca" (ENG-06) se marca e modo são eixos independentes?
-  → A: Distribuição em um `base.css` neutro de marca (ordem das camadas, primitivos compartilhados,
-  modo padrão e resolvedor de tokens) mais um arquivo por marca só com seletores dela; a app importa
-  `base.css` e o arquivo da marca (FR-013, FR-017).
-- Q: O que conta como "variável sem valor" (ENG-06, FR-013, FR-014, SC-006)? → A: Token público
-  `--<prefixo>-*` (nome sem o segmento privado `_`) vazio ou garantidamente inválido, ou `var()` sem
-  fallback que resolva assim. Variáveis privadas do mecanismo de escopo, com segmento `_`, são vazias
-  ou `initial` por desenho e ficam fora. Interpretação a confirmar com o aceitante.
-- Q: Pares de estado inativo ou desabilitado falham a checagem de contraste? → A: Não. O WCAG 2.2 AA
-  (premissa do A11Y-01) isenta componentes inativos: esses pares ficam no manifesto, são medidos e
-  reportados, mas não falham o build (FR-020).
-- Q: Indicador de foco que fica parte dentro e parte fora do componente precisa de 3:1 dos dois
-  lados? → A: Não; basta um dos lados (Understanding 1.4.11). O manifesto declara esses pares como
-  grupo em que ao menos um membro atinge o mínimo (FR-020).
-- Q: Como um token que varia por marca e por modo aparece na ferramenta de design com marca e modo
-  em coleções independentes e sem variáveis auxiliares (DSN-04, DSN-05)? → A: A fonte o expressa como
-  token de eixo modo cujo valor em cada modo é alias para um token de eixo marca com as mesmas chaves
-  em toda marca (FR-033).
-- Q: Adicionar uma marca regenera o relatório de API de tokens, versionado por exigência do QA-08.
-  Isso viola "apenas arquivos de tokens" (TOK-07)? → A: Não. O relatório é arquivo de tokens,
-  derivado da fonte e nunca editado à mão; a checagem de diff aceita a fonte e esse relatório e
-  rejeita qualquer outro arquivo (FR-009, SC-005).
-- Q: Tokens compostos de tipografia são publicados? → A: Não. Só tokens com um valor CSS único são
-  publicáveis; a categoria tipografia usa tokens atômicos (família, peso, tamanho, altura de linha,
-  espaçamento), o que mantém um token por custom property, por entrada do mapa de valores e por
-  variável na ferramenta de design (FR-006, FR-016, FR-028).
+- Q: How does the CSS satisfy "only that brand's selectors" (ENG-06) if brand and mode are independent axes?
+  → A: Distribution in a brand-neutral `base.css` (layer order, shared primitives,
+  default mode, and token resolver) plus one file per brand with only its own selectors; the app imports
+  `base.css` and the brand's file (FR-013, FR-017).
+- Q: What counts as a "variable without a value" (ENG-06, FR-013, FR-014, SC-006)? → A: A public token
+  `--<prefixo>-*` (name without the private `_` segment) that is empty or guaranteed invalid, or a `var()` without
+  a fallback that resolves that way. The scoping mechanism's private variables, with the `_` segment, are empty
+  or `initial` by design and are out of scope. Interpretation to be confirmed with the acceptor.
+- Q: Do inactive or disabled state pairs fail the contrast check? → A: No. WCAG 2.2 AA
+  (A11Y-01 premise) exempts inactive components: those pairs stay in the manifest, are measured and
+  reported, but do not fail the build (FR-020).
+- Q: Does a focus indicator that falls partly inside and partly outside the component need 3:1 on both
+  sides? → A: No; one of the sides is enough (Understanding 1.4.11). The manifest declares those pairs as a
+  group in which at least one member meets the minimum (FR-020).
+- Q: How does a token that varies by brand and by mode appear in the design tool with brand and mode
+  in independent collections and without auxiliary variables (DSN-04, DSN-05)? → A: The source expresses it as a
+  mode-axis token whose value in each mode is an alias to a brand-axis token with the same keys
+  across every brand (FR-033).
+- Q: Adding a brand regenerates the token API report, versioned as required by QA-08.
+  Does this violate "only token files" (TOK-07)? → A: No. The report is a token file,
+  derived from the source and never edited by hand; the diff check accepts the source and this report and
+  rejects any other file (FR-009, SC-005).
+- Q: Are composite typography tokens published? → A: No. Only tokens with a single CSS value are
+  publishable; the typography category uses atomic tokens (family, weight, size, line height,
+  spacing), which keeps one token per custom property, per value-map entry, and per
+  variable in the design tool (FR-006, FR-016, FR-028).
 
 ## User Scenarios & Testing *(mandatory)*
 
-Atores:
+Actors:
 
-- **Mantenedor do DS**: pessoa que cria e altera tokens no repositório do PatoDS.
-- **Responsável de design da marca**: pessoa do requerente que define os valores de cada marca.
-- **Dev de app consumidora**: pessoa que usa os tokens publicados numa aplicação React, Vue ou
-  qualquer página web.
-- **Designer**: pessoa que usa as variáveis do PatoDS na ferramenta de design.
-- **Dono da sincronização**: papel do fornecedor que executa a sincronização com a ferramenta de
-  design e corrige falhas (DSN-02).
+- **DS maintainer**: the person who creates and changes tokens in the PatoDS repository.
+- **Brand design lead**: the requester's person who defines each brand's values.
+- **Consumer app dev**: the person who uses the published tokens in a React, Vue, or
+  any web-page application.
+- **Designer**: the person who uses the PatoDS variables in the design tool.
+- **Sync owner**: the vendor role that runs the sync with the design
+  tool and fixes failures (DSN-02).
 
-### User Story 1 - Definir tokens numa fonte única validada (Priority: P1)
+### User Story 1 - Define tokens in a single validated source (Priority: P1)
 
-O mantenedor do DS define todos os tokens num único lugar, em formato aberto, organizados em
-camadas primitiva, semântica e de componente, com nomes padronizados. Toda mudança proposta passa
-por validação automática antes de ser integrada; token mal formado, mal nomeado, com valor literal
-fora da camada primitiva ou com referência inválida é barrado.
+The DS maintainer defines all tokens in a single place, in an open format, organized into
+primitive, semantic, and component layers, with standardized names. Every proposed change goes
+through automated validation before being integrated; a malformed, misnamed token, one with a literal value
+outside the primitive layer, or one with an invalid reference is blocked.
 
-**Why this priority**: tudo o mais (saídas geradas, temas, contraste, sincronização) depende de
-uma fonte única confiável. Sem ela, não há "fonte única da aparência" (ADR-02, Princípio II).
+**Why this priority**: everything else (generated outputs, themes, contrast, sync) depends on
+a reliable single source. Without it, there is no "single source of appearance" (ADR-02, Principle II).
 
-**Independent Test**: propor mudanças com tokens válidos e inválidos (nome fora do padrão, literal
-na camada semântica, alias para token inexistente, ciclo de alias, categoria sem token semântico) e
-confirmar que só as válidas passam, com relatório por categoria.
+**Independent Test**: propose changes with valid and invalid tokens (name off the standard, literal
+in the semantic layer, alias to a nonexistent token, alias cycle, category without a semantic token) and
+confirm that only the valid ones pass, with a report by category.
 
 **Acceptance Scenarios**:
 
-1. **Given** a fonte de tokens válida, **When** o mantenedor propõe um token semântico com valor
-   literal, **Then** a validação rejeita a mudança e aponta o token e a regra violada.
-2. **Given** a fonte de tokens válida, **When** o mantenedor propõe um token com nome fora da
-   convenção, **Then** a validação rejeita a mudança.
-3. **Given** a fonte de tokens válida, **When** alguém tenta definir um token fora da fonte única
-   (por exemplo, uma variável de cor declarada direto num arquivo de estilo), **Then** a busca da
-   validação encontra a ocorrência e bloqueia a integração.
-4. **Given** uma mudança válida, **When** a validação termina, **Then** o relatório lista a
-   contagem de tokens por categoria e a escala de alturas de controle de cada tema.
+1. **Given** a valid token source, **When** the maintainer proposes a semantic token with a literal
+   value, **Then** validation rejects the change and points to the token and the violated rule.
+2. **Given** a valid token source, **When** the maintainer proposes a token with a name off the
+   convention, **Then** validation rejects the change.
+3. **Given** a valid token source, **When** someone tries to define a token outside the single source
+   (for example, a color variable declared directly in a style file), **Then** the validation scan
+   finds the occurrence and blocks the integration.
+4. **Given** a valid change, **When** validation finishes, **Then** the report lists the
+   token count by category and the control-height scale of each theme.
 
 ---
 
-### User Story 2 - Consumir tokens gerados com marca e modo por subárvore (Priority: P2)
+### User Story 2 - Consume generated tokens with brand and mode per subtree (Priority: P2)
 
-A dev de app consumidora importa o CSS de uma marca e, opcionalmente, os módulos tipados de
-referência. Ela escolhe marca e modo (claro ou escuro) marcando qualquer elemento da página, e pode
-aninhar escopos: uma área em modo escuro dentro de uma página clara, ou uma marca diferente dentro
-de outra. Ao digitar o nome de um token inexistente, recebe erro de tipos.
+The consumer app dev imports a brand's CSS and, optionally, the typed reference
+modules. She chooses brand and mode (light or dark) by marking any element on the page, and can
+nest scopes: an area in dark mode inside a light page, or a different brand inside
+another. When she types the name of a nonexistent token, she gets a type error.
 
-**Why this priority**: é a entrega de valor para quem usa o design system; sem ela os tokens não
-saem do repositório.
+**Why this priority**: it is the value delivery for whoever uses the design system; without it the tokens never
+leave the repository.
 
-**Independent Test**: numa app de exemplo que importa só o CSS da marca A, alternar modo e
-aninhar escopos de marca e modo; verificar os valores aplicados em cada escopo, a ausência de
-variáveis exclusivas da marca B e a ausência de variáveis sem valor; num projeto tipado, referenciar
-um token inexistente e confirmar o erro de tipos.
+**Independent Test**: in an example app that imports only brand A's CSS, toggle mode and
+nest brand and mode scopes; check the applied values in each scope, the absence of
+brand B-exclusive variables, and the absence of variables without a value; in a typed project, reference
+a nonexistent token and confirm the type error.
 
 **Acceptance Scenarios**:
 
-1. **Given** uma app que importa só o CSS da marca A, selecionada conforme o FR-013, **When** o
-   conteúdo é analisado, **Then** não há variável exclusiva da marca B nem variável usada sem valor.
-2. **Given** um elemento com marca A e modo claro, **When** um descendente declara modo escuro,
-   **Then** o descendente usa os valores de marca A e modo escuro, e o restante continua em marca A
-   e modo claro.
-3. **Given** escopos alternados marca A → marca B → marca A, **When** os valores são lidos no
-   escopo mais interno, **Then** valem os da marca A.
-4. **Given** um projeto tipado que usa os módulos de tokens, **When** o código referencia um nome de
-   token inexistente, **Then** a verificação de tipos falha.
-5. **Given** a mesma fonte de tokens, **When** o build roda duas vezes, **Then** as saídas são
-   idênticas byte a byte.
+1. **Given** an app that imports only brand A's CSS, selected per FR-013, **When** the
+   content is analyzed, **Then** there is no brand B-exclusive variable and no variable used without a value.
+2. **Given** an element with brand A and light mode, **When** a descendant declares dark mode,
+   **Then** the descendant uses brand A and dark mode values, and the rest stays on brand A
+   and light mode.
+3. **Given** alternating scopes brand A → brand B → brand A, **When** the values are read in the
+   innermost scope, **Then** brand A's values apply.
+4. **Given** a typed project that uses the token modules, **When** the code references a nonexistent
+   token name, **Then** type checking fails.
+5. **Given** the same token source, **When** the build runs twice, **Then** the outputs are
+   byte-for-byte identical.
 
 ---
 
-### User Story 3 - Adicionar uma marca sem tocar em componentes (Priority: P3)
+### User Story 3 - Add a brand without touching components (Priority: P3)
 
-O responsável de design da marca entrega os valores de uma nova marca, e o mantenedor a adiciona
-alterando apenas arquivos de tokens. A nova marca passa a existir nos modos claro e escuro, com o
-mesmo conjunto de chaves semânticas das demais, e pode ser trocada em tempo de execução.
+The brand design lead delivers a new brand's values, and the maintainer adds it by changing
+only token files. The new brand then exists in light and dark modes, with the
+same set of semantic keys as the others, and can be switched at runtime.
 
-**Why this priority**: múltiplas marcas são requisito de contrato (TOK-07), mas dependem das
-histórias 1 e 2.
+**Why this priority**: multiple brands are a contract requirement (TOK-07), but they depend on
+stories 1 and 2.
 
-**Independent Test**: adicionar uma marca sintética nova e conferir no diff que só arquivos de
-tokens mudaram (fonte e relatório de API regenerado); conferir que a checagem de chaves passa e que a app de exemplo alterna
-entre a marca nova e outra em tempo de execução.
+**Independent Test**: add a new synthetic brand and check in the diff that only token files
+changed (source and regenerated API report); check that the key check passes and that the example app toggles
+between the new brand and another at runtime.
 
 **Acceptance Scenarios**:
 
-1. **Given** duas marcas publicadas, **When** o mantenedor adiciona uma terceira, **Then** o diff
-   altera apenas arquivos de tokens: a fonte e o relatório de API de tokens regenerado.
-2. **Given** uma marca nova sem uma chave semântica que as demais têm, **When** a validação roda,
-   **Then** a mudança é bloqueada e a chave ausente é apontada.
-3. **Given** a app de exemplo, **When** a dev troca a marca em tempo de execução, **Then** os
-   valores aplicados mudam sem recarregar a página e sem alterar código de componente.
+1. **Given** two published brands, **When** the maintainer adds a third, **Then** the diff
+   changes only token files: the source and the regenerated token API report.
+2. **Given** a new brand missing a semantic key that the others have, **When** validation runs,
+   **Then** the change is blocked and the missing key is pointed out.
+3. **Given** the example app, **When** the dev switches the brand at runtime, **Then** the
+   applied values change without reloading the page and without changing component code.
 
 ---
 
-### User Story 4 - Garantir contraste em todas as combinações (Priority: P4)
+### User Story 4 - Guarantee contrast across all combinations (Priority: P4)
 
-Cada par de cores de frente e fundo, em cada estado, é declarado num manifesto e medido em todas as
-combinações de marca e modo. Par que não atinge a razão exigida pelo nível de acessibilidade alvo
-falha o build.
+Each pair of foreground and background colors, in each state, is declared in a manifest and measured across all
+brand and mode combinations. A pair that does not reach the ratio required by the target accessibility
+level fails the build.
 
-**Why this priority**: acessibilidade é inegociável (Princípio V), mas a checagem só tem efeito
-depois que existem tokens de cor e marcas.
+**Why this priority**: accessibility is non-negotiable (Principle V), but the check only takes
+effect after color tokens and brands exist.
 
-**Independent Test**: incluir no manifesto um par sabidamente reprovado e outro com cor
-translúcida; confirmar que o build falha no primeiro e que o segundo é medido com a opacidade
-composta sobre o fundo.
+**Independent Test**: include in the manifest a pair known to fail and another with a translucent
+color; confirm that the build fails on the first and that the second is measured with the opacity
+composited over the background.
 
 **Acceptance Scenarios**:
 
-1. **Given** um par de texto com razão abaixo de 4,5:1 em qualquer combinação, **When** o build
-   roda, **Then** o build falha e aponta par, marca e modo.
-2. **Given** um par não textual (incluindo indicador de foco) abaixo de 3:1, **When** o build roda,
-   **Then** o build falha.
-3. **Given** uma cor de frente com opacidade, **When** a razão é calculada, **Then** a cor é
-   composta sobre o fundo antes do cálculo.
-4. **Given** um estilo de exemplo que usa um par de cores ausente do manifesto, **When** a
-   checagem roda, **Then** ela falha e aponta o par.
+1. **Given** a text pair with a ratio below 4.5:1 in any combination, **When** the build
+   runs, **Then** the build fails and points to the pair, brand, and mode.
+2. **Given** a non-text pair (including a focus indicator) below 3:1, **When** the build runs,
+   **Then** the build fails.
+3. **Given** a foreground color with opacity, **When** the ratio is calculated, **Then** the color is
+   composited over the background before the calculation.
+4. **Given** an example style that uses a color pair missing from the manifest, **When** the
+   check runs, **Then** it fails and points to the pair.
 
 ---
 
-### User Story 5 - Barrar estilos fora dos tokens (Priority: P5)
+### User Story 5 - Block styles outside the tokens (Priority: P5)
 
-O mantenedor que escreve estilos de componente recebe erro de lint ao usar token primitivo, valor
-literal ou altura de controle fora da escala única.
+The maintainer writing component styles gets a lint error when using a primitive token, a literal
+value, or a control height outside the single scale.
 
-**Why this priority**: a regra protege o núcleo de estilos, que nasce na feature de componentes;
-aqui ela é entregue e provada por exemplos, e passa a valer no núcleo assim que ele existir.
+**Why this priority**: the rule protects the style core, which is born in the components feature;
+here it is delivered and proven by examples, and it starts to apply to the core as soon as it exists.
 
-**Independent Test**: rodar o lint sobre exemplos válidos e inválidos e confirmar 100% dos erros
-esperados e zero falsos positivos.
+**Independent Test**: run the lint over valid and invalid examples and confirm 100% of the
+expected errors and zero false positives.
 
 **Acceptance Scenarios**:
 
-1. **Given** um estilo de componente que usa token primitivo, **When** o lint roda, **Then** o
-   merge é bloqueado.
-2. **Given** um estilo de componente com valor literal de cor, espaço ou raio, **When** o lint
-   roda, **Then** o merge é bloqueado.
-3. **Given** um controle interativo com altura fora da escala, **When** o lint roda, **Then** o
-   merge é bloqueado.
-4. **Given** estilos que usam só tokens semânticos ou de componente, **When** o lint roda,
-   **Then** não há erro.
+1. **Given** a component style that uses a primitive token, **When** the lint runs, **Then** the
+   merge is blocked.
+2. **Given** a component style with a literal value for color, space, or radius, **When** the lint
+   runs, **Then** the merge is blocked.
+3. **Given** an interactive control with a height outside the scale, **When** the lint runs, **Then** the
+   merge is blocked.
+4. **Given** styles that use only semantic or component tokens, **When** the lint runs,
+   **Then** there is no error.
 
 ---
 
-### User Story 6 - Manter a ferramenta de design sincronizada com o repositório (Priority: P6)
+### User Story 6 - Keep the design tool synced with the repository (Priority: P6)
 
-A cada versão publicada, as variáveis da ferramenta de design recebem os tokens do repositório,
-com os mesmos nomes e hierarquia, marca e modo como eixos independentes. Edição manual na
-ferramenta é desfeita na sincronização seguinte. Divergências são detectadas por verificação
-agendada e viram itens rastreáveis com responsável e prazo.
+With each published version, the design tool's variables receive the repository's tokens,
+with the same names and hierarchy, brand and mode as independent axes. A manual edit in the
+tool is undone on the next sync. Divergences are detected by a scheduled check
+and become trackable items with an assignee and due date.
 
-**Why this priority**: mantém design e código alinhados (seção DSN), mas depende de tokens
-publicados e da decisão sobre a ferramenta.
+**Why this priority**: it keeps design and code aligned (DSN section), but it depends on published
+tokens and the decision about the tool.
 
-**Independent Test**: publicar uma versão e conferir o log de variáveis alteradas; editar à mão
-uma variável na ferramenta e conferir que a sincronização seguinte restaura o valor e registra a
-ocorrência; trocar só a marca ou só o modo de um quadro e conferir que os valores mudam sem religar
-camadas; provocar uma divergência e conferir o item gerado.
+**Independent Test**: publish a version and check the log of changed variables; edit a
+variable by hand in the tool and check that the next sync restores the value and records the
+occurrence; switch only the brand or only the mode of a frame and check that the values change without relinking
+layers; cause a divergence and check the generated item.
 
 **Acceptance Scenarios**:
 
-1. **Given** uma versão publicada, **When** a sincronização roda, **Then** as variáveis da
-   ferramenta refletem os tokens e o log lista as variáveis alteradas.
-2. **Given** uma variável editada à mão na ferramenta, **When** a sincronização seguinte roda,
-   **Then** o valor da origem é restaurado e a ocorrência fica no log.
-3. **Given** um quadro na ferramenta, **When** o designer troca só a marca ou só o modo, **Then**
-   os valores mudam sem religar camadas.
-4. **Given** uma divergência de nome, hierarquia ou valor entre ferramenta e repositório, **When**
-   a verificação agendada roda, **Then** é criado um item rastreável com responsável e prazo.
-5. **Given** uma falha de sincronização, **When** ela ocorre, **Then** um alerta é atribuído ao
-   dono da sincronização.
-6. **Given** a premissa vigente, **When** o repositório é inspecionado, **Then** não existe rotina
-   que importe variáveis da ferramenta para o repositório.
+1. **Given** a published version, **When** the sync runs, **Then** the tool's
+   variables reflect the tokens and the log lists the changed variables.
+2. **Given** a variable edited by hand in the tool, **When** the next sync runs,
+   **Then** the source value is restored and the occurrence stays in the log.
+3. **Given** a frame in the tool, **When** the designer switches only the brand or only the mode, **Then**
+   the values change without relinking layers.
+4. **Given** a name, hierarchy, or value divergence between tool and repository, **When**
+   the scheduled check runs, **Then** a trackable item with an assignee and due date is created.
+5. **Given** a sync failure, **When** it occurs, **Then** an alert is assigned to the
+   sync owner.
+6. **Given** the current premise, **When** the repository is inspected, **Then** there is no routine
+   that imports variables from the tool into the repository.
 
 ---
 
 ### Edge Cases
 
-- Alias que aponta para token inexistente ou que forma ciclo: a validação falha e aponta a cadeia.
-- Token que referencia camada acima da sua (por exemplo, primitivo referenciando semântico): a
-  validação falha.
-- Marca ou modo com chave semântica a mais ou a menos que as demais combinações: bloqueado (TOK-09).
-- Escopo interno que define só o modo: herda a marca do ancestral mais próximo e aplica o modo
-  novo; o mesmo vale ao definir só a marca (cada eixo resolve pelo escopo mais próximo).
-- Escopos de marca alternados (A → B → A): vale o escopo mais próximo.
-- Atributo de marca ou modo com valor inexistente: o escopo continua com os valores do ancestral
-  mais próximo, sem variável sem valor.
-- Página sem nenhum atributo de marca ou modo que importa o CSS da marca padrão: aplica-se a
-  combinação padrão, sem variável sem valor; app que importa só outra marca a seleciona por
-  atributo na raiz do documento (FR-013).
-- Página que importa o CSS de duas marcas: a marca padrão, se for uma delas, vale nos escopos sem
-  atributo de marca, e a outra só tem efeito nos escopos que a selecionam.
-- Arquivo de CSS de tokens editado à mão no repositório: a validação falha, pois esse arquivo é
-  gerado.
-- Cor com opacidade em par de contraste: compõe-se sobre o fundo antes de medir.
-- Remoção ou renomeação de token publicado: é mudança incompatível de API pública e segue SemVer
-  (Princípio X).
-- Plano da ferramenta de design com limite de modos menor que o número de marcas × modos: o limite
-  e a solução adotada ficam registrados (DSN-05).
-- Sincronização interrompida no meio: a próxima execução converge para o estado da origem, sem
-  deixar variáveis parciais divergentes sem registro.
-- Edição manual na ferramenta entre duas sincronizações: a divergência é detectada pela verificação
-  agendada e desfeita na sincronização seguinte.
+- An alias that points to a nonexistent token or forms a cycle: validation fails and points to the chain.
+- A token that references a layer above its own (for example, a primitive referencing a semantic): the
+  validation fails.
+- A brand or mode with one more or one fewer semantic key than the other combinations: blocked (TOK-09).
+- An inner scope that defines only the mode: it inherits the brand from the nearest ancestor and applies the
+  new mode; the same holds when defining only the brand (each axis resolves from the nearest scope).
+- Alternating brand scopes (A → B → A): the nearest scope wins.
+- A brand or mode attribute with a nonexistent value: the scope keeps the values of the nearest
+  ancestor, with no variable without a value.
+- A page with no brand or mode attribute that imports the default brand's CSS: the default
+  combination applies, with no variable without a value; an app that imports only another brand selects it by
+  an attribute on the document root (FR-013).
+- A page that imports two brands' CSS: the default brand, if it is one of them, applies in scopes without a
+  brand attribute, and the other takes effect only in scopes that select it.
+- A token CSS file edited by hand in the repository: validation fails, because that file is
+  generated.
+- A color with opacity in a contrast pair: it is composited over the background before measuring.
+- Removal or renaming of a published token: it is an incompatible public-API change and follows SemVer
+  (Principle X).
+- A design-tool plan with a mode limit lower than the number of brands × modes: the limit
+  and the adopted solution are recorded (DSN-05).
+- A sync interrupted midway: the next run converges to the source state, without
+  leaving partial divergent variables unrecorded.
+- A manual edit in the tool between two syncs: the divergence is detected by the scheduled
+  check and undone on the next sync.
 
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
 
-**Fonte única e estrutura**
+**Single source and structure**
 
-- **FR-001**: O sistema DEVE definir todos os tokens numa fonte única no formato W3C Design Tokens
-  (DTCG); nenhum token PODE ser definido fora dela, e uma busca automatizada no repositório DEVE
-  confirmar isso (TOK-01).
-- **FR-002**: O sistema DEVE validar a fonte contra o schema DTCG em toda mudança proposta; erro de
-  schema DEVE bloquear o merge (TOK-01).
-- **FR-003**: O sistema DEVE organizar os tokens em três camadas: primitivos, semânticos e de
-  componente. Só tokens primitivos PODEM ter valor literal; semânticos e de componente DEVEM
-  referenciar outros tokens por alias, e a validação DEVE rejeitar literal fora da camada
-  primitiva (TOK-02).
-- **FR-004**: Todo alias DEVE resolver para um token existente, sem ciclo (TOK-01, TOK-02). Nenhuma
-  camada PODE referenciar camada acima dela (primitivo → primitivo; semântico → primitivo ou
-  semântico; componente → semântico, componente ou primitivo). Justificativa, sem ID próprio:
-  referência de camada inferior para camada superior inverte as três camadas do TOK-02 e faria o
-  valor de um primitivo depender de marca ou modo.
-- **FR-005**: O sistema DEVE adotar convenção de nomenclatura documentada, com prefixo `<prefixo>`
-  e segmentos em ordem fixa (ex.: categoria-propriedade-estado); a validação DEVE rejeitar nome
-  fora do padrão, e 100% dos tokens publicados DEVEM passar (TOK-04).
-- **FR-006**: O sistema DEVE cobrir as categorias cor, tipografia, espaço, dimensão, raio, borda,
-  sombra, movimento, z-index, breakpoints e opacidade, com ao menos um token semântico publicado em
-  cada uma (TOK-10).
-- **FR-007**: O sistema DEVE definir uma escala única de alturas para controles interativos, usada
-  por todos os controles (TOK-13).
-- **FR-008**: O sistema DEVE emitir, a cada build, relatório com a contagem de tokens por categoria
-  e a escala de alturas de controle de cada tema (TOK-10, TOK-13).
+- **FR-001**: The system MUST define all tokens in a single source in the W3C Design Tokens
+  (DTCG) format; no token MAY be defined outside it, and an automated repository scan MUST
+  confirm this (TOK-01).
+- **FR-002**: The system MUST validate the source against the DTCG schema on every proposed change; a schema
+  error MUST block the merge (TOK-01).
+- **FR-003**: The system MUST organize tokens into three layers: primitives, semantics, and
+  components. Only primitive tokens MAY have a literal value; semantics and components MUST
+  reference other tokens by alias, and validation MUST reject a literal outside the primitive
+  layer (TOK-02).
+- **FR-004**: Every alias MUST resolve to an existing token, without a cycle (TOK-01, TOK-02). No
+  layer MAY reference a layer above it (primitive → primitive; semantic → primitive or
+  semantic; component → semantic, component, or primitive). Rationale, with no ID of its own:
+  a reference from a lower layer to an upper layer inverts the three layers of TOK-02 and would make the
+  value of a primitive depend on brand or mode.
+- **FR-005**: The system MUST adopt a documented naming convention, with the `<prefixo>` prefix
+  and segments in a fixed order (e.g., category-property-state); validation MUST reject a name
+  off the standard, and 100% of published tokens MUST pass (TOK-04).
+- **FR-006**: The system MUST cover the color, typography, space, dimension, radius, border,
+  shadow, motion, z-index, breakpoints, and opacity categories, with at least one semantic token published in
+  each (TOK-10).
+- **FR-007**: The system MUST define a single height scale for interactive controls, used
+  by all controls (TOK-13).
+- **FR-008**: The system MUST emit, on each build, a report with the token count by category
+  and the control-height scale of each theme (TOK-10, TOK-13).
 
-**Marcas, modos e escopos**
+**Brands, modes, and scopes**
 
-- **FR-009**: O sistema DEVE suportar múltiplas marcas e publicar os tokens de cada marca da decisão
-  "Marcas e temas da versão 1.0" (premissa vigente: todas as marcas das apps consumidoras atuais),
-  cada uma nos modos claro e escuro; adicionar uma marca DEVE alterar apenas arquivos de tokens (a
-  fonte de tokens e o relatório de API de tokens regenerado pelo build), nunca código de componente
-  ou de ferramenta, comprovado pelo diff (TOK-07).
-- **FR-010**: O sistema DEVE oferecer modos claro e escuro como eixo independente da marca,
-  combinável com qualquer marca; marca e modo DEVEM ser selecionados por atributos de dados
-  distintos, ambos com o prefixo (`data-<prefixo>-*`), e o build DEVE gerar saída válida para todas
-  as combinações (TOK-08, CMP-05).
-- **FR-011**: Toda combinação de marca e modo DEVE ter exatamente o mesmo conjunto de chaves
-  semânticas; uma checagem DEVE comparar todas as combinações, e chave ausente ou excedente DEVE
-  bloquear o merge (TOK-09).
-- **FR-012**: Os atributos de marca e modo DEVEM valer em qualquer elemento, cada escopo DEVE
-  redeclarar os tokens semânticos, e em escopos aninhados DEVEM valer, para cada eixo, os valores
-  do escopo mais próximo (TOK-14, no nível de CSS).
-- **FR-013**: Sem atributo de modo no elemento nem em ancestral, DEVE valer o modo padrão; sem
-  atributo de marca no elemento nem em ancestral, DEVE valer a marca padrão indicada pelo
-  requerente (CMP-24). Valores de tokens de marca aplicados sem atributo de marca DEVEM vir somente
-  do CSS da marca padrão; app que importa só o CSS de outra marca seleciona essa marca por atributo
-  na raiz do documento, pois o arquivo de cada marca contém só seletores dela (ENG-06). Nessas
-  condições, nenhuma variável PODE ficar sem valor, no sentido da definição operacional da seção
-  Clarifications.
-- **FR-014**: Valor de atributo de marca ou modo inexistente NÃO DEVE deixar variável sem valor; o
-  escopo continua com os valores do ancestral mais próximo. Justificativa, sem ID próprio: estende a
-  valores de atributo inválidos a exigência do ENG-06 de que a app não tenha variáveis CSS sem valor.
+- **FR-009**: The system MUST support multiple brands and publish each brand's tokens from the
+  "Brands and themes of version 1.0" decision (current premise: all brands of the current consumer
+  apps), each in light and dark modes; adding a brand MUST change only token files (the
+  token source and the token API report regenerated by the build), never component
+  or tool code, proven by the diff (TOK-07).
+- **FR-010**: The system MUST offer light and dark modes as an axis independent of the brand,
+  combinable with any brand; brand and mode MUST be selected by distinct data
+  attributes, both prefixed (`data-<prefixo>-*`), and the build MUST generate valid output for all
+  combinations (TOK-08, CMP-05).
+- **FR-011**: Every brand and mode combination MUST have exactly the same set of
+  semantic keys; a check MUST compare all combinations, and a missing or excess key MUST
+  block the merge (TOK-09).
+- **FR-012**: The brand and mode attributes MUST apply on any element, each scope MUST
+  redeclare the semantic tokens, and in nested scopes the values of the nearest
+  scope MUST apply for each axis (TOK-14, at the CSS level).
+- **FR-013**: With no mode attribute on the element or on an ancestor, the default mode MUST
+  apply; with no brand attribute on the element or on an ancestor, the default brand indicated by the
+  requester MUST apply (CMP-24). Brand token values applied without a brand attribute MUST come only
+  from the default brand's CSS; an app that imports only another brand's CSS selects that brand by an attribute
+  on the document root, because each brand's file contains only its own selectors (ENG-06). Under those
+  conditions, no variable MAY be left without a value, in the sense of the operational definition in the
+  Clarifications section.
+- **FR-014**: A nonexistent brand or mode attribute value MUST NOT leave a variable without a value; the
+  scope keeps the values of the nearest ancestor. Rationale, with no ID of its own: it extends to
+  invalid attribute values the ENG-06 requirement that the app have no CSS variables without a value.
 
-**Saídas geradas**
+**Generated outputs**
 
-- **FR-015**: O sistema DEVE gerar, a partir da fonte única, CSS custom properties com prefixo
-  `--<prefixo>-`; o repositório NÃO DEVE versionar arquivo CSS de tokens editado à mão, e dois
-  builds da mesma fonte DEVEM produzir saída idêntica byte a byte (TOK-05).
-- **FR-016**: O sistema DEVE gerar módulos JavaScript ESM com declarações de tipo TypeScript para
-  todos os tokens: os módulos exportam referências `var(--<prefixo>-*)` e, em entrada separada,
-  mapas de valores por marca e modo. O pacote publicado DEVE conter os módulos ESM e os arquivos
-  .d.ts das duas entradas, e referenciar nome de token inexistente DEVE gerar erro de tipos,
-  comprovado por teste de tipos (TOK-06).
-- **FR-017**: O sistema DEVE distribuir o CSS de cada marca, com os modos claro e escuro, num
-  arquivo próprio que contém só seletores dessa marca, incluídos, no arquivo da marca padrão, os que
-  aplicam a combinação padrão (FR-013), conforme checagem automatizada; o que é neutro de marca
-  (ordem das camadas, primitivos compartilhados, modo padrão, resolvedor de tokens) DEVE ficar num
-  arquivo base comum, sem valor exclusivo de nenhuma marca. Uma app de exemplo que importa o arquivo
-  base e só a marca A NÃO DEVE conter variáveis exclusivas da marca B nem variáveis sem valor
+- **FR-015**: The system MUST generate, from the single source, CSS custom properties with the
+  `--<prefixo>-` prefix; the repository MUST NOT version a hand-edited token CSS file, and two
+  builds of the same source MUST produce byte-for-byte identical output (TOK-05).
+- **FR-016**: The system MUST generate ESM JavaScript modules with TypeScript type declarations for
+  all tokens: the modules export `var(--<prefixo>-*)` references and, in a separate entry,
+  value maps by brand and mode. The published package MUST contain the ESM modules and the
+  .d.ts files of both entries, and referencing a nonexistent token name MUST produce a type error,
+  proven by a type test (TOK-06).
+- **FR-017**: The system MUST distribute each brand's CSS, with light and dark modes, in its
+  own file containing only that brand's selectors, including, in the default brand's file, those that
+  apply the default combination (FR-013), per an automated check; what is brand-neutral (layer
+  order, shared primitives, default mode, token resolver) MUST stay in a common base
+  file, with no value exclusive to any brand. An example app that imports the base file
+  and only brand A MUST NOT contain brand B-exclusive variables or variables without a value
   (ENG-06).
-- **FR-018**: Uma app de exemplo, que DEVE consumir o pacote de tokens empacotado e nunca o
-  código-fonte (Princípio VII, QA-06), DEVE alternar entre duas marcas e entre os dois modos em tempo
-  de execução e demonstrar escopos aninhados, sem alterar código de componente (TOK-07, TOK-14). A
-  app de exemplo do FR-017 segue a mesma regra.
+- **FR-018**: An example app, which MUST consume the packaged token package and never the
+  source code (Principle VII, QA-06), MUST toggle between two brands and between the two modes at
+  runtime and demonstrate nested scopes, without changing component code (TOK-07, TOK-14). The
+  FR-017 example app follows the same rule.
 
-**Contraste**
+**Contrast**
 
-- **FR-019**: O sistema DEVE manter um manifesto versionado dos pares de cor de frente, fundo e
-  estado, classificados como texto ou não texto (A11Y-09).
-- **FR-020**: Uma checagem DEVE medir cada par do manifesto em todas as combinações de marca e
-  modo, compondo a opacidade antes de calcular a razão; sob a premissa vigente (WCAG 2.2 AA), texto
-  exige 4,5:1 e não texto, incluindo indicador de foco, 3:1; par reprovado DEVE falhar o build
-  (A11Y-09). Pares de estado inativo ou desabilitado, isentos pelo WCAG 2.2 AA, DEVEM constar do
-  manifesto e ser medidos e reportados, sem falhar o build; indicador de foco que fica parte dentro e
-  parte fora do componente é aprovado quando ao menos um dos lados atinge 3:1 (A11Y-01, A11Y-09).
-- **FR-021**: O sistema DEVE fornecer checagem que falha quando um estilo usa par de cores de frente
-  e fundo ausente do manifesto, entregue com exemplos válidos e inválidos que disparam 100% dos
-  erros esperados e zero falsos positivos; a checagem DEVE ser aplicada ao núcleo de estilos assim
-  que ele existir (A11Y-09).
+- **FR-019**: The system MUST maintain a versioned manifest of the foreground, background, and
+  state color pairs, classified as text or non-text (A11Y-09).
+- **FR-020**: A check MUST measure each manifest pair across all brand and mode combinations,
+  compositing opacity before computing the ratio; under the current premise (WCAG 2.2 AA), text
+  requires 4.5:1 and non-text, including the focus indicator, 3:1; a failing pair MUST fail the
+  build (A11Y-09). Inactive or disabled state pairs, exempt under WCAG 2.2 AA, MUST appear in the
+  manifest and be measured and reported, without failing the build; a focus indicator that falls partly inside and
+  partly outside the component passes when at least one of the sides reaches 3:1 (A11Y-01, A11Y-09).
+- **FR-021**: The system MUST provide a check that fails when a style uses a foreground and background color
+  pair missing from the manifest, delivered with valid and invalid examples that trigger 100% of the
+  expected errors and zero false positives; the check MUST be applied to the style core as soon
+  as it exists (A11Y-09).
 
-**Lint de estilos**
+**Style lint**
 
-- **FR-022**: O sistema DEVE fornecer regra de lint de estilos que bloqueia o merge ao detectar
-  token primitivo ou valor literal em estilo de componente (TOK-03).
-- **FR-023**: A mesma regra DEVE rejeitar altura de controle interativo fora da escala única
-  (TOK-13).
-- **FR-024**: A regra DEVE ser entregue com exemplos válidos e inválidos que disparam 100% dos
-  erros esperados e zero falsos positivos, e DEVE ser aplicada ao núcleo de estilos assim que ele
-  existir, com relatório de zero violações no CI (TOK-03).
+- **FR-022**: The system MUST provide a style lint rule that blocks the merge when it detects a
+  primitive token or literal value in a component style (TOK-03).
+- **FR-023**: The same rule MUST reject an interactive control height outside the single
+  scale (TOK-13).
+- **FR-024**: The rule MUST be delivered with valid and invalid examples that trigger 100% of the
+  expected errors and zero false positives, and MUST be applied to the style core as soon as it
+  exists, with a zero-violations report in CI (TOK-03).
 
-**Sincronização com a ferramenta de design**
+**Sync with the design tool**
 
-- **FR-025**: Um pipeline versionado DEVE sincronizar automaticamente os tokens com as variáveis
-  da ferramenta de design a cada versão publicada e registrar log das variáveis alteradas; sob a
-  premissa vigente (o repositório é a fonte, a ferramenta recebe as variáveis), nenhuma rotina PODE
-  importar variáveis da ferramenta para o repositório (DSN-01).
-- **FR-026**: O arquivo de donos DEVE indicar o papel dono da sincronização, e toda falha de
-  sincronização DEVE gerar alerta atribuído a esse papel (DSN-02).
-- **FR-027**: Edição manual no destino DEVE ser restaurada pela sincronização seguinte para o valor
-  da origem e registrada no log, comprovado por teste com alteração manual proposital (DSN-03).
-- **FR-028**: Cada variável na ferramenta DEVE ter nome e hierarquia idênticos ao token
-  correspondente; o relatório de divergência DEVE apontar zero diferenças de nome ou hierarquia
+- **FR-025**: A versioned pipeline MUST automatically sync the tokens with the
+  design tool's variables on each published version and record a log of the changed variables; under the
+  current premise (the repository is the source, the tool receives the variables), no routine MAY
+  import variables from the tool into the repository (DSN-01).
+- **FR-026**: The owners file MUST indicate the sync owner role, and every sync
+  failure MUST produce an alert assigned to that role (DSN-02).
+- **FR-027**: A manual edit at the destination MUST be restored by the next sync to the source
+  value and recorded in the log, proven by a test with a deliberate manual change (DSN-03).
+- **FR-028**: Each variable in the tool MUST have a name and hierarchy identical to the corresponding
+  token; the divergence report MUST point to zero name or hierarchy differences
   (DSN-04).
-- **FR-029**: Marca e modo DEVEM ser eixos trocáveis de forma independente na ferramenta: trocar só
-  a marca ou só o modo de um quadro altera os valores sem religar camadas; os limites de modos do
-  plano da ferramenta e a solução adotada DEVEM ficar registrados (DSN-05).
-- **FR-030**: Uma verificação agendada, ao menos semanal e a cada versão publicada, DEVE comparar
-  tokens do build e variáveis da ferramenta; cada divergência DEVE gerar item rastreável com
-  responsável e prazo (DSN-11, parte de tokens).
+- **FR-029**: Brand and mode MUST be independently swappable axes in the tool: switching only
+  the brand or only the mode of a frame changes the values without relinking layers; the tool plan's mode
+  limits and the adopted solution MUST be recorded (DSN-05).
+- **FR-030**: A scheduled check, at least weekly and on each published version, MUST compare
+  build tokens and tool variables; each divergence MUST produce a trackable item with an
+  assignee and due date (DSN-11, token part).
 
-**Rastreabilidade e itens condicionais**
+**Traceability and conditional items**
 
-- **FR-031**: Cada ID atendido por esta feature DEVE ter check de CI ou evidência retida ligado na
-  matriz de rastreabilidade (ACE-02).
-- **FR-032**: Se o TOK-12 (Desejável) for contratado, o CI DEVE publicar a cada build relatório de
-  tokens sem referência em componentes ou em outros tokens, e cada item DEVE ter decisão registrada
-  antes do release: manter, depreciar ou remover (TOK-12). A contratação do TOK-12 está pendente com
-  o requerente; até a resposta, este FR não entra no plano nem nas tarefas.
-- **FR-033**: Token semântico que varia por marca e por modo DEVE ser expresso como token de eixo
-  modo cujo valor em cada modo é alias para um token de eixo marca, com as mesmas chaves em toda
-  marca; a validação DEVE rejeitar variação nos dois eixos que não siga essa forma (TOK-09, DSN-04,
-  DSN-05). Justificativa: é a forma que permite marca e modo como eixos independentes no CSS
-  (FR-012) e na ferramenta de design sem variáveis que não correspondam a tokens (FR-028, FR-029).
+- **FR-031**: Each ID met by this feature MUST have a CI check or retained evidence linked in the
+  traceability matrix (ACE-02).
+- **FR-032**: If TOK-12 (Desirable) is contracted, CI MUST publish on each build a report of
+  tokens with no reference in components or in other tokens, and each item MUST have a decision recorded
+  before release: keep, deprecate, or remove (TOK-12). The contracting of TOK-12 is pending with
+  the requester; until the answer, this FR does not enter the plan or the tasks.
+- **FR-033**: A semantic token that varies by brand and by mode MUST be expressed as a mode-axis
+  token whose value in each mode is an alias to a brand-axis token, with the same keys across every
+  brand; validation MUST reject variation on both axes that does not follow this form (TOK-09, DSN-04,
+  DSN-05). Rationale: it is the form that allows brand and mode as independent axes in the CSS
+  (FR-012) and in the design tool without variables that do not correspond to tokens (FR-028, FR-029).
 
-### Rastreabilidade dos Requisitos
+### Requirements Traceability
 
-| ID | Atendido por | Observação |
+| ID | Met by | Note |
 | --- | --- | --- |
 | TOK-01 | FR-001, FR-002 | |
 | TOK-02 | FR-003, FR-004 | |
-| TOK-03 | FR-022, FR-024 | Zero violações no núcleo quando ele existir (feature de componentes) |
-| TOK-04 | FR-005 | Publicação da convenção no site depende da feature de docs |
+| TOK-03 | FR-022, FR-024 | Zero violations in the core once it exists (components feature) |
+| TOK-04 | FR-005 | Publishing the convention on the site depends on the docs feature |
 | TOK-05 | FR-015 | |
 | TOK-06 | FR-016 | |
 | TOK-07 | FR-009, FR-018 | |
 | TOK-08 | FR-010 | |
 | TOK-09 | FR-011, FR-033 | |
 | TOK-10 | FR-006, FR-008 | |
-| TOK-12 | FR-032 | Desejável; só se contratado |
+| TOK-12 | FR-032 | Desirable; only if contracted |
 | TOK-13 | FR-007, FR-008, FR-023 | |
-| TOK-14 | FR-012, FR-018 | Parcial: testes React/Vue e SSR na feature de componentes |
+| TOK-14 | FR-012, FR-018 | Partial: React/Vue and SSR tests in the components feature |
 | ENG-06 | FR-013, FR-014, FR-017 | |
-| CMP-05 | FR-010 | Parcial: só atributos de tema; demais na feature de componentes |
-| A11Y-09 | FR-019, FR-020, FR-021 | Aplicação do FR-021 ao núcleo na feature de componentes |
-| DSN-01 | FR-025 | Gatilho "versão publicada" depende do pipeline de publicação |
+| CMP-05 | FR-010 | Partial: theme attributes only; the rest in the components feature |
+| A11Y-09 | FR-019, FR-020, FR-021 | Applying FR-021 to the core in the components feature |
+| DSN-01 | FR-025 | The "published version" trigger depends on the publishing pipeline |
 | DSN-02 | FR-026 | |
 | DSN-03 | FR-027 | |
 | DSN-04 | FR-028, FR-033 | |
 | DSN-05 | FR-029, FR-033 | |
-| DSN-11 | FR-030 | Parcial: ícones, componentes, variantes, propriedades e estágio nas features respectivas |
+| DSN-11 | FR-030 | Partial: icons, components, variants, properties, and stage in their respective features |
 
 ### Key Entities *(include if feature involves data)*
 
-- **Token**: unidade de decisão visual; tem nome, camada, categoria, valor literal (só primitivo)
-  ou alias, e descrição.
-- **Camada**: primitiva, semântica ou de componente; define o que um token pode referenciar.
-- **Categoria**: uma das onze categorias do TOK-10.
-- **Marca**: identidade visual; fornece valores para os tokens semânticos.
-- **Modo**: claro ou escuro; eixo independente da marca.
-- **Combinação de tema**: par marca × modo; todas têm o mesmo conjunto de chaves semânticas.
-- **Escopo de tema**: elemento que seleciona marca, modo ou ambos para sua subárvore.
-- **Escala de alturas de controle**: conjunto fechado de alturas permitidas para controles
-  interativos.
-- **Par de contraste**: frente, fundo, estado e tipo (texto ou não texto), com razão mínima.
-- **Artefato gerado**: CSS por marca, módulo de referências tipado, mapa de valores por marca e
-  modo, relatório de build.
-- **Variável da ferramenta de design**: espelho de um token na ferramenta, com mesmo nome e
-  hierarquia.
-- **Registro de sincronização**: log de cada execução, com variáveis alteradas e edições manuais
-  restauradas.
-- **Divergência**: diferença detectada entre ferramenta e repositório, com tipo, responsável e
-  prazo.
+- **Token**: a unit of visual decision; it has a name, layer, category, literal value (primitive
+  only) or alias, and description.
+- **Layer**: primitive, semantic, or component; defines what a token can reference.
+- **Category**: one of the eleven categories of TOK-10.
+- **Brand**: visual identity; provides values for the semantic tokens.
+- **Mode**: light or dark; an axis independent of the brand.
+- **Theme combination**: a brand × mode pair; all have the same set of semantic keys.
+- **Theme scope**: an element that selects brand, mode, or both for its subtree.
+- **Control-height scale**: a closed set of heights allowed for interactive
+  controls.
+- **Contrast pair**: foreground, background, state, and type (text or non-text), with a minimum ratio.
+- **Generated artifact**: CSS per brand, typed reference module, value map by brand and
+  mode, build report.
+- **Design-tool variable**: a mirror of a token in the tool, with the same name and
+  hierarchy.
+- **Sync record**: a log of each run, with the changed variables and the restored manual
+  edits.
+- **Divergence**: a difference detected between tool and repository, with type, assignee, and
+  due date.
 
 ## Success Criteria *(mandatory)*
 
 ### Measurable Outcomes
 
-- **SC-001**: 100% dos tokens publicados passam na validação de schema, de camadas e de
-  nomenclatura, e zero tokens são encontrados fora da fonte única.
-- **SC-002**: Dois builds da mesma fonte produzem saídas idênticas em 100% das execuções.
-- **SC-003**: Cada uma das onze categorias tem ao menos um token semântico publicado.
-- **SC-004**: Todas as combinações de marca e modo têm o mesmo conjunto de chaves semânticas (zero
-  chaves ausentes ou excedentes).
-- **SC-005**: Uma marca nova é adicionada com zero arquivos alterados além da fonte de tokens e do
-  relatório de API de tokens regenerado.
-- **SC-006**: Uma aplicação que importa o arquivo base e só uma marca, selecionada conforme o
-  FR-013, carrega zero variáveis exclusivas de outras marcas e zero variáveis sem valor (definição
-  operacional na seção Clarifications).
-- **SC-007**: Em escopos aninhados, 100% dos valores lidos correspondem ao escopo mais próximo de
-  cada eixo.
-- **SC-008**: 100% dos pares do manifesto atingem a razão mínima em todas as combinações de marca e
-  modo.
-- **SC-009**: Cada tipo de violação coberto por esta feature (literal fora da camada primitiva,
-  nome fora do padrão, chave ausente, par reprovado, primitivo ou literal em estilo, altura fora da
-  escala, nome de token inexistente) é barrado em 100% dos casos provocados de propósito.
-- **SC-010**: Após cada sincronização, o relatório de divergência aponta zero diferenças de nome ou
-  hierarquia, e 100% das edições manuais no destino são restauradas e registradas.
-- **SC-011**: A verificação de divergência roda ao menos uma vez por semana e a cada versão
-  publicada, e 100% das divergências têm responsável e prazo.
+- **SC-001**: 100% of published tokens pass the schema, layer, and
+  naming validation, and zero tokens are found outside the single source.
+- **SC-002**: Two builds of the same source produce identical outputs in 100% of
+  runs.
+- **SC-003**: Each of the eleven categories has at least one published semantic token.
+- **SC-004**: All brand and mode combinations have the same set of semantic keys (zero
+  missing or excess keys).
+- **SC-005**: A new brand is added with zero files changed beyond the token source and the
+  regenerated token API report.
+- **SC-006**: An application that imports the base file and only one brand, selected per
+  FR-013, loads zero variables exclusive to other brands and zero variables without a value (operational
+  definition in the Clarifications section).
+- **SC-007**: In nested scopes, 100% of the read values correspond to the nearest scope of
+  each axis.
+- **SC-008**: 100% of the manifest pairs reach the minimum ratio across all brand and mode
+  combinations.
+- **SC-009**: Each type of violation covered by this feature (literal outside the primitive layer,
+  name off the standard, missing key, failing pair, primitive or literal in a style, height outside the
+  scale, nonexistent token name) is blocked in 100% of the deliberately triggered cases.
+- **SC-010**: After each sync, the divergence report points to zero name or
+  hierarchy differences, and 100% of the manual edits at the destination are restored and recorded.
+- **SC-011**: The divergence check runs at least once a week and on each published
+  version, and 100% of the divergences have an assignee and due date.
 
 ## Assumptions
 
-- Marcas da versão 1.0: vale a premissa vigente, todas as marcas das apps consumidoras atuais, com
-  claro e escuro. Os valores vêm do responsável de design de cada marca antes da Fase 1; até lá,
-  testes e exemplos usam duas marcas sintéticas (A e B), sem dados reais (QA-15).
-- Nível de acessibilidade: vale a premissa vigente, WCAG 2.2 AA (A11Y-01).
-- Direção da sincronização: vale a premissa vigente, o repositório é a fonte e a ferramenta recebe
-  as variáveis (DSN-01).
-- Combinação padrão: marca indicada pelo requerente (CMP-24) e modo padrão claro, até decisão em
-  contrário.
-- Prefixo: `<prefixo>` é marcador intencional do prefixo do projeto, conforme o TODO(PREFIXO) da
-  constituição v1.0.0; o valor será definido pelo requerente e incorporado por emenda da
-  constituição, sem alterar os requisitos desta feature.
-- Ferramenta de design: a escolha é decisão em aberto do requerente, com prazo antes do início da
-  Fase 1 (Premissas); os requisitos desta feature valem para qualquer ferramenta escolhida, e os
-  limites dela, como o número de modos do plano, são registrados conforme o FR-029. A escolha é
-  insumo do plano.
-- "Versão publicada" é a versão promovida à tag principal do registro (ENG-26). Enquanto o pipeline
-  de publicação não existir, a sincronização PODE ser disparada manualmente pelo dono da
-  sincronização, com o mesmo log.
-- Navegadores alvo seguem a lista versionada da premissa de versões mínimas (ENG-08).
-- Remover ou renomear token publicado é mudança incompatível de API pública e exige versão major
-  (GOV-01).
+- Version 1.0 brands: the current premise applies, all brands of the current consumer apps, with
+  light and dark. The values come from each brand's design lead before Phase 1; until then,
+  tests and examples use two synthetic brands (A and B), with no real data (QA-15).
+- Accessibility level: the current premise applies, WCAG 2.2 AA (A11Y-01).
+- Sync direction: the current premise applies, the repository is the source and the tool receives
+  the variables (DSN-01).
+- Default combination: the brand indicated by the requester (CMP-24) and light default mode, until decided
+  otherwise.
+- Prefix: `<prefixo>` is an intentional marker of the project prefix, per the constitution's TODO(PREFIXO)
+  v1.0.0; the value will be defined by the requester and incorporated by a constitution
+  amendment, without changing this feature's requirements.
+- Design tool: the choice is an open decision of the requester, with a deadline before the start of
+  Phase 1 (Premises); this feature's requirements apply to any chosen tool, and its
+  limits, such as the plan's number of modes, are recorded per FR-029. The choice is a plan
+  input.
+- "Published version" is the version promoted to the registry's main tag (ENG-26). While the publishing
+  pipeline does not exist, the sync MAY be triggered manually by the sync
+  owner, with the same log.
+- Target browsers follow the versioned list of the minimum-versions premise (ENG-08).
+- Removing or renaming a published token is an incompatible public-API change and requires a major
+  version (GOV-01).
 
-**Dependências**
+**Dependencies**
 
-- Feature de CI e publicação: pré-release e promoção (ENG-26), verificação de API pública
-  (GOV-01) e arquivo de donos (GOV-09) para o gatilho e os portões desta feature.
-- Feature de núcleo e componentes: aplicação do lint ao núcleo (FR-024), aplicação ao núcleo da
-  checagem de pares (FR-021), Provedor de tema e testes React/Vue de tema aninhado e SSR (TOK-14).
-- Feature de documentação: publicação da convenção de nomenclatura no site (TOK-04) e fundamentos
-  de tokens (DOC-05).
-- Requerente: lista e valores das marcas, marca padrão, escolha da ferramenta de design, acesso à
-  conta da ferramenta, valor do prefixo e resposta sobre a contratação do TOK-12 (FR-032).
+- CI and publishing feature: pre-release and promotion (ENG-26), public-API check
+  (GOV-01), and the owners file (GOV-09) for this feature's trigger and gates.
+- Core and components feature: applying the lint to the core (FR-024), applying the pair
+  check to the core (FR-021), the theme Provider and React/Vue nested-theme and SSR tests (TOK-14).
+- Documentation feature: publishing the naming convention on the site (TOK-04) and token
+  fundamentals (DOC-05).
+- Requester: the brand list and values, default brand, design-tool choice, access to
+  the tool account, prefix value, and the answer about contracting TOK-12 (FR-032).
 
-**Fora do escopo**
+**Out of scope**
 
-- Componentes, Provedor de tema e seus testes React/Vue de tema aninhado e SSR.
-- Documentação dos fundamentos no site (DOC-05).
-- Mapeamento de tokens legados (MIG-03) e temas que reproduzem marcas legadas (MIG-08).
-- Sincronização de ícones, componentes, variantes, propriedades e estágio com a ferramenta de
-  design (demais partes do DSN-11 e DSN-06 a DSN-09).
+- Components, the theme Provider, and its React/Vue nested-theme and SSR tests.
+- Fundamentals documentation on the site (DOC-05).
+- Legacy token mapping (MIG-03) and themes that reproduce legacy brands (MIG-08).
+- Sync of icons, components, variants, properties, and stage with the design
+  tool (the other parts of DSN-11 and DSN-06 to DSN-09).
