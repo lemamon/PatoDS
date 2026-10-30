@@ -90,4 +90,4 @@ Architecture Decision Records live under `docs/adr/` (kept locally; not tracked 
 
 ## License
 
-Private / `UNLICENSED`. Not for public distribution.
+[MIT](LICENSE) © Deyvid Marinho
