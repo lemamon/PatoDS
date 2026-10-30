@@ -20,15 +20,15 @@ export interface ScanFinding {
 export function scanText(file: string, text: string): ScanFinding[] {
   const out: ScanFinding[] = []
   if (file.endsWith('.tokens.json')) {
-    out.push({ code: 'FR001-DTCG-OUTSIDE-SOURCE', file, message: 'Arquivo .tokens.json fora da fonte única.' })
+    out.push({ code: 'FR001-DTCG-OUTSIDE-SOURCE', file, message: '.tokens.json file outside the single source.' })
     return out
   }
   if (SCAN_EXT.test(file)) {
     if (DECL.test(text)) {
-      out.push({ code: 'FR001-CSS-VAR-DECL', file, message: `Custom property --${PREFIX}-* declarada fora da fonte.` })
+      out.push({ code: 'FR001-CSS-VAR-DECL', file, message: `Custom property --${PREFIX}-* declared outside the source.` })
     }
     if (SETPROP.test(text)) {
-      out.push({ code: 'FR001-SETPROPERTY', file, message: `setProperty('--${PREFIX}-…') fora da fonte.` })
+      out.push({ code: 'FR001-SETPROPERTY', file, message: `setProperty('--${PREFIX}-…') outside the source.` })
     }
   }
   return out
