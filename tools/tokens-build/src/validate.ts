@@ -31,7 +31,7 @@ function literals(m: Model, out: Finding[]): void {
         rule: 'V-02',
         id: t.id,
         file: t.file,
-        message: `Token ${t.layer} "${t.id}" tem valor literal; só a camada primitiva pode (TOK-02, FR-003).`,
+        message: `Token ${t.layer} "${t.id}" has a literal value; only the primitive layer may (TOK-02, FR-003).`,
       })
     }
   }
@@ -56,7 +56,7 @@ function direction(m: Model, out: Finding[]): void {
           rule: 'V-04',
           id: t.id,
           file: t.file,
-          message: `Token ${t.layer} "${t.id}" referencia ${d.layer} "${dep}"; direção proibida (TOK-02, FR-004).`,
+          message: `Token ${t.layer} "${t.id}" references ${d.layer} "${dep}"; forbidden direction (TOK-02, FR-004).`,
         })
       }
     }
@@ -74,7 +74,7 @@ function naming(m: Model, out: Finding[]): void {
           rule: 'V-06',
           id: t.id,
           file: t.file,
-          message: `Segmento "${s}" em "${t.id}" fora do padrão kebab ASCII minúsculo (TOK-04, FR-005).`,
+          message: `Segment "${s}" in "${t.id}" outside the lowercase ASCII kebab pattern (TOK-04, FR-005).`,
         })
       }
     }
@@ -84,7 +84,7 @@ function naming(m: Model, out: Finding[]): void {
         rule: 'V-06',
         id: t.id,
         file: t.file,
-        message: `Primeiro segmento "${t.category}" de "${t.id}" não é uma categoria do TOK-10 (FR-005, FR-006).`,
+        message: `First segment "${t.category}" of "${t.id}" is not a TOK-10 category (FR-005, FR-006).`,
       })
     }
     const prev = byCss.get(t.cssName)
@@ -94,7 +94,7 @@ function naming(m: Model, out: Finding[]): void {
         rule: 'V-06',
         id: t.id,
         file: t.file,
-        message: `Nome CSS "${t.cssName}" colide entre "${prev}" e "${t.id}" (FR-005).`,
+        message: `CSS name "${t.cssName}" collides between "${prev}" and "${t.id}" (FR-005).`,
       })
     } else byCss.set(t.cssName, t.id)
   }
@@ -110,7 +110,7 @@ function brandSource(m: Model, out: Finding[]): void {
         rule: 'V-08',
         id: t.id,
         file: t.file,
-        message: `Token "${t.id}": grupo reservado "brand." e papel brand-mode-source devem coincidir (FR-033).`,
+        message: `Token "${t.id}": reserved group "brand." and role brand-mode-source must match (FR-033).`,
       })
       continue
     }
@@ -122,7 +122,7 @@ function brandSource(m: Model, out: Finding[]): void {
           rule: 'V-08',
           id: t.id,
           file: t.file,
-          message: `Token brand-mode-source "${t.id}" deve terminar num id de modo (${[...MODE_IDS].join(', ')}) (FR-033).`,
+          message: `Token brand-mode-source "${t.id}" must end in a mode id (${[...MODE_IDS].join(', ')}) (FR-033).`,
         })
       }
     }
@@ -143,7 +143,7 @@ function colorHex(m: Model, out: Finding[]): void {
         rule: 'V-10',
         id: t.id,
         file: t.file,
-        message: `Token "${t.id}": hex ${v.hex} diverge dos componentes (esperado ${expected}) (FR-015).`,
+        message: `Token "${t.id}": hex ${v.hex} diverges from the components (expected ${expected}) (FR-015).`,
       })
     }
   }
@@ -160,7 +160,7 @@ function coverage(m: Model, out: Finding[]): void {
       out.push({
         code: 'TKN-CATEGORY-COVERAGE',
         rule: 'V-11',
-        message: `Categoria "${c}" sem token semântico público (TOK-10, FR-006).`,
+        message: `Category "${c}" without a public semantic token (TOK-10, FR-006).`,
       })
     }
   }
@@ -176,7 +176,7 @@ function controlScale(m: Model, out: Finding[]): void {
         rule: 'V-12',
         id: t.id,
         file: t.file,
-        message: `Altura de controle "${t.id}" fora da escala única (TOK-13, FR-007).`,
+        message: `Control height "${t.id}" outside the single scale (TOK-13, FR-007).`,
       })
     }
   }
@@ -196,7 +196,7 @@ function parity(m: Model, out: Finding[]): void {
           code: 'TKN-PARITY-MISSING',
           rule: 'V-13',
           id,
-          message: `Chave semântica "${id}" ausente na permutação ${perm.id} (TOK-09, FR-011).`,
+          message: `Semantic key "${id}" missing in permutation ${perm.id} (TOK-09, FR-011).`,
         })
       }
     }
