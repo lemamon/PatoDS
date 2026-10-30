@@ -16,7 +16,7 @@ function printFindings(findings: Finding[], json: boolean): void {
   }
   for (const f of findings) {
     const loc = f.file ? `${f.file}` : '—'
-    process.stderr.write(`${loc}  erro  ${f.code}  ${f.id ?? ''}: ${f.message} [${f.rule}]\n`)
+    process.stderr.write(`${loc}  error  ${f.code}  ${f.id ?? ''}: ${f.message} [${f.rule}]\n`)
   }
 }
 
@@ -30,7 +30,7 @@ async function main(): Promise<number> {
   })
   const cmd = positionals[0]
   if (cmd !== 'validate' && cmd !== 'build') {
-    process.stderr.write('uso: tokens-build <validate|build> [--json] [--src <dir>]\n')
+    process.stderr.write('usage: tokens-build <validate|build> [--json] [--src <dir>]\n')
     return 2
   }
   const srcDir = resolve(values.src ?? 'src')
@@ -40,7 +40,7 @@ async function main(): Promise<number> {
     load = await loadTokens(srcDir)
   } catch (err) {
     // Parser errors (V-01 schema, V-03 alias/cycle) land here.
-    process.stderr.write(`erro  TKN-PARSE  ${(err as Error).message}\n`)
+    process.stderr.write(`error  TKN-PARSE  ${(err as Error).message}\n`)
     return 1
   }
 
@@ -51,11 +51,11 @@ async function main(): Promise<number> {
     printFindings(findings, Boolean(values.json))
     if (!values.json) {
       const s = validationSummary(model)
-      process.stdout.write('\nContagem por categoria (primitive/semantic/component):\n')
+      process.stdout.write('\nCount per category (primitive/semantic/component):\n')
       for (const [c, r] of Object.entries(s.categories)) {
         process.stdout.write(`  ${c.padEnd(12)} ${r.primitive}/${r.semantic}/${r.component}\n`)
       }
-      process.stdout.write(`Escala de alturas de controle: ${s.controlScale.join(', ')}\n`)
+      process.stdout.write(`Control-height scale: ${s.controlScale.join(', ')}\n`)
     }
     return findings.length > 0 ? 1 : 0
   }
@@ -63,14 +63,14 @@ async function main(): Promise<number> {
   // build command
   if (findings.length > 0) {
     printFindings(findings, Boolean(values.json))
-    process.stderr.write('build abortado: a validação falhou.\n')
+    process.stderr.write('build aborted: validation failed.\n')
     return 1
   }
   try {
     await runBuild(model, srcDir)
     return 0
   } catch (err) {
-    process.stderr.write(`erro  TKN-BUILD-INTERNAL  ${(err as Error).message}\n`)
+    process.stderr.write(`error  TKN-BUILD-INTERNAL  ${(err as Error).message}\n`)
     return 3
   }
 }
@@ -78,7 +78,7 @@ async function main(): Promise<number> {
 main().then(
   (code) => process.exit(code),
   (err) => {
-    process.stderr.write(`erro interno: ${err?.stack ?? err}\n`)
+    process.stderr.write(`internal error: ${err?.stack ?? err}\n`)
     process.exit(3)
   },
 )
