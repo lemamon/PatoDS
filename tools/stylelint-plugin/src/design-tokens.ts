@@ -8,12 +8,12 @@ const { createPlugin, utils } = stylelint
 export const ruleName = 'patods/design-tokens'
 
 export const messages = utils.ruleMessages(ruleName, {
-  primitive: (name: string) => `primitive-token: "${name}" é primitivo; use um token semântico ou de componente (TOK-03).`,
-  brandSource: (name: string) => `brand-mode-source-token: "${name}" é fonte de marca/modo e não pode ser consumido (FR-033).`,
-  unknown: (name: string) => `unknown-token: "${name}" não está no catálogo de tokens.`,
-  literal: (prop: string) => `literal-value: valor literal em "${prop}"; use um token (TOK-03).`,
-  fallback: (name: string) => `var-fallback-literal: fallback literal em var(${name}, …) (TOK-03).`,
-  definition: (prop: string) => `token-definition: custom property "${prop}" definida fora da fonte de tokens (FR-001).`,
+  primitive: (name: string) => `primitive-token: "${name}" is primitive; use a semantic or component token (TOK-03).`,
+  brandSource: (name: string) => `brand-mode-source-token: "${name}" is a brand/mode source and cannot be consumed (FR-033).`,
+  unknown: (name: string) => `unknown-token: "${name}" is not in the token catalog.`,
+  literal: (prop: string) => `literal-value: literal value in "${prop}"; use a token (TOK-03).`,
+  fallback: (name: string) => `var-fallback-literal: literal fallback in var(${name}, …) (TOK-03).`,
+  definition: (prop: string) => `token-definition: custom property "${prop}" defined outside the token source (FR-001).`,
 })
 
 const PREFIX = 'patods'
@@ -60,13 +60,13 @@ const rule = (primary: boolean, secondary?: { manifestPath?: string }) => {
     if (!valid || !primary) return
     const manifestPath = secondary?.manifestPath
     if (!manifestPath) {
-      throw new Error(`${ruleName}: opção "manifestPath" obrigatória.`)
+      throw new Error(`${ruleName}: option "manifestPath" required.`)
     }
     let manifest: Map<string, Entry>
     try {
       manifest = loadManifest(manifestPath)
     } catch (e) {
-      throw new Error(`${ruleName}: não foi possível ler o manifesto (${manifestPath}).`)
+      throw new Error(`${ruleName}: could not read the manifest (${manifestPath}).`)
     }
 
     root.walkDecls((decl: any) => {
