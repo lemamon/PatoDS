@@ -1,69 +1,69 @@
-# Contrato: CLIs das ferramentas e scripts da raiz
+# Contract: tool CLIs and root scripts
 
-**Feature**: [spec.md](../spec.md) | **Pesquisa**: [research.md](../research.md) (D1 a D7) |
-**Modelo**: [data-model.md](../data-model.md) | **Sincronização**: [design-sync.md](design-sync.md) |
-**ADRs**: ADR-11, ADR-12, ADR-14, ADR-15 e ADR-16 em [docs/adr/](../../../docs/adr/) (todos Proposto) |
-**Data**: 2026-10-21
+**Feature**: [spec.md](../spec.md) | **Research**: [research.md](../research.md) (D1 to D7) |
+**Model**: [data-model.md](../data-model.md) | **Sync**: [design-sync.md](design-sync.md) |
+**ADRs**: ADR-11, ADR-12, ADR-14, ADR-15 and ADR-16 in [docs/adr/](../../../docs/adr/) (all Proposed) |
+**Date**: 2026-10-21
 
-Este contrato define cada comando das CLIs privadas `tokens-build`, `tokens-contrast`,
-`repo-checks` e `design-sync`, a execução do lint de estilos e os scripts da raiz do monorepo:
-propósito, argumentos, entradas, saídas, formato `--json`, códigos de saída, requisitos que cada
-comando comprova e o job de CI que o executa. Formatos são esboços de interface; nenhuma
-implementação é definida aqui. `<prefixo>` é o marcador da constituição (TODO(PREFIXO)).
+This contract defines each command of the private CLIs `tokens-build`, `tokens-contrast`,
+`repo-checks` and `design-sync`, the execution of the style lint and the root scripts of the monorepo:
+purpose, arguments, inputs, outputs, `--json` format, exit codes, the requirements each command proves
+and the CI job that runs it. Formats are interface sketches; no implementation is defined here.
+`<prefixo>` is the constitution's marker (TODO(PREFIXO)).
 
-## Premissas usadas
+## Assumptions used
 
-| Decisão em aberto | Premissa usada neste contrato |
+| Open decision | Assumption used in this contract |
 | --- | --- |
-| Plataforma de repositório e CI | GitHub e GitHub Actions (inferida do ENG-18), workflows `.github/workflows/tokens-ci.yml` e `design-sync.yml`, ações fixadas por SHA. |
-| Versões mínimas (ENG-08) | Toolchain do repositório em Node 24.x (`.node-version`). Matriz noturna com o piso da premissa "Node em LTS" (Node 22) e o mais recente (Node 26 LTS a partir de 2026-10-28). TypeScript 6.0.x como valor provisório do `<versão>`; eixo 7.0.x só com `tsc`. |
-| Lista de navegadores (ENG-08, QA-12) | Lista versionada ainda não definida. Chromium em todo PR; à noite e antes de publicar, todos os motores da lista. Enquanto ela não existe, os testes usam os três motores do Playwright fixado (Chromium, Firefox, WebKit) como premissa de trabalho, sem fixar a lista. |
-| Ferramenta de design (DSN-01) | Nenhuma escolhida; só o adaptador `memory` existe. Jobs com adaptador real entram depois da decisão. |
-| Limiares do CI (QA-14) | `quality/thresholds.json` com os valores da premissa; cobertura `<N>`% ainda indefinida; seção de contraste `{ "level": "WCAG22-AA", "text": 4.5, "nonText": 3 }` (premissa do A11Y-01). |
-| Marcas e marca padrão | Marcas sintéticas A e B (C no teste de marca nova), A como padrão de teste (QA-15). |
-| TOK-12 | Não contratado até resposta do requerente: nenhum comando de tokens sem uso (FR-032 fora do plano). |
+| Repository and CI platform | GitHub and GitHub Actions (inferred from ENG-18), workflows `.github/workflows/tokens-ci.yml` and `design-sync.yml`, actions pinned by SHA. |
+| Minimum versions (ENG-08) | Repository toolchain on Node 24.x (`.node-version`). Nightly matrix with the floor of the assumption "Node on LTS" (Node 22) and the latest (Node 26 LTS from 2026-10-28). TypeScript 6.0.x as the provisional value of `<version>`; the 7.0.x axis only with `tsc`. |
+| Browser list (ENG-08, QA-12) | Versioned list still undefined. Chromium on every PR; nightly and before publishing, every engine of the list. While it does not exist, the tests use the three engines of the pinned Playwright (Chromium, Firefox, WebKit) as a working assumption, without fixing the list. |
+| Design tool (DSN-01) | None chosen; only the `memory` adapter exists. Jobs with a real adapter enter after the decision. |
+| CI thresholds (QA-14) | `quality/thresholds.json` with the assumption's values; coverage `<N>`% still undefined; contrast section `{ "level": "WCAG22-AA", "text": 4.5, "nonText": 3 }` (A11Y-01 assumption). |
+| Brands and default brand | Synthetic brands A and B (C in the new-brand test), A as the test default (QA-15). |
+| TOK-12 | Not contracted until the requester responds: no token-without-use command (FR-032 out of the plan). |
 
-## 1. Convenções comuns
+## 1. Common conventions
 
-### 1.1 Invocação
+### 1.1 Invocation
 
-Cada ferramenta é um pacote privado (`private: true`, nunca publicado) com `bin` apontando para a
-saída compilada do pacote (tarefa `build` do turbo, TypeScript 6.0). Formas de execução:
+Each tool is a private package (`private: true`, never published) with a `bin` pointing to the
+package's compiled output (turbo's `build` task, TypeScript 6.0). Ways of running it:
 
-- pelos scripts da raiz (seção 7), que chamam tarefas do turbo;
-- diretamente: `pnpm --filter @<prefixo>/<pacote> exec <bin> <comando> [flags]`.
+- through the root scripts (section 7), which call turbo tasks;
+- directly: `pnpm --filter @<prefixo>/<package> exec <bin> <command> [flags]`.
 
-Argumentos depois de `--` num script da raiz são repassados ao comando (ex.:
+Arguments after `--` in a root script are forwarded to the command (e.g.
 `pnpm tokens:validate -- --json`).
 
-### 1.2 Códigos de saída
+### 1.2 Exit codes
 
-| Código | Significado | Exemplos |
+| Code | Meaning | Examples |
 | --- | --- | --- |
-| 0 | Sucesso, sem violação | Validação limpa; todos os pares aprovados; builds idênticos |
-| 1 | Violações encontradas | Regra de validação, lint, par de contraste reprovado, divergência, saídas diferentes, arquivo gerado versionado |
-| 2 | Erro de uso ou de configuração | Flag desconhecida, argumento ausente, arquivo de entrada inexistente, configuração inválida, checksum de schema divergente |
-| 3 | Erro interno | Exceção não prevista, subprocesso que falhou por motivo alheio à regra |
-| 4 | Só `design-sync`: falha de acesso à ferramenta | Credencial ausente, inválida, vencida ou sem escopo; 401 ou 403; rede; 5xx; limite de taxa esgotado |
-| 5 | Só `design-sync`: verify divergente após apply | Snapshot lido depois de aplicar difere do manifesto |
+| 0 | Success, no violation | Clean validation; all pairs passed; identical builds |
+| 1 | Violations found | Validation rule, lint, failed contrast pair, divergence, different outputs, versioned generated file |
+| 2 | Use or configuration error | Unknown flag, missing argument, nonexistent input file, invalid configuration, mismatched schema checksum |
+| 3 | Internal error | Unforeseen exception, subprocess that failed for a reason unrelated to the rule |
+| 4 | Only `design-sync`: tool access failure | Missing, invalid, expired or unscoped credential; 401 or 403; network; 5xx; exhausted rate limit |
+| 5 | Only `design-sync`: verify divergent after apply | Snapshot read after applying differs from the manifest |
 
-Quando mais de uma condição ocorre, vale a mais grave, na ordem 3, 2, 4, 5, 1. Erros de classe 2,
-3 e 4 interrompem a execução; violações (1) são todas coletadas antes de sair. `--json` não altera
-o código.
+When more than one condition occurs, the most severe applies, in the order 3, 2, 4, 5, 1. Class 2, 3
+and 4 errors interrupt the execution; violations (1) are all collected before exiting. `--json` does not
+change the code.
 
-Os scripts da raiz passam pelo turbo, que devolve zero quando todas as tarefas passam e diferente
-de zero quando alguma falha, sem garantir o código específico. Jobs que precisam distinguir códigos
-(por exemplo, os de `design-sync`) chamam o `bin` diretamente ou leem `exitCode` da saída `--json`.
+The root scripts go through turbo, which returns zero when all tasks pass and non-zero when some fails,
+without guaranteeing the specific code. Jobs that need to distinguish codes (for example, those of
+`design-sync`) call the `bin` directly or read `exitCode` from the `--json` output.
 
-### 1.3 Saída humana e `--json`
+### 1.3 Human output and `--json`
 
-- Sem `--json`: saída legível em stdout, uma linha por achado no formato
-  `arquivo:linha:coluna  erro|aviso  código  mensagem`, seguida de uma linha de resumo. Progresso e
-  diagnóstico vão para stderr.
-- Com `--json`: stdout contém exatamente um documento JSON canônico (seção 1.4) e nada mais;
-  progresso continua em stderr.
+- Without `--json`: readable output on stdout, one line per finding in the format
+  `file:line:column  error|warning  code  message`, followed by a summary line. Progress and
+  diagnostics go to stderr.
+- With `--json`: stdout contains exactly one canonical JSON document (section 1.4) and nothing else;
+  progress stays on stderr.
 
-Envelope comum a todos os comandos:
+Common envelope of all commands:
 
 ```json
 {
@@ -79,32 +79,32 @@ Envelope comum a todos os comandos:
 }
 ```
 
-`ok` é `exitCode === 0`. Cada comando acrescenta chaves próprias, descritas nas seções seguintes.
+`ok` is `exitCode === 0`. Each command adds its own keys, described in the following sections.
 
-### 1.4 JSON canônico
+### 1.4 Canonical JSON
 
-Usado em toda saída `--json` e em todo arquivo JSON gerado pelas ferramentas (relatórios,
-manifestos, plano e log da sincronização):
+Used in all `--json` output and in every JSON file generated by the tools (reports,
+manifests, sync plan and log):
 
-- UTF-8 sem BOM, fim de linha LF, newline final, indentação de 2 espaços;
-- chaves de objeto ordenadas por code point; arrays na ordem definida por cada contrato, nunca pela
-  ordem de inserção;
-- números na forma mais curta de ida e volta do ECMAScript (`JSON.stringify`), sem `NaN`,
-  `Infinity` nem `-0`;
-- sem data, hora, caminho absoluto, nome de máquina, usuário ou valor de ambiente; caminhos são
-  relativos à raiz do repositório, com `/`.
+- UTF-8 without BOM, LF line ending, final newline, 2-space indentation;
+- object keys ordered by code point; arrays in the order defined by each contract, never by the
+  insertion order;
+- numbers in ECMAScript's shortest round-trip form (`JSON.stringify`), without `NaN`,
+  `Infinity` or `-0`;
+- no date, time, absolute path, machine name, user or environment value; paths are
+  relative to the repository root, with `/`.
 
-A única exceção é o envelope de execução do `design-sync` (`sync-envelope.json`), que carrega data
-e URL da execução e fica fora do conteúdo canônico.
+The only exception is the `design-sync` run envelope (`sync-envelope.json`), which carries the date
+and the run URL and sits outside the canonical content.
 
-### 1.5 Achados e erros
+### 1.5 Findings and errors
 
 ```json
 {
   "code": "TKN-ALIAS-UNRESOLVED",
   "rule": "V-03",
   "severity": "error",
-  "message": "color.bg.surface: Alias para token inexistente {brand.color.bg.surface.dark} na marca \"b\". [V-03; FR-004]",
+  "message": "color.bg.surface: Alias to a nonexistent token {brand.color.bg.surface.dark} in brand \"b\". [V-03; FR-004]",
   "file": "packages/tokens/src/semantic/mode/dark.tokens.json",
   "line": 14,
   "column": 9,
@@ -114,101 +114,101 @@ e URL da execução e fica fora do conteúdo canônico.
 }
 ```
 
-O exemplo é um achado de `tokens-build validate`; o formato de `data` de cada comando está no seu
-contrato (para `tokens-build`, [token-source.md](token-source.md), seção 10.4).
+The example is a finding of `tokens-build validate`; the `data` format of each command is in its
+contract (for `tokens-build`, [token-source.md](token-source.md), section 10.4).
 
-- Obrigatórios: `code`, `severity` (`error` ou `warning`), `message`. Opcionais: `rule`, `file`,
-  `line` e `column` (base 1; presentes sempre que o achado tem posição em arquivo), `token`,
-  `context` (permutação em que ocorre), `data` (detalhe da regra, ex.: cadeia de alias).
-- Ordem: `file`, `line`, `column`, `code`, `token`, em code point.
-- `errors[]` (códigos 2 a 5): `{ "code", "message", "file"?, "line"?, "column"? }`, com `code` em
-  `USAGE`, `CONFIG`, `INTERNAL` ou um código de domínio documentado no comando.
-- `warning` nunca muda o código de saída, salvo onde o comando disser o contrário.
+- Required: `code`, `severity` (`error` or `warning`), `message`. Optional: `rule`, `file`,
+  `line` and `column` (1-based; present whenever the finding has a position in a file), `token`,
+  `context` (permutation in which it occurs), `data` (rule detail, e.g. alias chain).
+- Order: `file`, `line`, `column`, `code`, `token`, in code point.
+- `errors[]` (codes 2 to 5): `{ "code", "message", "file"?, "line"?, "column"? }`, with `code` in
+  `USAGE`, `CONFIG`, `INTERNAL` or a domain code documented in the command.
+- A `warning` never changes the exit code, except where the command says otherwise.
 
-### 1.6 Flags comuns
+### 1.6 Common flags
 
-| Flag | Efeito |
+| Flag | Effect |
 | --- | --- |
-| `--json` | Saída de máquina (seção 1.3). |
-| `--help` | Uso do comando; código 0. |
-| `--version` | Versão do pacote da ferramenta; código 0. |
-| `--root <dir>` | Raiz do repositório; padrão: o diretório mais próximo com `pnpm-workspace.yaml`. Caminhos de outras flags são relativos a ela. |
+| `--json` | Machine output (section 1.3). |
+| `--help` | Command usage; code 0. |
+| `--version` | Version of the tool's package; code 0. |
+| `--root <dir>` | Repository root; default: the nearest directory with `pnpm-workspace.yaml`. Paths of other flags are relative to it. |
 
-Flag desconhecida, comando desconhecido ou argumento obrigatório ausente: código 2 com
+An unknown flag, an unknown command or a missing required argument: code 2 with
 `errors[0].code = "USAGE"`.
 
-### 1.7 Determinismo e ambiente
+### 1.7 Determinism and environment
 
-- `tokens-build`, `tokens-contrast` e `repo-checks` não acessam a rede. `tokens-build` passa ao
-  parser um `req` que rejeita `$ref` que não seja `file:` (D1).
-- Para as mesmas entradas, arquivos gerados e saída `--json` são idênticos byte a byte,
-  independentemente de `TZ`, `LC_ALL`, diretório corrente e caminho absoluto do checkout. Ordenação
-  sempre por code point, nunca por localidade.
-- Variáveis de ambiente lidas são só as declaradas nas tarefas do turbo (`envMode: strict`).
-  `design-sync` lê também credenciais e variáveis de URL da execução do CI, que só vão para o
+- `tokens-build`, `tokens-contrast` and `repo-checks` do not access the network. `tokens-build` passes
+  the parser a `req` that rejects any `$ref` that is not `file:` (D1).
+- For the same inputs, generated files and `--json` output are byte-for-byte identical,
+  regardless of `TZ`, `LC_ALL`, the current directory and the absolute checkout path. Ordering
+  always by code point, never by locale.
+- The only environment variables read are those declared in the turbo tasks (`envMode: strict`).
+  `design-sync` also reads credentials and CI run URL variables, which go only to the
   envelope.
 
-### 1.8 Schemas de saída
+### 1.8 Output schemas
 
-Cada pacote de ferramenta versiona, em `schemas/`, o JSON Schema (2020-12) da saída `--json` de
-cada comando e dos arquivos JSON que gera. Testes unitários (QA-02) validam as saídas das fixtures
-contra esses schemas. Mudança incompatível incrementa `version` no documento. Jobs de CI só dependem
-dos campos descritos neste contrato.
+Each tool package versions, in `schemas/`, the JSON Schema (2020-12) of the `--json` output of
+each command and of the JSON files it generates. Unit tests (QA-02) validate the fixture outputs
+against those schemas. An incompatible change increments `version` in the document. CI jobs depend only
+on the fields described in this contract.
 
 ## 2. `tokens-build` (`@<prefixo>/tokens-build`, `tools/tokens-build`)
 
-Validação e geração a partir da fonte única, sobre `@terrazzo/parser` usado como biblioteca, com as
-regras do PatoDS num adaptador próprio que roda sobre todas as permutações marca × modo (D1, D7).
+Validation and generation from the single source, over `@terrazzo/parser` used as a library, with the
+PatoDS rules in a dedicated adapter that runs over all brand × mode permutations (D1, D7).
 
 ### 2.1 `tokens-build validate`
 
-**Uso**: `tokens-build validate [--resolver <arquivo>] [--schemas <dir>] [--json]`
+**Usage**: `tokens-build validate [--resolver <file>] [--schemas <dir>] [--json]`
 
-**Propósito**: validar a fonte de tokens em todas as permutações, sem gerar arquivos.
+**Purpose**: validate the token source in all permutations, without generating files.
 
-| Flag | Padrão |
+| Flag | Default |
 | --- | --- |
 | `--resolver` | `packages/tokens/src/tokens.resolver.json` |
 | `--schemas` | `packages/tokens/schemas/dtcg-2025.10` (`format.json`, `resolver.json`, `SHA256SUMS`) |
 
-**Entradas**: o resolver; todos os `*.tokens.json` referenciados por seus sets
+**Inputs**: the resolver; all `*.tokens.json` referenced by its sets
 (`src/primitive/`, `src/semantic/invariant.tokens.json`, `src/semantic/brand/<id>.tokens.json`,
-`src/semantic/mode/light.tokens.json` e `dark.tokens.json`, `src/component/`); cópias versionadas
-dos schemas DTCG 2025.10 e seus sha256. A gramática de nomes e os vocabulários vêm de tabelas do
-próprio `@<prefixo>/tokens-build`, conforme [token-source.md](token-source.md), seção 8; o documento
-da convenção (`docs/tokens/convencao-de-nomes.md`) é derivado dessas tabelas e não é entrada do
-validador (token-source.md, seção 11).
+`src/semantic/mode/light.tokens.json` and `dark.tokens.json`, `src/component/`); versioned copies
+of the DTCG 2025.10 schemas and their sha256. The name grammar and the vocabularies come from tables of
+`@<prefixo>/tokens-build` itself, per [token-source.md](token-source.md), section 8; the convention
+document (`docs/tokens/convencao-de-nomes.md`) is derived from those tables and is not an input of the
+validator (token-source.md, section 11).
 
-**Saídas**: nenhum arquivo.
+**Outputs**: no file.
 
-**Regras e códigos**: os códigos de achado (`code`), a saída humana, o JSON e os códigos de saída
-são os de [token-source.md](token-source.md), seções 10.2 a 10.5. O campo `rule` traz o id da
-regra do data-model. Correspondência:
+**Rules and codes**: the finding codes (`code`), the human output, the JSON and the exit codes
+are those of [token-source.md](token-source.md), sections 10.2 to 10.5. The `rule` field carries the id
+of the data-model rule. Correspondence:
 
-| `rule` (data-model) | `code` (token-source.md, seção 10.5) | Verifica | FR |
+| `rule` (data-model) | `code` (token-source.md, section 10.5) | Checks | FR |
 | --- | --- | --- | --- |
-| V-01 | `TKN-JSON-PARSE`, `TKN-SCHEMA`, `TKN-RESOLVER-REF`, `TKN-ALIAS-TYPE` | Schema DTCG 2025.10 de cada arquivo e do resolver; JSON malformado com linha e coluna | FR-002 |
-| V-02 | `TKN-LITERAL-OUTSIDE-PRIMITIVE` | Literal (inclusive subvalor de composto) fora da camada primitiva | FR-003 |
-| V-03 | `TKN-ALIAS-UNRESOLVED`, `TKN-ALIAS-CYCLE`, `TKN-ALIAS-TYPE` | Alias inexistente ou ciclo em qualquer permutação; `data.chain` traz a cadeia | FR-004 |
-| V-04 | `TKN-LAYER-DIRECTION` | Referência para camada acima | FR-004 |
-| V-05 | `TKN-REF-OUTSIDE-PRIMITIVE`, `TKN-REF-NOT-LOCAL`, `TKN-ROOT-FORBIDDEN`, `TKN-EXTENDS-FORM` | `$ref` fora do primitivo ou não local; `$root`; `$extends` fora da forma com chaves | FR-003, FR-004 |
-| V-06 | `TKN-NAME-SEGMENT`, `TKN-NAME-CATEGORY`, `TKN-NAME-GRAMMAR`, `TKN-NAME-RESERVED`, `TKN-NAME-COLLISION`, `TKN-TYPE-MISSING`, `TKN-TYPE-CATEGORY` | Gramática por categoria e segmentos em ordem fixa; colisão de nome CSS; `$type` ausente ou incompatível com a categoria | FR-005 |
-| V-07 | `TKN-RESOLVER-STRUCTURE`, `TKN-FILE-LOCATION`, `TKN-PATH-DUPLICATE`, `TKN-AXIS-DEPENDENCY` | Eixo coerente com o set que define o token | FR-011 |
-| V-08 | `TKN-AXIS-BOTH`, `TKN-BRAND-SOURCE-FORM`, `TKN-BRAND-SOURCE-REF` | Variação nos dois eixos fora da forma do FR-033; token sob `brand.` sem id de modo no fim ou sem as mesmas chaves em toda marca | FR-033 |
-| V-09 | `TKN-PATH-DUPLICATE` | Set compartilhado com valor de eixo marca ou modo | FR-011 |
-| V-10 | `TKN-COLOR-HEX-MISMATCH` | `hex` divergente da quantização de 8 bits dos componentes (cor dentro do gamut sRGB) | FR-015, FR-020 |
-| V-11 | `TKN-CATEGORY-COVERAGE` | Categoria sem token semântico | FR-006 |
-| V-12 | `TKN-CONTROL-SCALE` | Altura de controle fora da escala `size.control.<passo>`; passos diferentes entre permutações | FR-007 |
-| V-13 | `TKN-PARITY-CONTEXT`, `TKN-PARITY-PERMUTATION` | Chave semântica ausente ou excedente, por permutação e por contexto | FR-011 |
-| — | `TKN-FILE-UNREFERENCED` | `*.tokens.json` em `src/` que nenhum set referencia | FR-001 |
+| V-01 | `TKN-JSON-PARSE`, `TKN-SCHEMA`, `TKN-RESOLVER-REF`, `TKN-ALIAS-TYPE` | DTCG 2025.10 schema of each file and of the resolver; malformed JSON with line and column | FR-002 |
+| V-02 | `TKN-LITERAL-OUTSIDE-PRIMITIVE` | A literal (including a composite subvalue) outside the primitive layer | FR-003 |
+| V-03 | `TKN-ALIAS-UNRESOLVED`, `TKN-ALIAS-CYCLE`, `TKN-ALIAS-TYPE` | A nonexistent alias or a cycle in any permutation; `data.chain` carries the chain | FR-004 |
+| V-04 | `TKN-LAYER-DIRECTION` | A reference to a layer above | FR-004 |
+| V-05 | `TKN-REF-OUTSIDE-PRIMITIVE`, `TKN-REF-NOT-LOCAL`, `TKN-ROOT-FORBIDDEN`, `TKN-EXTENDS-FORM` | `$ref` outside the primitive or non-local; `$root`; `$extends` outside the braces form | FR-003, FR-004 |
+| V-06 | `TKN-NAME-SEGMENT`, `TKN-NAME-CATEGORY`, `TKN-NAME-GRAMMAR`, `TKN-NAME-RESERVED`, `TKN-NAME-COLLISION`, `TKN-TYPE-MISSING`, `TKN-TYPE-CATEGORY` | Grammar per category and segments in a fixed order; CSS name collision; `$type` missing or incompatible with the category | FR-005 |
+| V-07 | `TKN-RESOLVER-STRUCTURE`, `TKN-FILE-LOCATION`, `TKN-PATH-DUPLICATE`, `TKN-AXIS-DEPENDENCY` | An axis consistent with the set that defines the token | FR-011 |
+| V-08 | `TKN-AXIS-BOTH`, `TKN-BRAND-SOURCE-FORM`, `TKN-BRAND-SOURCE-REF` | Variation on both axes outside the FR-033 form; a token under `brand.` without a mode id at the end or without the same keys in every brand | FR-033 |
+| V-09 | `TKN-PATH-DUPLICATE` | A shared set with a brand-axis or mode-axis value | FR-011 |
+| V-10 | `TKN-COLOR-HEX-MISMATCH` | A `hex` divergent from the 8-bit quantization of the components (in-gamut sRGB color) | FR-015, FR-020 |
+| V-11 | `TKN-CATEGORY-COVERAGE` | A category with no semantic token | FR-006 |
+| V-12 | `TKN-CONTROL-SCALE` | A control height outside the `size.control.<step>` scale; different steps between permutations | FR-007 |
+| V-13 | `TKN-PARITY-CONTEXT`, `TKN-PARITY-PERMUTATION` | A semantic key missing or extra, per permutation and per context | FR-011 |
+| — | `TKN-FILE-UNREFERENCED` | A `*.tokens.json` in `src/` that no set references | FR-001 |
 
-Erros de configuração (código 2, em `errors[]`): fonte ou resolver inexistente
-(`TKN-CONFIG-INPUT`); sha256 dos schemas diferente de `SHA256SUMS` (`TKN-CONFIG-SCHEMA-HASH`); lista
-de permutações indefinida por limite do parser ou diferente de marcas × modos
-(`TKN-CONFIG-PERMUTATIONS`). Flag ou argumento inválidos usam `USAGE` (seção 1.6); erro interno,
-`TKN-INTERNAL` (código 3).
+Configuration errors (code 2, in `errors[]`): nonexistent source or resolver
+(`TKN-CONFIG-INPUT`); sha256 of the schemas different from `SHA256SUMS` (`TKN-CONFIG-SCHEMA-HASH`); a
+permutation list undefined by a parser limit or different from brands × modes
+(`TKN-CONFIG-PERMUTATIONS`). An invalid flag or argument uses `USAGE` (section 1.6); an internal error,
+`TKN-INTERNAL` (code 3).
 
-**`--json`** (além do envelope): `summary` conforme token-source.md, seção 10.4:
+**`--json`** (besides the envelope): `summary` per token-source.md, section 10.4:
 
 ```json
 {
@@ -223,43 +223,43 @@ de permutações indefinida por limite do parser ou diferente de marcas × modos
 }
 ```
 
-**Códigos**: 0, 1, 2, 3.
+**Codes**: 0, 1, 2, 3.
 
-**Comprova**: FR-002, FR-003, FR-004, FR-005, FR-006, FR-007, FR-011, FR-033; FR-001 do lado da
-fonte (complementa `scan-tokens`); FR-009 (marca nova sem chave é barrada, US3 cenário 2); SC-001,
-SC-003, SC-004; SC-009 (literal fora do primitivo, nome fora do padrão, chave ausente); US1
-cenários 1 e 2.
+**Proves**: FR-002, FR-003, FR-004, FR-005, FR-006, FR-007, FR-011, FR-033; FR-001 from the source
+side (complements `scan-tokens`); FR-009 (a new brand without a key is blocked, US3 scenario 2); SC-001,
+SC-003, SC-004; SC-009 (literal outside the primitive, name outside the pattern, missing key); US1
+scenarios 1 and 2.
 
-**Jobs**: PR (job `validate`, obrigatório), noturno, release.
+**Jobs**: PR (job `validate`, required), nightly, release.
 
 ### 2.2 `tokens-build build`
 
-**Uso**: `tokens-build build [--resolver <arquivo>] [--schemas <dir>] [--out <dir>] [--api-report <arquivo>] [--json]`
+**Usage**: `tokens-build build [--resolver <file>] [--schemas <dir>] [--out <dir>] [--api-report <file>] [--json]`
 
-**Propósito**: executar a validação completa da seção 2.1 (nada é emitido se houver violação),
-gerar todos os artefatos e conferir a saída gerada.
+**Purpose**: run the full validation of section 2.1 (nothing is emitted if there is a violation),
+generate all artifacts and check the generated output.
 
-| Flag | Padrão |
+| Flag | Default |
 | --- | --- |
-| `--out` | `packages/tokens/dist` (no `.gitignore`) |
-| `--api-report` | `packages/tokens/api/tokens.api.json` (versionado) |
+| `--out` | `packages/tokens/dist` (in `.gitignore`) |
+| `--api-report` | `packages/tokens/api/tokens.api.json` (versioned) |
 
-`--out` dentro de `packages/tokens/src/` é recusado (código 2).
+`--out` inside `packages/tokens/src/` is refused (code 2).
 
-**Saídas**:
+**Outputs**:
 
-| Arquivo | Conteúdo | FR |
+| File | Content | FR |
 | --- | --- | --- |
-| `dist/css/base.css` | Ordem das camadas, primitivos compartilhados, toggles de modo privados, resolvedor, tudo em `@layer <prefixo>.tokens` | FR-015, FR-017 |
-| `dist/css/brand-<id>.css` | Um por marca: só seletores `[data-<prefixo>-brand="<id>"]`; só a marca padrão acrescenta `:where(:root)` | FR-013, FR-017 |
-| `dist/esm/index.js` + `index.d.ts` | Referências `var(--<prefixo>-*)` dos tokens públicos, com tipos literais | FR-016 |
-| `dist/esm/values.js` + `values.d.ts` | Mapas de valores por marca × modo | FR-016 |
-| `dist/meta/tokens.manifest.json` | Token → nome CSS, camada, categoria, eixo, papel, cadeia de alias, escala; insumo do lint e do contraste | FR-020, FR-022, FR-023 |
-| `dist/meta/sync-manifest.json` | Estado desejado da ferramenta de design ([design-sync.md](design-sync.md), seção 3) | FR-025, FR-028 |
-| `dist/meta/report.json` + `report.md` | Contagem por categoria e camada; escala de alturas por permutação | FR-008 |
-| `api/tokens.api.json` | Superfície pública (nomes, tipos, entradas); conferida por `repo-checks drift` | FR-016 |
+| `dist/css/base.css` | Layer order, shared primitives, private mode toggles, resolver, all in `@layer <prefixo>.tokens` | FR-015, FR-017 |
+| `dist/css/brand-<id>.css` | One per brand: only selectors `[data-<prefixo>-brand="<id>"]`; only the default brand adds `:where(:root)` | FR-013, FR-017 |
+| `dist/esm/index.js` + `index.d.ts` | `var(--<prefixo>-*)` references of the public tokens, with literal types | FR-016 |
+| `dist/esm/values.js` + `values.d.ts` | Value maps per brand × mode | FR-016 |
+| `dist/meta/tokens.manifest.json` | Token → CSS name, layer, category, axis, role, alias chain, scale; input to the lint and the contrast | FR-020, FR-022, FR-023 |
+| `dist/meta/sync-manifest.json` | Desired state of the design tool ([design-sync.md](design-sync.md), section 3) | FR-025, FR-028 |
+| `dist/meta/report.json` + `report.md` | Count per category and layer; control-height scale per permutation | FR-008 |
+| `api/tokens.api.json` | Public surface (names, types, entries); checked by `repo-checks drift` | FR-016 |
 
-Formato e mecanismo do CSS: [css-output.md](css-output.md). Esboço de `report.json`:
+CSS format and mechanism: [css-output.md](css-output.md). Sketch of `report.json`:
 
 ```json
 {
@@ -277,32 +277,32 @@ Formato e mecanismo do CSS: [css-output.md](css-output.md). Esboço de `report.j
 }
 ```
 
-**Escrita atômica**: os arquivos são gerados num diretório temporário ao lado de `--out`, passam
-pelas checagens abaixo e só então substituem `--out` e o relatório de API. Com violação, os arquivos
-existentes ficam intactos.
+**Atomic write**: the files are generated in a temporary directory next to `--out`, pass
+the checks below and only then replace `--out` and the API report. With a violation, the existing files
+stay intact.
 
-**Checagens da saída gerada** (definição detalhada das checagens de CSS em
-[css-output.md](css-output.md), seção 13, e da serialização na seção 11):
+**Checks of the generated output** (detailed definition of the CSS checks in
+[css-output.md](css-output.md), section 13, and of the serialization in section 11):
 
-| `code` | Verifica | FR |
+| `code` | Checks | FR |
 | --- | --- | --- |
-| `css-brand-selector` | Arquivo de marca só com seletores dessa marca; `:where(:root)` só no arquivo da marca padrão | FR-013, FR-017 |
-| `css-base-brand-value` | `base.css` sem valor exclusivo de alguma marca | FR-017 |
-| `css-toggle-form` | Token de eixo modo na forma `var(--<prefixo>-_on-light, L)var(--<prefixo>-_on-dark, D)`, sem espaço entre os toggles; toggles com o literal `initial` ou vazio, nunca `var()` | FR-012, FR-014 |
-| `css-var-undeclared` | Todo alvo de `var()` declarado em `base.css` ou no arquivo da marca | FR-013, FR-014 |
-| `css-public-outside-resolver` | Token público declarado só no resolvedor ou no escopo de marca | FR-012 |
-| `css-layer` | Toda regra em `@layer <prefixo>.tokens`, com a declaração de ordem das camadas | FR-015 |
-| `css-combinations` | CSS válido e completo para toda combinação marca × modo | FR-010 |
-| `css-syntax` | CSS válido, só cabeçalho, declaração de ordem das camadas e um bloco `@layer` com regras simples; sem `!important` nem at-rules proibidas | FR-015 |
-| `css-var-fallback` | Nenhum `var()` com fallback, exceto os toggles | FR-013, FR-014 |
-| `css-scope-dependency` | Declarações da regra de marca sem dependência de token de eixo modo ou de componente; fonte marca-modo só na forma de toggles | FR-012, FR-033 |
-| `css-value-format` | Cores, números e compostos na forma única de serialização | FR-015, FR-020 |
-| `css-format` | Cabeçalho, ordenação, indentação, LF e quebra de linha final | FR-015 |
-| `unserializable-value` | Token publicado sem representação num único valor CSS (`typography` composto, `strokeStyle` em objeto; css-output.md, S-04) | FR-015, FR-016 |
-| `private-segment-leak` | Segmento privado `_` ausente do ESM, do `.d.ts` e do relatório de API | FR-016 |
-| `dist-parity` | CSS, chaves do ESM, união `TokenName`, manifesto e relatório de API listam o mesmo conjunto de tokens | FR-016, FR-017 |
+| `css-brand-selector` | A brand file only with selectors of that brand; `:where(:root)` only in the default brand's file | FR-013, FR-017 |
+| `css-base-brand-value` | `base.css` without a value exclusive to some brand | FR-017 |
+| `css-toggle-form` | A mode-axis token in the form `var(--<prefixo>-_on-light, L)var(--<prefixo>-_on-dark, D)`, with no space between the toggles; toggles with the literal `initial` or empty, never `var()` | FR-012, FR-014 |
+| `css-var-undeclared` | Every `var()` target declared in `base.css` or in the brand file | FR-013, FR-014 |
+| `css-public-outside-resolver` | A public token declared only in the resolver or in the brand scope | FR-012 |
+| `css-layer` | Every rule in `@layer <prefixo>.tokens`, with the layer-order declaration | FR-015 |
+| `css-combinations` | Valid and complete CSS for every brand × mode combination | FR-010 |
+| `css-syntax` | Valid CSS, only a header, the layer-order declaration and an `@layer` block with simple rules; no `!important` and no forbidden at-rules | FR-015 |
+| `css-var-fallback` | No `var()` with a fallback, except the toggles | FR-013, FR-014 |
+| `css-scope-dependency` | Brand-rule declarations without a dependency on a mode-axis or component token; a brand-mode source only in the toggle form | FR-012, FR-033 |
+| `css-value-format` | Colors, numbers and composites in the single serialization form | FR-015, FR-020 |
+| `css-format` | Header, ordering, indentation, LF and final line break | FR-015 |
+| `unserializable-value` | A published token without a single-CSS-value representation (composite `typography`, `strokeStyle` in object form; css-output.md, S-04) | FR-015, FR-016 |
+| `private-segment-leak` | The private segment `_` absent from the ESM, the `.d.ts` and the API report | FR-016 |
+| `dist-parity` | CSS, ESM keys, the `TokenName` union, the manifest and the API report list the same set of tokens | FR-016, FR-017 |
 
-**`--json`** (além do envelope): `summary` igual ao da seção 2.1 e
+**`--json`** (besides the envelope): `summary` equal to that of section 2.1 and
 
 ```json
 {
@@ -313,67 +313,67 @@ existentes ficam intactos.
 }
 ```
 
-com `files` ordenado por `path`.
+with `files` ordered by `path`.
 
-**Códigos**: 0; 1 (violação da fonte ou da saída gerada); 2; 3.
+**Codes**: 0; 1 (violation of the source or of the generated output); 2; 3.
 
-**Comprova**: FR-008, FR-010, FR-013 e FR-017 (parte estática), FR-015, FR-016 (arquivos das duas
-entradas), SC-003 (relatório); US1 cenário 4; SC-002 e US2 cenário 5 junto com
+**Proves**: FR-008, FR-010, FR-013 and FR-017 (static part), FR-015, FR-016 (files of the two
+entries), SC-003 (report); US1 scenario 4; SC-002 and US2 scenario 5 together with
 `repo-checks determinism`.
 
-**Jobs**: PR (job `build`; `dist/` e relatório sobem como artefatos para os jobs seguintes),
-noturno (Node 24, 22 e 26), release.
+**Jobs**: PR (job `build`; `dist/` and the report are uploaded as artifacts for the following jobs),
+nightly (Node 24, 22 and 26), release.
 
 ## 3. `tokens-contrast` (`@<prefixo>/tokens-contrast`, `tools/tokens-contrast`)
 
 ### 3.1 `tokens-contrast check`
 
-**Uso**: `tokens-contrast check [--manifest <arquivo>] [--surfaces <arquivo>] [--tokens <arquivo>] [--thresholds <arquivo>] [--out <dir>] [--json]`
+**Usage**: `tokens-contrast check [--manifest <file>] [--surfaces <file>] [--tokens <file>] [--thresholds <file>] [--out <dir>] [--json]`
 
-**Propósito**: medir cada par do manifesto de contraste em toda permutação marca × modo (D5):
-resolve frente e pilha de fundo; converte com `toEmittedSrgb()` de `@<prefixo>/color` (o mesmo
-valor que o CSS emite); compõe source-over em sRGB codificado em gama sobre pilha com base opaca ou
-sobre cada superfície de um conjunto nomeado; calcula a razão WCAG 2.2 em ponto flutuante e numa
-variante que arredonda para 8 bits a cada dobra; vale o menor; aprova com razão maior ou igual ao
-mínimo.
+**Purpose**: measure each pair of the contrast manifest in every brand × mode permutation (D5):
+it resolves the foreground and the background stack; converts with `toEmittedSrgb()` of `@<prefixo>/color`
+(the same value the CSS emits); composes source-over in gamma-encoded sRGB over a stack with an opaque
+base or over each surface of a named set; computes the WCAG 2.2 ratio in floating point and in a variant
+that rounds to 8 bits at each fold; the smaller applies; it passes with a ratio greater than or equal to
+the minimum.
 
-| Flag | Padrão |
+| Flag | Default |
 | --- | --- |
 | `--manifest` | `packages/tokens/contrast/manifest.json` |
 | `--surfaces` | `packages/tokens/contrast/surfaces.json` |
-| `--tokens` | `packages/tokens/dist/meta/tokens.manifest.json`, com os valores emitidos por permutação expostos pelo build em `./meta/*`; ausente: código 2 com orientação para rodar `pnpm tokens:build` |
-| `--thresholds` | `quality/thresholds.json`, seção `contrast` |
-| `--out` | nenhum; quando informado, grava `contrast-report.json` e `contrast-report.md` |
+| `--tokens` | `packages/tokens/dist/meta/tokens.manifest.json`, with the emitted values per permutation exposed by the build in `./meta/*`; missing: code 2 with guidance to run `pnpm tokens:build` |
+| `--thresholds` | `quality/thresholds.json`, section `contrast` |
+| `--out` | none; when provided, writes `contrast-report.json` and `contrast-report.md` |
 
-**Regras de medição** (premissa WCAG 2.2 AA, A11Y-01): texto 4,5:1 e não texto, inclusive foco,
-3:1. Par com `exempt: "wcag-inactive"` (só em estado `disabled` ou `inactive`) é medido e
-reportado, mas não falha. Grupo `any-of` (foco que atravessa a borda do componente) passa se algum
-membro atinge o mínimo; todos os membros são reportados.
+**Measurement rules** (assumption WCAG 2.2 AA, A11Y-01): text 4.5:1 and non-text, including focus,
+3:1. A pair with `exempt: "wcag-inactive"` (only in state `disabled` or `inactive`) is measured and
+reported, but does not fail. An `any-of` group (focus that crosses the component border) passes if some
+member meets the minimum; all members are reported.
 
-**Achados**:
+**Findings**:
 
-| `code` | Regra do data-model | Situação |
+| `code` | Data-model rule | Situation |
 | --- | --- | --- |
-| `pair-below-minimum` | V-15 | Par sem isenção, fora de grupo, abaixo do mínimo em alguma permutação |
-| `group-below-minimum` | V-15 | Nenhum membro do grupo atinge o mínimo |
-| `unknown-token` | V-14 | Referência ausente em alguma permutação |
-| `forbidden-reference` | Par de contraste | `fg` ou `bg` primitivo, `brand-mode-source` ou literal |
-| `stack-not-opaque` | V-16 | Pilha sem base opaca |
-| `empty-surface-set` | V-16 | Conjunto de superfícies vazio no modo |
-| `exempt-invalid-state` | Par de contraste | `exempt` com estado diferente de `disabled` ou `inactive` |
-| `unknown-state` | Par de contraste | Estado fora do vocabulário versionado |
-| `manifest-schema`, `duplicate-id`, `unsorted-manifest` | FR-019 | Manifesto inválido, id repetido ou fora de ordem |
-| `unknown-surface-set` | Par de contraste | `@conjunto` inexistente em `surfaces.json` ou fora da base da pilha |
-| `duplicate-pair` | Par de contraste | Tupla canônica (`fg`, `bg`, `state`, `kind`) repetida |
-| `invalid-group` | Par de contraste | Grupo `any-of` com menos de dois membros, estado ou tipo inválido, `fg` diferente ou membro com `exempt` |
-| `emitted-mismatch` | Valor medido = emitido | String de `toEmittedSrgb()` diferente da emitida pelo build no manifesto de tokens |
+| `pair-below-minimum` | V-15 | A pair without an exemption, outside a group, below the minimum in some permutation |
+| `group-below-minimum` | V-15 | No member of the group meets the minimum |
+| `unknown-token` | V-14 | A reference missing in some permutation |
+| `forbidden-reference` | Contrast pair | `fg` or `bg` a primitive, `brand-mode-source` or literal |
+| `stack-not-opaque` | V-16 | A stack without an opaque base |
+| `empty-surface-set` | V-16 | An empty surface set in the mode |
+| `exempt-invalid-state` | Contrast pair | `exempt` with a state other than `disabled` or `inactive` |
+| `unknown-state` | Contrast pair | A state outside the versioned vocabulary |
+| `manifest-schema`, `duplicate-id`, `unsorted-manifest` | FR-019 | Invalid manifest, duplicate id or out of order |
+| `unknown-surface-set` | Contrast pair | `@set` nonexistent in `surfaces.json` or outside the base of the stack |
+| `duplicate-pair` | Contrast pair | Canonical tuple (`fg`, `bg`, `state`, `kind`) repeated |
+| `invalid-group` | Contrast pair | An `any-of` group with fewer than two members, an invalid state or type, a different `fg` or a member with `exempt` |
+| `emitted-mismatch` | Measured value = emitted | The string of `toEmittedSrgb()` different from the one emitted by the build in the token manifest |
 
-Regras detalhadas desses códigos (CM-01 a CM-08, V-14 a V-16): [contrast-manifest.md](contrast-manifest.md), seção 6.
+Detailed rules of these codes (CM-01 to CM-08, V-14 to V-16): [contrast-manifest.md](contrast-manifest.md), section 6.
 
-Erros de configuração (código 2): arquivo ausente (`CONFIG`); valores de `quality/thresholds.json`
-que não batem com o nível declarado, ou nível desconhecido (`THRESHOLDS_MISMATCH`).
+Configuration errors (code 2): a missing file (`CONFIG`); values of `quality/thresholds.json`
+that do not match the declared level, or an unknown level (`THRESHOLDS_MISMATCH`).
 
-**`--json`** (além do envelope):
+**`--json`** (besides the envelope):
 
 ```json
 {
@@ -403,47 +403,47 @@ que não batem com o nível declarado, ou nível desconhecido (`THRESHOLDS_MISMA
 }
 ```
 
-`cases` ordenado por `pair`, `brand`, `mode`, `surface`. Razões truncadas (não arredondadas) em 4
-casas no JSON e em 2 no Markdown; aprovação calculada sobre o valor não truncado. `result` de caso:
-`pass`, `fail` ou `exempt`. `flags` de caso: lista, hoje só com `near-threshold` (sinal informativo,
-não falha; contrast-manifest.md, seção 8, passo 11).
+`cases` ordered by `pair`, `brand`, `mode`, `surface`. Ratios truncated (not rounded) to 4
+places in the JSON and to 2 in the Markdown; the pass/fail is computed over the untruncated value.
+Case `result`: `pass`, `fail` or `exempt`. Case `flags`: a list, today only with `near-threshold`
+(informative signal, does not fail; contrast-manifest.md, section 8, step 11).
 
-**Códigos**: 0 (todos aprovados; isentos não contam); 1 (par ou grupo reprovado, ou violação do
-manifesto); 2; 3.
+**Codes**: 0 (all passed; exempts do not count); 1 (a pair or group failed, or a manifest
+violation); 2; 3.
 
-**Comprova**: FR-019, FR-020; SC-008; SC-009 (par reprovado); US4 cenários 1, 2 e 3; A11Y-09
-(medição). A checagem de par usado em estilo e ausente do manifesto (FR-021) é a regra
-`<prefixo>/contrast-pairs` (seção 6).
+**Proves**: FR-019, FR-020; SC-008; SC-009 (a failed pair); US4 scenarios 1, 2 and 3; A11Y-09
+(measurement). The check of a pair used in a style and missing from the manifest (FR-021) is the rule
+`<prefixo>/contrast-pairs` (section 6).
 
-**Jobs**: PR (job `contrast`, obrigatório; relatório como artefato e evidência do ACE-02), noturno
-(o relatório entra na comparação entre Node piso e mais recente), release.
+**Jobs**: PR (job `contrast`, required; report as an artifact and evidence of ACE-02), nightly
+(the report enters the comparison between the floor and the latest Node), release.
 
 ## 4. `repo-checks` (`@<prefixo>/repo-checks`, `tools/repo-checks`)
 
-Scripts próprios sem dependência do workspace (só `node:crypto`, `git`, `pnpm` e postcss), cada
-um com fixtures de violação proposital (QA-02).
+Standalone scripts with no workspace dependency (only `node:crypto`, `git`, `pnpm` and postcss), each
+one with deliberate violation fixtures (QA-02).
 
 ### 4.1 `repo-checks determinism`
 
-**Uso**:
+**Usage**:
 
-- `repo-checks determinism [--ref <git-ref>] [--package <nome>] [--keep] [--json]`
-- `repo-checks determinism --hashes-out <arquivo> [--label <texto>] [--extra <caminho>]… [--json]`
-- `repo-checks determinism --compare <arquivoA> <arquivoB> [--json]`
+- `repo-checks determinism [--ref <git-ref>] [--package <name>] [--keep] [--json]`
+- `repo-checks determinism --hashes-out <file> [--label <text>] [--extra <path>]… [--json]`
+- `repo-checks determinism --compare <fileA> <fileB> [--json]`
 
-**Propósito**: provar que dois builds da mesma fonte produzem saída idêntica byte a byte.
+**Purpose**: prove that two builds of the same source produce byte-for-byte identical output.
 
-- **Modo padrão (build duplo)**: cria dois `git worktree` limpos de `--ref` (padrão `HEAD`) em
-  caminhos absolutos diferentes (o segundo com espaço e caractere não ASCII). Execução A com
-  `TZ=UTC` e `LC_ALL=C`; execução B com `TZ=Pacific/Kiritimati` e `LC_ALL=tr_TR.UTF-8`. Em cada uma:
-  `pnpm install --frozen-lockfile --offline`, `turbo run tokens:build --force` (sem cache local nem
-  remoto) e `pnpm pack` do pacote `--package` (padrão `@<prefixo>/tokens`). Compara a lista ordenada
-  de arquivos e o sha256 de cada arquivo de `packages/tokens/dist/**` e
-  `packages/tokens/api/tokens.api.json`, e o sha256 dos tarballs. `--keep` preserva os worktrees.
-- **`--hashes-out`**: um build sem cache no checkout atual, que grava o manifesto de hashes
-  (inclui os caminhos de `--extra`, como o relatório de contraste).
-- **`--compare`**: compara dois manifestos de hashes produzidos em runners ou versões de Node
-  diferentes. `label` identifica a origem e não entra na comparação.
+- **Default mode (double build)**: creates two clean `git worktree` of `--ref` (default `HEAD`) in
+  different absolute paths (the second with a space and a non-ASCII character). Run A with
+  `TZ=UTC` and `LC_ALL=C`; run B with `TZ=Pacific/Kiritimati` and `LC_ALL=tr_TR.UTF-8`. In each one:
+  `pnpm install --frozen-lockfile --offline`, `turbo run tokens:build --force` (no local or
+  remote cache) and `pnpm pack` of the `--package` package (default `@<prefixo>/tokens`). It compares the
+  ordered file list and the sha256 of each file of `packages/tokens/dist/**` and
+  `packages/tokens/api/tokens.api.json`, and the sha256 of the tarballs. `--keep` preserves the worktrees.
+- **`--hashes-out`**: a single cacheless build in the current checkout, which writes the hash manifest
+  (includes the `--extra` paths, such as the contrast report).
+- **`--compare`**: compares two hash manifests produced on different runners or Node versions.
+  `label` identifies the origin and does not enter the comparison.
 
 ```json
 {
@@ -456,7 +456,7 @@ um com fixtures de violação proposital (QA-02).
 }
 ```
 
-**`--json`** (além do envelope):
+**`--json`** (besides the envelope):
 
 ```json
 {
@@ -467,212 +467,212 @@ um com fixtures de violação proposital (QA-02).
 }
 ```
 
-A saída humana mostra o primeiro arquivo divergente e um trecho do diff.
+The human output shows the first divergent file and a snippet of the diff.
 
-**Códigos**: 0 (idênticos); 1 (divergência); 2 (não é repositório git, ref inexistente, store do
-pnpm indisponível em modo offline, manifesto de hashes inválido); 3 (falha de um dos builds; o
-código do subprocesso vai em `errors[0]`).
+**Codes**: 0 (identical); 1 (divergence); 2 (not a git repository, nonexistent ref, pnpm store
+unavailable in offline mode, invalid hash manifest); 3 (failure of one of the builds; the subprocess
+code goes in `errors[0]`).
 
-**Comprova**: FR-015 (byte a byte), SC-002, US2 cenário 5; salvaguarda do D1 entre Node piso e mais
-recente.
+**Proves**: FR-015 (byte for byte), SC-002, US2 scenario 5; D1 safeguard between the floor and the
+latest Node.
 
-**Jobs**: PR (job `determinism`, quando afetados `packages/tokens`, `tools/tokens-build`,
-`tools/color`, lockfile ou toolchain, ENG-02); noturno (entre runners e entre Node 22 e Node 26,
-com `--hashes-out` em cada job da matriz e `--compare` no job final); release.
+**Jobs**: PR (job `determinism`, when `packages/tokens`, `tools/tokens-build`,
+`tools/color`, the lockfile or the toolchain are affected, ENG-02); nightly (between runners and between
+Node 22 and Node 26, with `--hashes-out` in each matrix job and `--compare` in the final job); release.
 
 ### 4.2 `repo-checks drift`
 
-**Uso**: `repo-checks drift [--no-regenerate] [--json]`
+**Usage**: `repo-checks drift [--no-regenerate] [--json]`
 
-**Propósito**:
+**Purpose**:
 
-1. falhar se `git ls-files` listar caminho gerado (lista versionada de padrões no próprio pacote,
-   que inclui `packages/tokens/dist/**`) ou arquivo versionado com o cabeçalho do gerador (cobre o
-   edge case "arquivo de CSS de tokens editado à mão");
-2. salvo `--no-regenerate`, regenerar os artefatos versionados de propósito
-   (`packages/tokens/api/tokens.api.json`) com `tokens-build build` e exigir `git diff --exit-code`
-   e `git status --porcelain` vazio.
+1. fail if `git ls-files` lists a generated path (versioned list of patterns in the package itself,
+   which includes `packages/tokens/dist/**`) or a versioned file with the generator header (covers the
+   edge case "a token CSS file edited by hand");
+2. unless `--no-regenerate`, regenerate the on-purpose versioned artifacts
+   (`packages/tokens/api/tokens.api.json`) with `tokens-build build` and require `git diff --exit-code`
+   and an empty `git status --porcelain`.
 
-**Achados**: `generated-file-tracked`, `generated-header-tracked`, `versioned-artifact-stale`,
+**Findings**: `generated-file-tracked`, `generated-header-tracked`, `versioned-artifact-stale`,
 `worktree-dirty`.
 
-**`--json`** (além do envelope): `tracked` (`[{ "path", "reason" }]`), `regenerated`
-(`[{ "path", "changed" }]`), `status` (linhas do `--porcelain`, ordenadas).
+**`--json`** (besides the envelope): `tracked` (`[{ "path", "reason" }]`), `regenerated`
+(`[{ "path", "changed" }]`), `status` (`--porcelain` lines, ordered).
 
-**Códigos**: 0, 1, 2, 3 (falha do build de regeneração).
+**Codes**: 0, 1, 2, 3 (failure of the regeneration build).
 
-**Comprova**: FR-015 (nenhum CSS de tokens versionado ou editado à mão); FR-016 (relatório de API
-em dia, insumo do QA-08 e do GOV-01).
+**Proves**: FR-015 (no token CSS versioned or hand-edited); FR-016 (API report
+up to date, input to QA-08 and GOV-01).
 
-**Jobs**: PR (obrigatório), noturno, release.
+**Jobs**: PR (required), nightly, release.
 
 ### 4.3 `repo-checks scan-tokens`
 
-**Uso**: `repo-checks scan-tokens [--allowlist <arquivo>] [--self-test] [--json]`
+**Usage**: `repo-checks scan-tokens [--allowlist <file>] [--self-test] [--json]`
 
-**Propósito**: varredura do FR-001 sobre os arquivos de `git ls-files`.
+**Purpose**: the FR-001 scan over the files of `git ls-files`.
 
-| `code` | Sinaliza |
+| `code` | Flags |
 | --- | --- |
-| `custom-property-literal` | Declaração de custom property com valor literal, com qualquer nome (prefixado ou não), em CSS, bloco `<style>` de SFC `.vue`, HTML e atributo `style=` |
-| `token-name-in-code` | Definição de `--<prefixo>-*` em TS, JS ou JSON: chave de objeto ou `setProperty('--<prefixo>-…', …)`. Leitura por `var(--<prefixo>-…)` é permitida |
-| `dtcg-outside-source` | Documento JSON com `$value` ou `$type` DTCG fora de `packages/tokens/src/` |
-| `allowlist-stale` | Entrada da allowlist que não casou com nada |
+| `custom-property-literal` | A custom property declaration with a literal value, with any name (prefixed or not), in CSS, a `<style>` block of a `.vue` SFC, HTML and a `style=` attribute |
+| `token-name-in-code` | A definition of `--<prefixo>-*` in TS, JS or JSON: an object key or `setProperty('--<prefixo>-…', …)`. Reading via `var(--<prefixo>-…)` is allowed |
+| `dtcg-outside-source` | A JSON document with DTCG `$value` or `$type` outside `packages/tokens/src/` |
+| `allowlist-stale` | An allowlist entry that matched nothing |
 
-Allowlist versionada `quality/scan-allowlist.json`; entrada sem justificativa é erro de
-configuração (código 2):
+Versioned allowlist `quality/scan-allowlist.json`; an entry without a justification is a configuration
+error (code 2):
 
 ```json
 {
   "version": 1,
   "entries": [
-    { "path": "packages/tokens/src/**", "rules": ["dtcg-outside-source"], "justification": "Fonte única de tokens (FR-001)." },
-    { "path": "tools/repo-checks/fixtures/**", "rules": ["custom-property-literal", "dtcg-outside-source", "token-name-in-code"], "justification": "Fixtures de autoteste da varredura." }
+    { "path": "packages/tokens/src/**", "rules": ["dtcg-outside-source"], "justification": "Single token source (FR-001)." },
+    { "path": "tools/repo-checks/fixtures/**", "rules": ["custom-property-literal", "dtcg-outside-source", "token-name-in-code"], "justification": "Self-test fixtures of the scan." }
   ]
 }
 ```
 
-`--self-test` roda a varredura sobre as fixtures do pacote (CSS, SFC Vue, TSX, JSON e HTML, com
-nomes prefixados e não prefixados) e exige o multiconjunto esperado de `{file, line, column, code}`,
-sem achado a mais.
+`--self-test` runs the scan over the package's fixtures (CSS, Vue SFC, TSX, JSON and HTML, with
+prefixed and non-prefixed names) and requires the expected multiset of `{file, line, column, code}`,
+with no extra finding.
 
-**`--json`** (além do envelope): `summary: { "filesScanned", "byRule" }`; cada achado traz `data.match`
-com trecho de até 120 caracteres.
+**`--json`** (besides the envelope): `summary: { "filesScanned", "byRule" }`; each finding carries
+`data.match` with a snippet of up to 120 characters.
 
-**Códigos**: 0, 1, 2, 3.
+**Codes**: 0, 1, 2, 3.
 
-**Comprova**: FR-001; SC-001 (zero tokens fora da fonte); US1 cenário 3; SC-009 (parte).
+**Proves**: FR-001; SC-001 (zero tokens outside the source); US1 scenario 3; SC-009 (part).
 
-**Jobs**: PR (obrigatório, com `--self-test` no mesmo job), noturno.
+**Jobs**: PR (required, with `--self-test` in the same job), nightly.
 
 ### 4.4 `repo-checks layers`
 
-**Uso**: `repo-checks layers [--self-test] [--json]`
+**Usage**: `repo-checks layers [--self-test] [--json]`
 
-**Propósito**: check de manifesto do ENG-01 (parte c do D2), complementar a `turbo boundaries` e às
-regras de import do ESLint.
+**Purpose**: the ENG-01 manifest check (part c of D2), complementary to `turbo boundaries` and to the
+ESLint import rules.
 
-**Entradas**: `turbo.json` da raiz (`boundaries.tags`, arquivo versionado de camadas e arestas),
-tags do `turbo.json` de cada pacote, `package.json` de cada pacote, `pnpm ls -r --json` e
-`pnpm ls -r --prod --json`, código-fonte dos pacotes de ferramenta, registro versionado de exceções
-de fronteira (vazio nesta feature).
+**Inputs**: the root `turbo.json` (`boundaries.tags`, versioned file of layers and edges),
+tags of each package's `turbo.json`, `package.json` of each package, `pnpm ls -r --json` and
+`pnpm ls -r --prod --json`, source code of the tool packages, versioned registry of boundary
+exceptions (empty in this feature).
 
-Arestas desta feature:
+Edges of this feature:
 
-| Pacote | Tag | Pode depender de |
+| Package | Tag | Can depend on |
 | --- | --- | --- |
 | `packages/tokens` | `tokens` | dev: `tools/tokens-build`, `tools/color` |
 | `tools/tokens-build` | `tools` | `tools/color` |
-| `tools/color` | `tools` | nenhum pacote do workspace |
-| `tools/tokens-contrast` | `tools` | dev: `tokens` (só `./meta/*`), `tools/color` |
-| `tools/stylelint-plugin` | `tools` | dev: `tokens` (só `./meta/*`) |
-| `tools/design-sync` | `tools` | dev: `tokens` (só `./meta/*`) |
-| `tools/repo-checks` | `tools` | nenhum |
-| `apps/tokens-example`, `tests/types-consumer` | `apps` | `tokens` só pelo tarball empacotado |
+| `tools/color` | `tools` | no workspace package |
+| `tools/tokens-contrast` | `tools` | dev: `tokens` (only `./meta/*`), `tools/color` |
+| `tools/stylelint-plugin` | `tools` | dev: `tokens` (only `./meta/*`) |
+| `tools/design-sync` | `tools` | dev: `tokens` (only `./meta/*`) |
+| `tools/repo-checks` | `tools` | none |
+| `apps/tokens-example`, `tests/types-consumer` | `apps` | `tokens` only via the packaged tarball |
 
-| `code` | Sinaliza |
+| `code` | Flags |
 | --- | --- |
-| `missing-layer-tag`, `multiple-layer-tags` | Pacote sem exatamente uma tag de camada |
-| `forbidden-edge` | Dependência fora das arestas permitidas, por tipo (`dependencies` ou `devDependencies`) |
-| `dev-only-edge-in-prod` | Pacote `tools` com pacote de UI no fechamento `--prod` |
-| `leaf-has-workspace-dep` | `tools/color` com dependência do workspace |
-| `app-source-dependency` | App ou teste dependendo de `workspace:` ou `link:` em vez do tarball (QA-06) |
-| `subpath-not-allowed` | Ferramenta importando `@<prefixo>/tokens` fora de `./meta/*` |
-| `token-source-reference` | Ferramenta referenciando `packages/tokens/src` (garante a G-1 de [design-sync.md](design-sync.md)) |
-| `boundaries-ignore-unregistered` | `@boundaries-ignore` ou desativação de regra de import fora do registro de exceções |
+| `missing-layer-tag`, `multiple-layer-tags` | A package without exactly one layer tag |
+| `forbidden-edge` | A dependency outside the allowed edges, by type (`dependencies` or `devDependencies`) |
+| `dev-only-edge-in-prod` | A `tools` package with a UI package in the `--prod` closure |
+| `leaf-has-workspace-dep` | `tools/color` with a workspace dependency |
+| `app-source-dependency` | An app or test depending on `workspace:` or `link:` instead of the tarball (QA-06) |
+| `subpath-not-allowed` | A tool importing `@<prefixo>/tokens` outside `./meta/*` |
+| `token-source-reference` | A tool referencing `packages/tokens/src` (ensures G-1 of [design-sync.md](design-sync.md)) |
+| `boundaries-ignore-unregistered` | `@boundaries-ignore` or a disabled import rule outside the exceptions registry |
 
-`--self-test` roda workspaces de fixture, cada um com uma aresta proibida proposital em `.ts`, e
-exige o código esperado em cada um (evidência do ACE-08 para as camadas novas). As fixtures em
-`.vue` e as regras de import do ESLint chegam com a feature de CI, antes do primeiro `.vue`
-(ADR-12, decisão 3).
+`--self-test` runs fixture workspaces, each with a deliberate forbidden edge in `.ts`, and
+requires the expected code in each one (ACE-08 evidence for the new layers). The `.vue` fixtures
+and the ESLint import rules arrive with the CI feature, before the first `.vue`
+(ADR-12, decision 3).
 
-**Códigos**: 0, 1, 2, 3.
+**Codes**: 0, 1, 2, 3.
 
-**Comprova**: ENG-01 nas camadas desta feature (Princípio XI); FR-018 (app consome só o tarball,
-parte); FR-025 e US6 cenário 6 (parte: `design-sync` não alcança a fonte).
+**Proves**: ENG-01 in the layers of this feature (Principle XI); FR-018 (the app consumes only the tarball,
+part); FR-025 and US6 scenario 6 (part: `design-sync` does not reach the source).
 
-**Jobs**: PR (obrigatório), noturno.
+**Jobs**: PR (required), nightly.
 
 ## 5. `design-sync` (`@<prefixo>/design-sync`, `tools/design-sync`)
 
-Formatos, portas, plano, log e itens: [design-sync.md](design-sync.md). Nenhum comando importa
-variáveis da ferramenta para o repositório (FR-025).
+Formats, ports, plan, log and items: [design-sync.md](design-sync.md). No command imports
+tool variables into the repository (FR-025).
 
-### 5.1 Flags comuns
+### 5.1 Common flags
 
-| Flag | Padrão | Uso |
+| Flag | Default | Use |
 | --- | --- | --- |
-| `--adapter memory\|<ferramenta>` | `tool.adapter` da configuração | `memory` usa o `InMemoryDesignTool`. O adaptador real só existe depois da decisão do requerente. |
-| `--config <arquivo>` | `tools/design-sync/design-sync.config.json` | Configuração versionada. |
-| `--manifest <arquivo>` | `packages/tokens/dist/meta/sync-manifest.json` | Estado desejado atual. |
-| `--previous <arquivo>` | nenhum | Manifesto da última versão verificada (classificação de drift). |
-| `--out <dir>` | nenhum (só stdout) | Destino de plano, log e relatório; recusado dentro de `packages/tokens/` (código 2). |
-| `--memory-state <arquivo>`, `--memory-out <arquivo>` | nenhum | Só com `--adapter memory`: estado inicial e final do fake. |
-| `--tracker memory\|github`, `--alert memory\|github` | `memory` | `github` só nos jobs com token de instalação da GitHub App. |
-| `--trigger release\|schedule\|manual\|pr` | `manual` | Vai só para o envelope. |
-| `--run-url <url>` | derivado das variáveis do CI, quando presentes | Vai só para o envelope. |
-| `--json` | | Saída de máquina. |
+| `--adapter memory\|<tool>` | `tool.adapter` from the configuration | `memory` uses the `InMemoryDesignTool`. The real adapter only exists after the requester's decision. |
+| `--config <file>` | `tools/design-sync/design-sync.config.json` | Versioned configuration. |
+| `--manifest <file>` | `packages/tokens/dist/meta/sync-manifest.json` | Current desired state. |
+| `--previous <file>` | none | Manifest of the last verified version (drift classification). |
+| `--out <dir>` | none (stdout only) | Destination of plan, log and report; refused inside `packages/tokens/` (code 2). |
+| `--memory-state <file>`, `--memory-out <file>` | none | Only with `--adapter memory`: initial and final state of the fake. |
+| `--tracker memory\|github`, `--alert memory\|github` | `memory` | `github` only in jobs with a GitHub App installation token. |
+| `--trigger release\|schedule\|manual\|pr` | `manual` | Goes only to the envelope. |
+| `--run-url <url>` | derived from the CI variables, when present | Goes only to the envelope. |
+| `--json` | | Machine output. |
 
-Credenciais chegam só por variáveis de ambiente registradas no inventário do ENG-13, nunca por
-flag. Credencial ausente com adaptador real: código 4 (`CREDENTIAL_MISSING`). Toda saída 2 a 5
-chama `AlertPort.raise`.
+Credentials arrive only through environment variables registered in the ENG-13 inventory, never by a
+flag. A missing credential with a real adapter: code 4 (`CREDENTIAL_MISSING`). Every exit 2 to 5
+calls `AlertPort.raise`.
 
 ### 5.2 `design-sync plan`
 
-**Uso**: `design-sync plan [flags comuns] [--fail-on-changes]`
+**Usage**: `design-sync plan [common flags] [--fail-on-changes]`
 
-**Propósito**: ler manifestos e snapshot e calcular o plano; não escreve na ferramenta nem no
-tracker.
+**Purpose**: read the manifests and the snapshot and compute the plan; it does not write to the tool nor
+to the tracker.
 
-**Saídas** (com `--out`): `sync-plan.json` (`SyncPlan`) e `sync-plan.md`.
+**Outputs** (with `--out`): `sync-plan.json` (`SyncPlan`) and `sync-plan.md`.
 
-**`--json`** (além do envelope): `plan` com o `SyncPlan` completo.
+**`--json`** (besides the envelope): `plan` with the full `SyncPlan`.
 
-**Códigos**: 0 (com ou sem mudanças); 1 (com `--fail-on-changes` e plano não vazio); 2 (configuração
-ou pré-condição: manifesto inválido, `aliases` ausente, `maxModesPerAxis` insuficiente, `read`
-manual, remoção em massa); 3; 4.
+**Codes**: 0 (with or without changes); 1 (with `--fail-on-changes` and a non-empty plan); 2 (configuration
+or precondition: invalid manifest, missing `aliases`, insufficient `maxModesPerAxis`, manual `read`,
+mass removal); 3; 4.
 
-**Comprova**: FR-028 (casamento por chave e por segmentos); base de FR-027 e FR-029.
+**Proves**: FR-028 (matching by key and by segments); basis of FR-027 and FR-029.
 
-**Jobs**: PR (job `design-sync-fake`, `--adapter memory` sobre fixtures); `workflow_dispatch`.
+**Jobs**: PR (job `design-sync-fake`, `--adapter memory` over fixtures); `workflow_dispatch`.
 
 ### 5.3 `design-sync apply`
 
-**Uso**: `design-sync apply [flags comuns] [--version <x.y.z>] [--dry-run] [--allow-mass-delete] [--no-publish]`
+**Usage**: `design-sync apply [common flags] [--version <x.y.z>] [--dry-run] [--allow-mass-delete] [--no-publish]`
 
-**Propósito**: planejar sobre snapshot novo, aplicar (`DesignToolPort.apply`), verificar com novo
-snapshot, pedir publicação (salvo `--no-publish`), gravar o log, abrir itens de resultado de
-capacidade e resolver alertas abertos após resultado `verified`. `--version` precisa igualar
-`source.version` do manifesto (senão código 2). `--dry-run` chama `apply` com `dryRun: true` e não
-altera a ferramenta.
+**Purpose**: plan over a new snapshot, apply (`DesignToolPort.apply`), verify with a new
+snapshot, request publication (unless `--no-publish`), write the log, open capability-outcome items
+and resolve open alerts after a `verified` result. `--version` must equal
+`source.version` of the manifest (otherwise code 2). `--dry-run` calls `apply` with `dryRun: true` and does
+not change the tool.
 
-**Saídas** (com `--out`): `sync-plan.json`, `sync-plan.md`, `sync-log.json`, `sync-log.md`,
+**Outputs** (with `--out`): `sync-plan.json`, `sync-plan.md`, `sync-log.json`, `sync-log.md`,
 `sync-envelope.json`.
 
-**`--json`** (além do envelope): `log` com o conteúdo de `sync-log.json` e `envelope` com o conteúdo
-de `sync-envelope.json` (não determinístico; comparações o ignoram).
+**`--json`** (besides the envelope): `log` with the content of `sync-log.json` and `envelope` with the
+content of `sync-envelope.json` (non-deterministic; comparisons ignore it).
 
-**Códigos**: 0 (`verified` ou `dry-run`); 1 (`write: manual`: nada escrito, item `manual-write`
-aberto); 2 (configuração ou pré-condição); 3; 4 (acesso, credencial, rede, 5xx ou limite de taxa
-esgotado, inclusive no meio da aplicação, com resultado `failed`); 5 (verify divergente).
+**Codes**: 0 (`verified` or `dry-run`); 1 (`write: manual`: nothing written, a `manual-write` item
+opened); 2 (configuration or precondition); 3; 4 (access, credential, network, 5xx or exhausted rate
+limit, including in the middle of the application, with result `failed`); 5 (verify divergent).
 
-**Comprova**: FR-025, FR-026, FR-027, FR-028, FR-029; SC-010; US6 cenários 1, 2 e 5.
+**Proves**: FR-025, FR-026, FR-027, FR-028, FR-029; SC-010; US6 scenarios 1, 2 and 5.
 
-**Jobs**: release (job `sync` do `design-sync.yml`, environment `design-sync-write`, após a
-promoção; até o ENG-26, `workflow_dispatch` pelo dono da sincronização); PR (`--adapter memory`).
+**Jobs**: release (job `sync` of `design-sync.yml`, environment `design-sync-write`, after the
+promotion; until ENG-26, `workflow_dispatch` by the sync owner); PR (`--adapter memory`).
 
 ### 5.4 `design-sync detect`
 
-**Uso**: `design-sync detect [flags comuns] [--no-tracker]`
+**Usage**: `design-sync detect [common flags] [--no-tracker]`
 
-**Propósito**: comparar snapshot e manifesto atual (classificação com o anterior), gerar o
-relatório de divergência, criar ou atualizar itens por impressão digital e resolver itens cuja
-impressão digital sumiu, inclusive `manual-write` e `manual-publish` atendidos. Nunca escreve na
-ferramenta. `--no-tracker` só gera o relatório.
+**Purpose**: compare the snapshot and the current manifest (classification against the previous), generate
+the divergence report, create or update items by fingerprint and resolve items whose
+fingerprint has disappeared, including satisfied `manual-write` and `manual-publish`. It never writes to
+the tool. `--no-tracker` only generates the report.
 
-**Saídas** (com `--out`): `divergence-report.json`, `divergence-report.md` e envelope.
+**Outputs** (with `--out`): `divergence-report.json`, `divergence-report.md` and an envelope.
 
-**`--json`** (além do envelope):
+**`--json`** (besides the envelope):
 
 ```json
 {
@@ -686,133 +686,132 @@ ferramenta. `--no-tracker` só gera o relatório.
 }
 ```
 
-**Códigos**: 0 (sem divergência); 1 (divergências; itens criados ou atualizados); 2; 3; 4.
+**Codes**: 0 (no divergence); 1 (divergences; items created or updated); 2; 3; 4.
 
-**Comprova**: FR-028 (zero diferença de nome ou hierarquia após sincronizar), FR-030; SC-010,
-SC-011; US6 cenário 4.
+**Proves**: FR-028 (zero name or hierarchy difference after syncing), FR-030; SC-010,
+SC-011; US6 scenario 4.
 
-**Jobs**: agendado semanal (job `detect`, environment `design-sync-read`); após cada `sync`;
+**Jobs**: weekly scheduled (job `detect`, environment `design-sync-read`); after each `sync`;
 `workflow_dispatch`; PR (`--adapter memory`).
 
 ### 5.5 `design-sync check-access`
 
-**Uso**: `design-sync check-access [--adapter …] [--config …] [--json]`
+**Usage**: `design-sync check-access [--adapter …] [--config …] [--json]`
 
-**Propósito**: chamar `checkAccess()`, validar a configuração, resolver o time dono pelo arquivo de
-donos e conferir as capacidades que não dependem do manifesto (`read`). Credencial que vence dentro
-de `credentialExpiryWarnDays` gera aviso e item `credential` (rotação do ENG-13).
+**Purpose**: call `checkAccess()`, validate the configuration, resolve the owner team from the owners
+file and check the capabilities that do not depend on the manifest (`read`). A credential that expires
+within `credentialExpiryWarnDays` generates a warning and a `credential` item (ENG-13 rotation).
 
-**`--json`** (além do envelope): `access` (`AccessReport`), `capabilities`
+**`--json`** (besides the envelope): `access` (`AccessReport`), `capabilities`
 (`DesignToolCapabilities`), `owner` (`RoleRef`).
 
-**Códigos**: 0 (inclusive com aviso de vencimento); 2 (configuração, dono ambíguo no arquivo de
-donos, `read` manual); 4 (problema de acesso).
+**Codes**: 0 (including with an expiration warning); 2 (configuration, ambiguous owner in the owners
+file, manual `read`); 4 (access problem).
 
-**Jobs**: primeiro passo de todo job com adaptador real (`sync`, `detect`, `contract-real`).
+**Jobs**: first step of every job with a real adapter (`sync`, `detect`, `contract-real`).
 
-## 6. Lint de estilos (Stylelint)
+## 6. Style lint (Stylelint)
 
-Não é CLI própria: `pnpm lint:styles` executa a CLI do Stylelint 17 com o plugin
-`@<prefixo>/stylelint-plugin` e uma configuração de gate:
+Not its own CLI: `pnpm lint:styles` runs the Stylelint 17 CLI with the plugin
+`@<prefixo>/stylelint-plugin` and a gate configuration:
 
 ```text
-stylelint "<globs>" --config <config do gate> --ignore-disables --max-warnings 0 \
-  --formatter json --output-file <relatório>
+stylelint "<globs>" --config <gate config> --ignore-disables --max-warnings 0 \
+  --formatter json --output-file <report>
 ```
 
-- Regras: `<prefixo>/design-tokens` (subcódigos `primitive-token`, `brand-mode-source-token`,
+- Rules: `<prefixo>/design-tokens` (subcodes `primitive-token`, `brand-mode-source-token`,
   `unknown-token`, `literal-value`, `var-fallback-literal`, `token-definition`, `control-height`,
-  `control-height-missing`, `unclassified-component`) e `<prefixo>/contrast-pairs` (par de frente e
-  fundo ausente do manifesto). Detalhe em [lint-rules.md](lint-rules.md).
-- Entradas: `dist/meta/tokens.manifest.json` (via `./meta/*`), `contrast/manifest.json`, registro de
-  controles de fixture (o registro de produção vem do contrato de DOM na feature de componentes).
-- Alvos do gate nesta feature: as fixtures válidas e a sonda de violação proposital
-  ([lint-rules.md](lint-rules.md), seção 6); o CSS de `apps/tokens-example` não é estilo de
-  componente e fica fora. O núcleo de estilos entra no gate na feature de componentes. As fixtures
-  válidas e inválidas rodam em `pnpm test`, comparando multiconjuntos de
+  `control-height-missing`, `unclassified-component`) and `<prefixo>/contrast-pairs` (a foreground/
+  background pair missing from the manifest). Detail in [lint-rules.md](lint-rules.md).
+- Inputs: `dist/meta/tokens.manifest.json` (via `./meta/*`), `contrast/manifest.json`, the fixture
+  control registry (the production registry comes from the DOM contract in the components feature).
+- Gate targets in this feature: the valid fixtures and the deliberate-violation probe
+  ([lint-rules.md](lint-rules.md), section 6); the CSS of `apps/tokens-example` is not a component style
+  and stays out. The style core enters the gate in the components feature. The valid and invalid
+  fixtures run in `pnpm test`, comparing multisets of
   `{file, line, column, code}`.
-- Códigos de saída: os do próprio Stylelint, exceção documentada à tabela da seção 1.2: 0 sem
-  problema; 2 com problema de regra (equivale ao 1 canônico); 64 erro de uso e 78 configuração
-  inválida (equivalem ao 2); 1 erro inesperado (equivale ao 3). O job trata qualquer valor diferente
-  de zero como falha, e o relatório JSON é a evidência de zero violações (TOK-03).
+- Exit codes: those of Stylelint itself, a documented exception to the table of section 1.2: 0 with no
+  problem; 2 with a rule problem (equivalent to the canonical 1); 64 use error and 78 invalid
+  configuration (equivalent to 2); 1 unexpected error (equivalent to 3). The job treats any non-zero value
+  as a failure, and the JSON report is the zero-violations evidence (TOK-03).
 
-**Comprova**: FR-021, FR-022, FR-023, FR-024; SC-009 (primitivo ou literal em estilo, altura fora da
-escala); US5; US4 cenário 4.
+**Proves**: FR-021, FR-022, FR-023, FR-024; SC-009 (a primitive or literal in a style, a height outside the
+scale); US5; US4 scenario 4.
 
-**Jobs**: PR (obrigatório), noturno, release.
+**Jobs**: PR (required), nightly, release.
 
-## 7. Scripts da raiz
+## 7. Root scripts
 
-Todos rodam via turbo (`envMode: strict`, telemetria desligada). Tarefas com efeito colateral ou que
-precisam evitar cache (`check:determinism`, `design-sync`) têm `cache: false`.
+All run via turbo (`envMode: strict`, telemetry off). Tasks with a side effect or that
+need to avoid the cache (`check:determinism`, `design-sync`) have `cache: false`.
 
-| Script | Executa | Dependências no turbo | Propósito | Comprova |
+| Script | Runs | Turbo dependencies | Purpose | Proves |
 | --- | --- | --- | --- | --- |
-| `pnpm install --frozen-lockfile` | pnpm 11.28.x | n/a | Instala só do lockfile; falha com lockfile desatualizado; scripts de instalação bloqueados salvo `allowBuilds`; `minimumReleaseAge` 1440 | ENG-16, ENG-24 (provas na feature de CI) |
-| `pnpm tokens:validate` | `tokens-build validate` | `^build` | Seção 2.1 | FR-002 a FR-007, FR-011, FR-033 |
-| `pnpm tokens:build` | `tokens-build build` | `^build`; saídas `dist/**` e `api/**` | Seção 2.2 | FR-008, FR-010, FR-015 a FR-017 |
-| `pnpm contrast:check` | `tokens-contrast check` | `@<prefixo>/tokens#tokens:build` | Seção 3.1 | FR-019, FR-020 |
-| `pnpm lint:styles` | Stylelint com o gate | `@<prefixo>/tokens#tokens:build` | Seção 6 | FR-021 a FR-024 |
-| `pnpm test` | `vitest run` (Node, coverage-v8) em cada pacote | `^build`; `tokens:build` onde a fixture usa o manifesto | Unidade de todas as ferramentas (regras, formatadores, cor, WCAG, composição, fixtures das regras de lint, varredura, drift, determinismo, núcleo do `design-sync` e suíte de contrato contra o fake); teste de integração da marca nova (copia a fonte para worktree temporário, acrescenta a marca sintética C, builda e exige que `git diff --name-only` só toque `packages/tokens/src/**` e o relatório de API regenerado `packages/tokens/api/tokens.api.json`, conforme [esm-output.md](esm-output.md), §11.3, pendência P-03); falha com módulo de lógica sem arquivo de teste (QA-02); limiares de cobertura de `quality/thresholds.json` (QA-03) | FR-009, SC-005, SC-009; QA-02 |
-| `pnpm test:types` | Em `tests/types-consumer`: instala o tarball; `tsc --noEmit` estrito com `moduleResolution` `bundler` e `nodenext`, em TS 6.0.x e 7.0.x; `publint` no tarball | tarefa interna `pack` de `@<prefixo>/tokens` | Casos positivos com `expect-type`; negativos com `@ts-expect-error` para token, marca e modo inexistentes nas duas entradas | FR-016; SC-009 (nome inexistente); US2 cenário 4 |
-| `pnpm test:e2e` | Em `apps/tokens-example`: instala dependências congeladas e o tarball com scripts desativados, confere integridade, `vite build`, Playwright contra `vite preview` na imagem fixada por digest, sem rede externa | tarefa interna `pack`; `contrast:check` com `--out` (o `contrast-report.json` é entrada das amostras de contraste, via `CONTRAST_REPORT`, [contrast-manifest.md](contrast-manifest.md), seção 11) | Escopos aninhados, padrões sem atributo, valor inválido, A → B → A, troca de marca e modo em runtime, marca nova (tarball da fixture com C), análise do bundle que importa só a marca A, nenhuma variável pública sem valor, amostras de cor iguais ao sRGB emitido com axe sobre superfície opaca; valores esperados lidos do mapa de valores do tarball | FR-012, FR-013, FR-014, FR-017, FR-018; SC-006, SC-007; US2 cenários 1 a 3; US3 cenário 3 |
-| `pnpm check:determinism` | `repo-checks determinism` | `cache: false` | Seção 4.1 | FR-015, SC-002 |
-| `pnpm check:drift` | `repo-checks drift` | nenhuma | Seção 4.2 | FR-015, FR-016 |
-| `pnpm check:scan` | `repo-checks scan-tokens` e `--self-test` | nenhuma | Seção 4.3 | FR-001, SC-001 |
-| `pnpm check:layers` | `turbo boundaries`, `repo-checks layers` e `--self-test`; as regras de import do ESLint (que cobrem `.vue`) entram com a feature de CI (ADR-12) | nenhuma | Seção 4.4 | ENG-01 |
-| `pnpm design-sync -- plan\|apply\|detect --adapter memory` | `design-sync` | `cache: false`; `@<prefixo>/tokens#tokens:build` | Execução local e de PR com o fake | FR-025 a FR-030 (comportamento) |
+| `pnpm install --frozen-lockfile` | pnpm 11.28.x | n/a | Installs only from the lockfile; fails with an outdated lockfile; install scripts blocked except `allowBuilds`; `minimumReleaseAge` 1440 | ENG-16, ENG-24 (proofs in the CI feature) |
+| `pnpm tokens:validate` | `tokens-build validate` | `^build` | Section 2.1 | FR-002 to FR-007, FR-011, FR-033 |
+| `pnpm tokens:build` | `tokens-build build` | `^build`; outputs `dist/**` and `api/**` | Section 2.2 | FR-008, FR-010, FR-015 to FR-017 |
+| `pnpm contrast:check` | `tokens-contrast check` | `@<prefixo>/tokens#tokens:build` | Section 3.1 | FR-019, FR-020 |
+| `pnpm lint:styles` | Stylelint with the gate | `@<prefixo>/tokens#tokens:build` | Section 6 | FR-021 to FR-024 |
+| `pnpm test` | `vitest run` (Node, coverage-v8) in each package | `^build`; `tokens:build` where the fixture uses the manifest | Unit of all the tools (rules, formatters, color, WCAG, composition, lint-rule fixtures, scan, drift, determinism, `design-sync` core and the contract suite against the fake); new-brand integration test (copies the source to a temporary worktree, adds the synthetic brand C, builds and requires that `git diff --name-only` touch only `packages/tokens/src/**` and the regenerated API report `packages/tokens/api/tokens.api.json`, per [esm-output.md](esm-output.md), §11.3, pending item P-03); fails with a logic module without a test file (QA-02); coverage thresholds from `quality/thresholds.json` (QA-03) | FR-009, SC-005, SC-009; QA-02 |
+| `pnpm test:types` | In `tests/types-consumer`: installs the tarball; strict `tsc --noEmit` with `moduleResolution` `bundler` and `nodenext`, in TS 6.0.x and 7.0.x; `publint` on the tarball | internal `pack` task of `@<prefixo>/tokens` | Positive cases with `expect-type`; negative cases with `@ts-expect-error` for nonexistent token, brand and mode in the two entries | FR-016; SC-009 (nonexistent name); US2 scenario 4 |
+| `pnpm test:e2e` | In `apps/tokens-example`: installs frozen dependencies and the tarball with scripts disabled, checks integrity, `vite build`, Playwright against `vite preview` on the digest-pinned image, with no external network | internal `pack` task; `contrast:check` with `--out` (the `contrast-report.json` is input to the contrast samples, via `CONTRAST_REPORT`, [contrast-manifest.md](contrast-manifest.md), section 11) | Nested scopes, defaults without an attribute, an invalid value, A → B → A, brand and mode switch at runtime, a new brand (fixture tarball with C), analysis of the bundle that imports only brand A, no public variable without a value, color samples equal to the emitted sRGB with axe over an opaque surface; expected values read from the tarball's values map | FR-012, FR-013, FR-014, FR-017, FR-018; SC-006, SC-007; US2 scenarios 1 to 3; US3 scenario 3 |
+| `pnpm check:determinism` | `repo-checks determinism` | `cache: false` | Section 4.1 | FR-015, SC-002 |
+| `pnpm check:drift` | `repo-checks drift` | none | Section 4.2 | FR-015, FR-016 |
+| `pnpm check:scan` | `repo-checks scan-tokens` and `--self-test` | none | Section 4.3 | FR-001, SC-001 |
+| `pnpm check:layers` | `turbo boundaries`, `repo-checks layers` and `--self-test`; the ESLint import rules (which cover `.vue`) enter with the CI feature (ADR-12) | none | Section 4.4 | ENG-01 |
+| `pnpm design-sync -- plan\|apply\|detect --adapter memory` | `design-sync` | `cache: false`; `@<prefixo>/tokens#tokens:build` | Local and PR run with the fake | FR-025 to FR-030 (behavior) |
 
-A tarefa interna `pack` roda `pnpm pack` em `packages/tokens` para um diretório temporário; a
-checagem de allowlist do tarball (ENG-17) é da feature de CI e publicação.
+The internal `pack` task runs `pnpm pack` in `packages/tokens` to a temporary directory; the
+tarball allowlist check (ENG-17) is part of the CI and publishing feature.
 
-## 8. Jobs de CI
+## 8. CI jobs
 
-`.github/workflows/tokens-ci.yml`. Gatilhos: `pull_request` (só o afetado, com `--affected` e
-`TURBO_SCM_BASE`; execução completa quando mudam lockfile, toolchain ou workflows, ENG-02);
-noturno (`schedule` diário na branch padrão, completo, `--force` nos testes); release (os mesmos
-portões no commit da versão, antes da pré-release, chamados pelo pipeline de publicação da feature
-de CI).
+`.github/workflows/tokens-ci.yml`. Triggers: `pull_request` (only the affected, with `--affected` and
+`TURBO_SCM_BASE`; a full run when the lockfile, toolchain or workflows change, ENG-02);
+nightly (`schedule` daily on the default branch, full, `--force` on the tests); release (the same
+gates on the version commit, before the pre-release, called by the CI feature's publishing pipeline).
 
-| Job | PR | Noturno | Release | Executa |
+| Job | PR | Nightly | Release | Runs |
 | --- | --- | --- | --- | --- |
-| `validate` | sim | sim | sim | `pnpm tokens:validate` |
-| `build` | sim (Node 24) | sim (Node 24, 22 e 26) | sim | `pnpm tokens:build`; artefatos `dist/` e relatório |
-| `contrast` | sim | sim | sim | `pnpm contrast:check -- --out <dir>` |
-| `lint-styles` | sim | sim | sim | `pnpm lint:styles` |
-| `unit` | sim (Node 24) | sim (Node 24, 22 e 26) | sim | `pnpm test` |
-| `types` | sim (TS 6.0.x e 7.0.x) | sim | sim | `pnpm test:types` |
-| `e2e` | sim (Chromium) | sim (todos os motores) | sim (todos os motores) | `pnpm test:e2e` |
-| `determinism` | sim (build duplo) | sim (entre runners e entre Node 22 e 26) | sim | `pnpm check:determinism` |
-| `drift` | sim | sim | sim | `pnpm check:drift` |
-| `scan` | sim | sim | sim | `pnpm check:scan` |
-| `layers` | sim | sim | sim | `pnpm check:layers` |
-| `design-sync-fake` | sim | sim | não | `pnpm design-sync -- plan`, `apply` e `detect` com `--adapter memory` sobre fixtures |
+| `validate` | yes | yes | yes | `pnpm tokens:validate` |
+| `build` | yes (Node 24) | yes (Node 24, 22 and 26) | yes | `pnpm tokens:build`; `dist/` artifacts and report |
+| `contrast` | yes | yes | yes | `pnpm contrast:check -- --out <dir>` |
+| `lint-styles` | yes | yes | yes | `pnpm lint:styles` |
+| `unit` | yes (Node 24) | yes (Node 24, 22 and 26) | yes | `pnpm test` |
+| `types` | yes (TS 6.0.x and 7.0.x) | yes | yes | `pnpm test:types` |
+| `e2e` | yes (Chromium) | yes (all engines) | yes (all engines) | `pnpm test:e2e` |
+| `determinism` | yes (double build) | yes (between runners and between Node 22 and 26) | yes | `pnpm check:determinism` |
+| `drift` | yes | yes | yes | `pnpm check:drift` |
+| `scan` | yes | yes | yes | `pnpm check:scan` |
+| `layers` | yes | yes | yes | `pnpm check:layers` |
+| `design-sync-fake` | yes | yes | no | `pnpm design-sync -- plan`, `apply` and `detect` with `--adapter memory` over fixtures |
 
-`.github/workflows/design-sync.yml` ([design-sync.md](design-sync.md), seção 10):
+`.github/workflows/design-sync.yml` ([design-sync.md](design-sync.md), section 10):
 
-| Job | Gatilho | Environment | Executa |
+| Job | Trigger | Environment | Runs |
 | --- | --- | --- | --- |
-| `sync` | Após promoção à tag principal; `workflow_dispatch` até o ENG-26 | `design-sync-write` | `check-access`, `apply --previous …`, anexa o log à versão, depois `detect` |
-| `detect` | Agendado semanal; `workflow_dispatch` | `design-sync-read` | `check-access`, `detect` |
-| `contract-real` | Noturno e sob demanda na branch protegida, só depois da escolha da ferramenta | sandbox | Suíte `describeDesignToolPortContract` contra o adaptador real |
+| `sync` | After promotion to the main tag; `workflow_dispatch` until ENG-26 | `design-sync-write` | `check-access`, `apply --previous …`, attaches the log to the version, then `detect` |
+| `detect` | Weekly scheduled; `workflow_dispatch` | `design-sync-read` | `check-access`, `detect` |
+| `contract-real` | Nightly and on demand on the protected branch, only after the tool is chosen | sandbox | `describeDesignToolPortContract` suite against the real adapter |
 
-Falha em job de PR bloqueia o merge; falha em qualquer motor no noturno ou no release bloqueia a
-publicação (QA-12). Cada job é um check nomeado, ligado à matriz de rastreabilidade (FR-031,
-ACE-02; o check da matriz é da feature de CI).
+A failure in a PR job blocks the merge; a failure in any engine in the nightly or release blocks the
+publication (QA-12). Each job is a named check, linked to the traceability matrix (FR-031,
+ACE-02; the matrix check is part of the CI feature).
 
-## 9. Rastreabilidade: requisito, comando e job
+## 9. Traceability: requirement, command and job
 
-| Requisito | Comando | Job |
+| Requirement | Command | Job |
 | --- | --- | --- |
-| FR-001 | `repo-checks scan-tokens`; `tokens-build validate` (`unreferenced-file`); regra `token-definition` | `scan`, `validate`, `lint-styles` |
+| FR-001 | `repo-checks scan-tokens`; `tokens-build validate` (`unreferenced-file`); rule `token-definition` | `scan`, `validate`, `lint-styles` |
 | FR-002 | `tokens-build validate` (V-01) | `validate` |
 | FR-003 | `tokens-build validate` (V-02, V-05) | `validate` |
 | FR-004 | `tokens-build validate` (V-03, V-04) | `validate` |
 | FR-005 | `tokens-build validate` (V-06) | `validate` |
-| FR-006 | `tokens-build validate` (V-11); relatório do build | `validate`, `build` |
+| FR-006 | `tokens-build validate` (V-11); build report | `validate`, `build` |
 | FR-007 | `tokens-build validate` (V-12) | `validate` |
 | FR-008 | `tokens-build build` (`report.json`, `report.md`) | `build` |
-| FR-009 | Teste de integração da marca C em `pnpm test`; `pnpm test:e2e` | `unit`, `e2e` |
+| FR-009 | Brand C integration test in `pnpm test`; `pnpm test:e2e` | `unit`, `e2e` |
 | FR-010 | `tokens-build build` (`css-combinations`) | `build` |
 | FR-011 | `tokens-build validate` (V-07, V-09, V-13) | `validate` |
 | FR-012 | `pnpm test:e2e`; `tokens-build build` (`css-toggle-form`, `css-public-outside-resolver`) | `e2e`, `build` |
@@ -822,29 +821,29 @@ ACE-02; o check da matriz é da feature de CI).
 | FR-016 | `tokens-build build`; `pnpm test:types`; `repo-checks drift` | `build`, `types`, `drift` |
 | FR-017 | `tokens-build build` (`css-brand-selector`, `css-base-brand-value`); `pnpm test:e2e` | `build`, `e2e` |
 | FR-018 | `pnpm test:e2e`; `repo-checks layers` (`app-source-dependency`) | `e2e`, `layers` |
-| FR-019 | `tokens-contrast check` (schema, ordem, ids) | `contrast` |
-| FR-020 | `tokens-contrast check`; `tokens-build validate` (V-10: valor medido igual ao emitido) | `contrast`, `validate` |
-| FR-021 | Regra `<prefixo>/contrast-pairs`; fixtures em `pnpm test` | `lint-styles`, `unit` |
-| FR-022 | Regra `<prefixo>/design-tokens`; fixtures em `pnpm test` | `lint-styles`, `unit` |
-| FR-023 | Subcódigos `control-height` e `control-height-missing` | `lint-styles`, `unit` |
-| FR-024 | Fixtures com multiconjunto exato; relatório JSON de zero violações | `unit`, `lint-styles` |
+| FR-019 | `tokens-contrast check` (schema, order, ids) | `contrast` |
+| FR-020 | `tokens-contrast check`; `tokens-build validate` (V-10: measured value equal to the emitted) | `contrast`, `validate` |
+| FR-021 | Rule `<prefixo>/contrast-pairs`; fixtures in `pnpm test` | `lint-styles`, `unit` |
+| FR-022 | Rule `<prefixo>/design-tokens`; fixtures in `pnpm test` | `lint-styles`, `unit` |
+| FR-023 | Subcodes `control-height` and `control-height-missing` | `lint-styles`, `unit` |
+| FR-024 | Fixtures with an exact multiset; zero-violations JSON report | `unit`, `lint-styles` |
 | FR-025 | `design-sync apply`; `repo-checks layers` (`token-source-reference`) | `sync`, `layers` |
-| FR-026 | `design-sync apply`, `detect`, `check-access` (alerta em toda saída 2 a 5) | `sync`, `detect` |
-| FR-027 | `design-sync apply` (`restored[]`); suíte de contrato C-08 | `sync`, `unit`, `contract-real` |
-| FR-028 | `design-sync detect` após `apply` | `sync`, `detect` |
-| FR-029 | `design-sync plan` e `apply` (`capabilityChecks`); suíte C-12 e C-15 | `sync`, `unit` |
+| FR-026 | `design-sync apply`, `detect`, `check-access` (alert on every exit 2 to 5) | `sync`, `detect` |
+| FR-027 | `design-sync apply` (`restored[]`); contract suite C-08 | `sync`, `unit`, `contract-real` |
+| FR-028 | `design-sync detect` after `apply` | `sync`, `detect` |
+| FR-029 | `design-sync plan` and `apply` (`capabilityChecks`); suite C-12 and C-15 | `sync`, `unit` |
 | FR-030 | `design-sync detect` | `detect`, `sync` |
-| FR-031 | Todos os jobs acima como checks nomeados | matriz de rastreabilidade (feature de CI) |
-| FR-032 | Fora do plano (TOK-12 não contratado) | n/a |
+| FR-031 | All jobs above as named checks | traceability matrix (CI feature) |
+| FR-032 | Out of the plan (TOK-12 not contracted) | n/a |
 | FR-033 | `tokens-build validate` (V-08) | `validate` |
 | SC-001 | `tokens-build validate`; `repo-checks scan-tokens` | `validate`, `scan` |
 | SC-002 | `repo-checks determinism` | `determinism` |
 | SC-003 | `tokens-build validate` (V-11); `report.json` | `validate`, `build` |
 | SC-004 | `tokens-build validate` (V-13) | `validate` |
-| SC-005 | Teste de integração da marca C | `unit` |
-| SC-006 | `pnpm test:e2e` (bundle só com a marca A, nenhuma variável pública sem valor) | `e2e` |
-| SC-007 | `pnpm test:e2e` (escopos aninhados) | `e2e` |
+| SC-005 | Brand C integration test | `unit` |
+| SC-006 | `pnpm test:e2e` (bundle with brand A only, no public variable without a value) | `e2e` |
+| SC-007 | `pnpm test:e2e` (nested scopes) | `e2e` |
 | SC-008 | `tokens-contrast check` | `contrast` |
-| SC-009 | Fixtures de violação de cada comando; `pnpm test:types` (nome inexistente) | `unit`, `validate`, `contrast`, `lint-styles`, `types` |
-| SC-010 | `design-sync apply` e `detect` | `sync` |
-| SC-011 | `design-sync detect` agendado e pós-versão | `detect`, `sync` |
+| SC-009 | Violation fixtures of each command; `pnpm test:types` (nonexistent name) | `unit`, `validate`, `contrast`, `lint-styles`, `types` |
+| SC-010 | `design-sync apply` and `detect` | `sync` |
+| SC-011 | `design-sync detect` scheduled and post-version | `detect`, `sync` |
