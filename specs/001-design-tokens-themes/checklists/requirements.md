@@ -1,4 +1,4 @@
-# Specification Quality Checklist: Design tokens e temas
+# Specification Quality Checklist: Design tokens and themes
 
 **Purpose**: Validate specification completeness and quality before proceeding to planning
 **Created**: 2026-10-21
@@ -31,13 +31,13 @@
 
 ## Notes
 
-- Formatos citados (DTCG, CSS custom properties, ESM, declarações TypeScript) são interfaces de
-  produto exigidas pelos Requisitos (TOK-01, TOK-05, TOK-06), não escolhas de implementação.
-  Nenhuma ferramenta de build, biblioteca ou ferramenta de design é nomeada.
-- Revisão por 3 lentes (fidelidade aos requisitos, constituição, qualidade Spec Kit) com
-  verificação adversarial: 13 achados confirmados e aplicados, 11 refutados.
-- Clarificações de prefixo e de ferramenta de design viraram Assumptions: ambas são decisões do
-  requerente que a constituição proíbe a spec decidir.
-- FR-032 (TOK-12, Desejável) ficou condicional à contratação, pendente com o requerente (opção C
-  da clarificação); fora do plano e das tarefas até a resposta.
-- Todos os itens passam.
+- The formats cited (DTCG, CSS custom properties, ESM, TypeScript declarations) are product
+  interfaces required by the Requirements (TOK-01, TOK-05, TOK-06), not implementation choices.
+  No build tool, library or design tool is named.
+- Review through 3 lenses (fidelity to the requirements, constitution, Spec Kit quality) with
+  adversarial verification: 13 findings confirmed and applied, 11 refuted.
+- The prefix and design-tool clarifications became Assumptions: both are requester decisions that
+  the constitution forbids the spec from deciding.
+- FR-032 (TOK-12, Desirable) became conditional on contracting, pending with the requester
+  (clarification option C); out of the plan and the tasks until the answer.
+- All items pass.
