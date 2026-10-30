@@ -63,7 +63,7 @@ export function checkDeterminism(root: string): CheckFinding[] {
   buildOnce(root, { TZ: 'Asia/Tokyo', LANG: 'ja_JP.UTF-8', LC_ALL: 'ja_JP.UTF-8' })
   const h2 = collect()
   if (h1.join('\n') !== h2.join('\n')) {
-    return [{ code: 'DETERMINISM-MISMATCH', message: 'Build não determinístico: saídas diferem entre execuções.' }]
+    return [{ code: 'DETERMINISM-MISMATCH', message: 'Non-deterministic build: outputs differ across runs.' }]
   }
   return []
 }
@@ -72,10 +72,10 @@ export function checkDrift(root: string): CheckFinding[] {
   const out: CheckFinding[] = []
   // dist must not be tracked
   const trackedDist = execFileSync('git', ['ls-files', 'packages/tokens/dist'], { cwd: root, encoding: 'utf8' }).trim()
-  if (trackedDist) out.push({ code: 'DRIFT-DIST-TRACKED', message: 'Arquivos gerados em dist/ estão versionados.' })
+  if (trackedDist) out.push({ code: 'DRIFT-DIST-TRACKED', message: 'Generated files in dist/ are tracked.' })
   // regenerated api report must leave git clean
   buildOnce(root, {})
   const dirty = execFileSync('git', ['status', '--porcelain', 'packages/tokens/api'], { cwd: root, encoding: 'utf8' }).trim()
-  if (dirty) out.push({ code: 'DRIFT-API-STALE', message: `Relatório de API desatualizado (regenere e commit):\n${dirty}` })
+  if (dirty) out.push({ code: 'DRIFT-API-STALE', message: `API report out of date (regenerate and commit):\n${dirty}` })
   return out
 }
