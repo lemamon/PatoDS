@@ -34,23 +34,23 @@ async function main(): Promise<number> {
   if (cmd === 'determinism') {
     const findings = checkDeterminism(root)
     for (const f of findings) process.stderr.write(`${f.code}  ${f.message}\n`)
-    if (!findings.length) process.stdout.write('determinismo: saídas idênticas entre execuções.\n')
+    if (!findings.length) process.stdout.write('determinism: identical outputs across runs.\n')
     return findings.length ? 1 : 0
   }
   if (cmd === 'drift') {
     const findings = checkDrift(root)
     for (const f of findings) process.stderr.write(`${f.code}  ${f.message}\n`)
-    if (!findings.length) process.stdout.write('drift: nenhum artefato gerado versionado; relatório de API em dia.\n')
+    if (!findings.length) process.stdout.write('drift: no generated artifact tracked; API report up to date.\n')
     return findings.length ? 1 : 0
   }
-  process.stderr.write('uso: repo-checks <scan-tokens|layers|determinism|drift> [--json] [--root <dir>]\n')
+  process.stderr.write('usage: repo-checks <scan-tokens|layers|determinism|drift> [--json] [--root <dir>]\n')
   return 2
 }
 
 main().then(
   (c) => process.exit(c),
   (e) => {
-    process.stderr.write(`erro interno: ${e?.stack ?? e}\n`)
+    process.stderr.write(`internal error: ${e?.stack ?? e}\n`)
     process.exit(3)
   },
 )
