@@ -1,38 +1,38 @@
-# Contrato: manifestos e relatório do build de tokens
+# Contract: token build manifests and report
 
-**Feature**: [spec.md](../spec.md) | **Modelo**: [data-model.md](../data-model.md) | **Data**: 2026-10-21
+**Feature**: [spec.md](../spec.md) | **Model**: [data-model.md](../data-model.md) | **Date**: 2026-10-21
 
-Formato normativo dos arquivos de `packages/tokens/dist/meta/` produzidos por
-`tokens-build build` ([tools-cli.md](tools-cli.md)). Este contrato é o dono do formato; os
-consumidores citam esta página:
+Normative format of the files in `packages/tokens/dist/meta/` produced by
+`tokens-build build` ([tools-cli.md](tools-cli.md)). This contract owns the format; the
+consumers cite this page:
 
-| Arquivo | Consumidores | Requisitos |
+| File | Consumers | Requirements |
 | --- | --- | --- |
-| `tokens.manifest.json` | `<prefixo>/design-tokens` e `<prefixo>/contrast-pairs` ([lint-rules.md](lint-rules.md)), `tokens-contrast` ([contrast-manifest.md](contrast-manifest.md)), testes em navegador ([css-output.md](css-output.md), §16), checagem do ENG-06 | FR-017, FR-020 a FR-023 |
-| `sync-manifest.json` | `design-sync` (formato em [design-sync.md](design-sync.md)) | FR-025 a FR-030 |
-| `report.json` e `report.md` | CI, pacote de aceite | FR-008 |
+| `tokens.manifest.json` | `<prefixo>/design-tokens` and `<prefixo>/contrast-pairs` ([lint-rules.md](lint-rules.md)), `tokens-contrast` ([contrast-manifest.md](contrast-manifest.md)), browser tests ([css-output.md](css-output.md), §16), ENG-06 check | FR-017, FR-020 to FR-023 |
+| `sync-manifest.json` | `design-sync` (format in [design-sync.md](design-sync.md)) | FR-025 to FR-030 |
+| `report.json` and `report.md` | CI, acceptance package | FR-008 |
 
-Todos são derivados, gerados a cada build, fora do controle de versão e publicados em `./meta/*`
-para ferramentas; apps não os importam ([esm-output.md](esm-output.md)). `<prefixo>` é o marcador
-da constituição.
+All are derived, generated on every build, outside version control, and published under `./meta/*`
+for tools; apps do not import them ([esm-output.md](esm-output.md)). `<prefixo>` is the constitution's
+marker.
 
-## 1. Regras comuns
+## 1. Common rules
 
-- **M-01** Envelope: todo arquivo JSON começa com `format` (identificador estável) e `version`
-  (inteiro). Mudança incompatível no formato incrementa `version` e é mudança major do pacote
+- **M-01** Envelope: every JSON file begins with `format` (stable identifier) and `version`
+  (integer). An incompatible format change increments `version` and is a major change of the package
   ([esm-output.md](esm-output.md), §11.2).
-- **M-02** JSON canônico: chaves de objeto ordenadas por code point, arrays na ordem definida neste
-  contrato, indentação de 2 espaços, LF, newline final, sem timestamp, sem caminho absoluto, sem dado
-  de ambiente. Dois builds da mesma fonte produzem arquivos idênticos byte a byte (FR-015, SC-002).
-- **M-03** Caminhos de arquivo são relativos a `packages/tokens/` e usam `/`.
-- **M-04** Chave de permutação: `"<marca>/<modo>"` (ex.: `"a/light"`). Permutações ordenadas por marca
-  e depois por modo, ambas por code point.
-- **M-05** Variáveis privadas do mecanismo de escopo (segmento `_`, como `--<prefixo>-_on-light`)
-  nunca aparecem nos manifestos ([css-output.md](css-output.md), §6).
+- **M-02** Canonical JSON: object keys ordered by code point, arrays in the order defined by this
+  contract, 2-space indentation, LF, final newline, no timestamp, no absolute path, no environment
+  data. Two builds of the same source produce byte-for-byte identical files (FR-015, SC-002).
+- **M-03** File paths are relative to `packages/tokens/` and use `/`.
+- **M-04** Permutation key: `"<brand>/<mode>"` (e.g. `"a/light"`). Permutations ordered by brand
+  then by mode, both by code point.
+- **M-05** Private variables of the scope mechanism (segment `_`, such as `--<prefixo>-_on-light`)
+  never appear in the manifests ([css-output.md](css-output.md), §6).
 
 ## 2. `tokens.manifest.json`
 
-### 2.1 Raiz
+### 2.1 Root
 
 ```json
 {
@@ -57,14 +57,14 @@ da constituição.
 }
 ```
 
-| Campo | Regra |
+| Field | Rule |
 | --- | --- |
-| `brands[]` | Uma entrada por contexto do modificador `brand`, ordenada por `id`; exatamente uma com `default: true` (FR-013, CMP-24). |
-| `modes[]` | `light` e `dark`, ordenados por `id`; `light` é o padrão (premissa do spec). |
-| `layerOrder` | Cópia de `src/layers.json` ([css-output.md](css-output.md), L-03); `<prefixo>.tokens` primeiro. |
-| `permutations` | Todas as combinações marca × modo (M-04). O build falha se a lista vier incompleta. |
-| `scales.control-height` | Caminhos dos membros da escala única de alturas (FR-007), ordenados por caminho. A ordem de tamanho fica no relatório (§4). |
-| `tokens[]` | Todos os tokens públicos e `brand-mode-source`, ordenados por `path` (code point). |
+| `brands[]` | One entry per `brand` modifier context, ordered by `id`; exactly one with `default: true` (FR-013, CMP-24). |
+| `modes[]` | `light` and `dark`, ordered by `id`; `light` is the default (spec assumption). |
+| `layerOrder` | Copy of `src/layers.json` ([css-output.md](css-output.md), L-03); `<prefixo>.tokens` first. |
+| `permutations` | All brand × mode combinations (M-04). The build fails if the list comes in incomplete. |
+| `scales.control-height` | Paths of the members of the single control-height scale (FR-007), ordered by path. The size order is in the report (§4). |
+| `tokens[]` | All public tokens and `brand-mode-source`, ordered by `path` (code point). |
 
 ### 2.2 Token
 
@@ -86,7 +86,7 @@ da constituição.
   },
   "cssName": "--<prefixo>-color-bg-surface",
   "deprecated": false,
-  "description": "Fundo padrão de superfícies.",
+  "description": "Default background for surfaces.",
   "exclusiveBrand": null,
   "layer": "semantic",
   "path": "color.bg.surface",
@@ -98,50 +98,52 @@ da constituição.
 }
 ```
 
-| Campo | Tipo | Regra |
+| Field | Type | Rule |
 | --- | --- | --- |
-| `path` | string | Caminho DTCG unido por `.` ([token-source.md](token-source.md)). |
-| `cssName` | string | `--<prefixo>-` + segmentos unidos por `-` ([css-output.md](css-output.md), L-05). |
+| `path` | string | DTCG path joined by `.` ([token-source.md](token-source.md)). |
+| `cssName` | string | `--<prefixo>-` + segments joined by `-` ([css-output.md](css-output.md), L-05). |
 | `layer` | `primitive` \| `semantic` \| `component` | V-02, V-04. |
-| `category` | string | Categoria do TOK-10 (data-model, "Categoria"). |
-| `type` | string | `$type` DTCG resolvido. Compostos permitidos: `shadow`, `border`, `transition` (§2.3). |
-| `axis` | `invariant` \| `brand` \| `mode` | V-07; primitivos e componentes são `invariant`. |
-| `role` | `public` \| `brand-mode-source` | `brand-mode-source` = token sob o grupo `brand.` (FR-033). |
-| `placement` | `base` \| `brand` \| `brand-exclusive` | Onde o CSS declara o token ([css-output.md](css-output.md), §4). |
-| `exclusiveBrand` | string \| null | Id da marca quando `placement` é `brand-exclusive`; senão `null`. |
-| `aliasOf` | objeto \| null | Alvo direto do alias por chave de contexto: `"*"` para `invariant`, id de marca para `brand`, id de modo para `mode`; `null` para primitivo. |
-| `aliasChains` | objeto \| null | Por permutação (M-04), a cadeia do próprio token até o primitivo terminal, inclusive. `null` para primitivo. Usada pelo lint para conferir pertença à escala através de aliases (FR-023). |
-| `scale` | `"control-height"` \| null | Membro da escala de alturas (FR-007). |
-| `color` | objeto \| null | Só para `type` `color` ou composto com cor; senão `null` (§2.3). |
-| `deprecated` | booleano \| string | De `$deprecated`. |
-| `description` | string \| null | De `$description`. |
-| `source` | objeto | Primeira definição do token: arquivo (M-03), linha e coluna, a partir de 1. |
+| `category` | string | TOK-10 category (data-model, "Category"). |
+| `type` | string | Resolved DTCG `$type`. Allowed composites: `shadow`, `border`, `transition` (§2.3). |
+| `axis` | `invariant` \| `brand` \| `mode` | V-07; primitives and components are `invariant`. |
+| `role` | `public` \| `brand-mode-source` | `brand-mode-source` = token under the `brand.` group (FR-033). |
+| `placement` | `base` \| `brand` \| `brand-exclusive` | Where the CSS declares the token ([css-output.md](css-output.md), §4). |
+| `exclusiveBrand` | string \| null | Brand id when `placement` is `brand-exclusive`; otherwise `null`. |
+| `aliasOf` | object \| null | Direct alias target per context key: `"*"` for `invariant`, brand id for `brand`, mode id for `mode`; `null` for primitive. |
+| `aliasChains` | object \| null | Per permutation (M-04), the chain from the token itself down to the terminal primitive, inclusive. `null` for primitive. Used by the lint to verify scale membership through aliases (FR-023). |
+| `scale` | `"control-height"` \| null | Member of the control-height scale (FR-007). |
+| `color` | object \| null | Only for `type` `color` or a composite with color; otherwise `null` (§2.3). |
+| `deprecated` | boolean \| string | From `$deprecated`. |
+| `description` | string \| null | From `$description`. |
+| `source` | object | First definition of the token: file (M-03), line and column, 1-based. |
 
-### 2.3 Cor e compostos
+### 2.3 Color and composites
 
-- `color.emitted`: por permutação, a string exatamente como sai no CSS e no mapa `./values`
-  (`#rrggbb` para opaco; `rgb(r g b / a)` com três casas no alfa), produzida por `toEmittedSrgb()`
-  ([css-output.md](css-output.md), §11; ADR-15). O checker de contraste compõe a partir dessa string
-  (`emitted-mismatch` se divergir do valor medido).
-- `color.subRefs`: para `shadow` e `border`, por permutação, a lista ordenada (ordem das camadas da
-  sombra) dos caminhos dos tokens de cor referenciados pelos subvalores; `null` para `color`.
-- `typography` composto e `strokeStyle` em forma de objeto não são publicáveis
-  ([css-output.md](css-output.md), S-04): `tokens-build build` os rejeita com
-  `unserializable-value`, e a categoria `typography` usa tokens atômicos (decisão do plano).
+- `color.emitted`: per permutation, the string exactly as it is emitted in the CSS and in the
+  `./values` map (`#rrggbb` for opaque; `rgb(r g b / a)` with three decimal places in the alpha),
+  produced by `toEmittedSrgb()` ([css-output.md](css-output.md), §11; ADR-15). The contrast checker
+  composes from that string (`emitted-mismatch` if it diverges from the measured value).
+- `color.subRefs`: for `shadow` and `border`, per permutation, the ordered list (order of the shadow
+  layers) of the paths of the color tokens referenced by the subvalues; `null` for `color`.
+- Composite `typography` and `strokeStyle` in object form are not publishable
+  ([css-output.md](css-output.md), S-04): `tokens-build build` rejects them with
+  `unserializable-value`, and the `typography` category uses atomic tokens (plan decision).
 
-### 2.4 Garantias
+### 2.4 Guarantees
 
-- **M-06** Todo token de `tokens[]` com `role: public` tem `cssName` declarado no CSS indicado por
-  `placement`, e todo `cssName` público do CSS gerado consta do manifesto (`dist-parity` no build).
-- **M-07** As chaves de `aliasChains` e `color.emitted` são exatamente `permutations`.
-- **M-08** Nenhum token tem `placement: brand-exclusive` sem `exclusiveBrand`, nem o contrário.
+- **M-06** Every token in `tokens[]` with `role: public` has a `cssName` declared in the CSS indicated
+  by `placement`, and every public `cssName` of the generated CSS appears in the manifest
+  (`dist-parity` in the build).
+- **M-07** The keys of `aliasChains` and `color.emitted` are exactly `permutations`.
+- **M-08** No token has `placement: brand-exclusive` without `exclusiveBrand`, nor the reverse.
 
 ## 3. `sync-manifest.json`
 
-Formato normativo em [design-sync.md](design-sync.md). Este contrato só fixa que ele segue M-01 a
-M-05, é gerado do mesmo modelo resolvido que `tokens.manifest.json` e lista as mesmas permutações.
+Normative format in [design-sync.md](design-sync.md). This contract only fixes that it follows M-01
+to M-05, is generated from the same resolved model as `tokens.manifest.json`, and lists the same
+permutations.
 
-## 4. `report.json` e `report.md`
+## 4. `report.json` and `report.md`
 
 ```json
 {
@@ -169,20 +171,20 @@ M-05, é gerado do mesmo modelo resolvido que `tokens.manifest.json` e lista as 
 }
 ```
 
-| Campo | Regra |
+| Field | Rule |
 | --- | --- |
-| `categories[]` | As 11 categorias do TOK-10, ordenadas por nome, com contagem por camada; categoria sem token semântico já falhou a validação (V-11). Evidência do FR-006 e do FR-008. |
-| `controlHeight` | Por permutação, a escala resolvida em ordem crescente de valor (FR-008, TOK-13). |
-| `colorMapping` | Cores fora do gamut sRGB mapeadas pelo algoritmo do CSS Color 4 (ADR-15); vazio quando não há. |
-| `files[]` | Tamanho bruto e gzip de cada arquivo de `dist/css/` e `dist/esm/`, insumo do orçamento do QA-07 (gzip com nível fixo, para determinismo). |
-| `permutations`, `totals` | Resumo. |
+| `categories[]` | The 11 TOK-10 categories, ordered by name, with a count per layer; a category without a semantic token has already failed validation (V-11). Evidence for FR-006 and FR-008. |
+| `controlHeight` | Per permutation, the scale resolved in ascending order of value (FR-008, TOK-13). |
+| `colorMapping` | Colors outside the sRGB gamut mapped by the CSS Color 4 algorithm (ADR-15); empty when there are none. |
+| `files[]` | Raw and gzip size of each file in `dist/css/` and `dist/esm/`, input to the QA-07 budget (gzip at a fixed level, for determinism). |
+| `permutations`, `totals` | Summary. |
 
-`report.md` traz as mesmas informações em tabelas, sem timestamp, e é anexado ao CI como evidência
-(ACE-02).
+`report.md` carries the same information in tables, without a timestamp, and is attached to CI as
+evidence (ACE-02).
 
-## 5. Rastreabilidade
+## 5. Traceability
 
-| ID | Coberto por |
+| ID | Covered by |
 | --- | --- |
 | FR-006, FR-008 | §4 (`categories`, `controlHeight`) |
 | FR-015 | M-02 |
