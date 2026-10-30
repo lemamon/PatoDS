@@ -83,7 +83,7 @@ export function runContrastCheck(pkgDir: string, thresholds: Thresholds): CheckR
       const rFloat = ratioFor(pair, tokensManifest, perm, false)
       const r8 = ratioFor(pair, tokensManifest, perm, true)
       if (rFloat === null || r8 === null) {
-        findings.push({ code: 'emitted-mismatch', pair: pair.id, perm, message: `Par "${pair.id}": cor não resolvida em ${perm}.` })
+        findings.push({ code: 'emitted-mismatch', pair: pair.id, perm, message: `Pair "${pair.id}": color not resolved in ${perm}.` })
         continue
       }
       const ratio = Math.min(rFloat, r8)
@@ -96,7 +96,7 @@ export function runContrastCheck(pkgDir: string, thresholds: Thresholds): CheckR
           code: 'contrast-below-min',
           pair: pair.id,
           perm,
-          message: `Par "${pair.id}" em ${perm}: razão ${truncated} < ${min} (${pair.kind}) (A11Y-09).`,
+          message: `Pair "${pair.id}" in ${perm}: ratio ${truncated} < ${min} (${pair.kind}) (A11Y-09).`,
         })
       }
     }
