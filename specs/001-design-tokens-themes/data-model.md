@@ -1,232 +1,232 @@
-# Data Model: Design tokens e temas
+# Data Model: Design tokens and themes
 
-**Feature**: [spec.md](spec.md) | **Pesquisa**: [research.md](research.md) | **Data**: 2026-10-21
+**Feature**: [spec.md](spec.md) | **Research**: [research.md](research.md) | **Date**: 2026-10-21
 
-Entidades do spec (Key Entities) com campos, regras de validação, relações e transições. Formatos
-de arquivo e gramática detalhada ficam em [contracts/](contracts/). `<prefixo>` é o marcador da
-constituição (TODO(PREFIXO)).
+Spec entities (Key Entities) with fields, validation rules, relations, and transitions. File
+formats and detailed grammar are in [contracts/](contracts/). `<prefixo>` is the constitution's
+marker (TODO(PREFIXO)).
 
-## Visão geral
+## Overview
 
 ```text
 Resolver (packages/tokens/src/tokens.resolver.json)
- ├─ modificador brand ──► Marca (1..n, uma padrão)
- ├─ modificador mode  ──► Modo (light, dark; padrão light)
- └─ sets ──► arquivos *.tokens.json por camada ──► Token (1..n)
+ ├─ brand modifier ──► Brand (1..n, one default)
+ ├─ mode modifier  ──► Mode (light, dark; default light)
+ └─ sets ──► *.tokens.json files per layer ──► Token (1..n)
 
-Permutação = Marca × Modo ──► mapa resolvido Token → valor
-Build ──► Artefatos gerados (base.css, brand-<id>.css, ESM refs/values, manifestos, relatório)
-Manifesto de contraste ──► Par de contraste (1..n) ──► Conjunto de superfícies (0..n)
-sync-manifest.json ──► Variável da ferramenta ──► Execução de sincronização ──► Divergência
+Permutation = Brand × Mode ──► resolved map Token → value
+Build ──► Generated artifacts (base.css, brand-<id>.css, ESM refs/values, manifests, report)
+Contrast manifest ──► Contrast pair (1..n) ──► Surface set (0..n)
+sync-manifest.json ──► Tool variable ──► Sync run ──► Divergence
 ```
 
 ## Token
 
-Unidade de decisão visual, definida só na fonte DTCG (FR-001).
+A unit of visual decision, defined only in the DTCG source (FR-001).
 
-| Campo | Tipo | Regra |
+| Field | Type | Rule |
 | --- | --- | --- |
-| `path` | lista de segmentos | Caminho DTCG (`color.bg.surface`). Segmentos em ASCII minúsculo kebab, sem `$`, `{`, `}` ou `.` internos (DTCG 2025.10, FR-005). |
-| `cssName` | string | `--<prefixo>-` + segmentos unidos por `-`. Único entre todos os tokens; colisão é erro (FR-005). |
-| `layer` | `primitive` \| `semantic` \| `component` | Derivada do diretório da fonte e registrada no índice do adaptador (D1, D7). |
-| `category` | enum Categoria | Primeiro segmento do caminho; segundo, sob o grupo reservado `brand` (FR-006). |
-| `type` | `$type` DTCG | Declarado ou herdado do grupo, nunca inferido. Deve ser compatível com a categoria. |
-| `axis` | `invariant` \| `brand` \| `mode` | Só para `semantic`. Primitivos e componentes são `invariant` na fonte (D7). |
-| `role` | `public` \| `brand-mode-source` | `brand-mode-source` = token de eixo marca sob o grupo raiz reservado `brand`, cujo último segmento é o id de um modo (ex.: `brand.color.bg.surface.light`), fonte de um token de eixo modo (FR-033). Não consumível por estilo de componente. O grupo é necessário porque, no DTCG, um token não pode ter filhos. |
-| `values` | mapa contexto → valor | Primitivo: literal DTCG. Semântico e componente: alias `{caminho}` (FR-003). Chaves do mapa seguem o eixo: um valor (`invariant`), um por marca (`brand`), um por modo (`mode`). |
-| `description` | string | Opcional; texto livre sujeito à varredura de Unicode invisível do catálogo (IA-18, feature do catálogo). |
-| `deprecated` | booleano ou string | Campo DTCG `$deprecated`; remoção segue SemVer major (Princípio X). |
-| `source` | arquivo, linha, coluna | Do índice montado na leitura do Ajv; usado em toda mensagem de erro. |
+| `path` | list of segments | DTCG path (`color.bg.surface`). Segments in ASCII lowercase kebab, with no internal `$`, `{`, `}`, or `.` (DTCG 2025.10, FR-005). |
+| `cssName` | string | `--<prefixo>-` + segments joined by `-`. Unique among all tokens; a collision is an error (FR-005). |
+| `layer` | `primitive` \| `semantic` \| `component` | Derived from the source directory and recorded in the adapter index (D1, D7). |
+| `category` | Category enum | First segment of the path; the second, under the reserved `brand` group (FR-006). |
+| `type` | DTCG `$type` | Declared or inherited from the group, never inferred. Must be compatible with the category. |
+| `axis` | `invariant` \| `brand` \| `mode` | Only for `semantic`. Primitives and components are `invariant` in the source (D7). |
+| `role` | `public` \| `brand-mode-source` | `brand-mode-source` = a brand-axis token under the reserved root group `brand`, whose last segment is a mode id (e.g., `brand.color.bg.surface.light`), the source of a mode-axis token (FR-033). Not consumable by a component style. The group is necessary because, in DTCG, a token cannot have children. |
+| `values` | context → value map | Primitive: DTCG literal. Semantic and component: alias `{path}` (FR-003). The map keys follow the axis: one value (`invariant`), one per brand (`brand`), one per mode (`mode`). |
+| `description` | string | Optional; free text subject to the catalog's invisible-Unicode scan (IA-18, catalog feature). |
+| `deprecated` | boolean or string | DTCG field `$deprecated`; removal follows SemVer major (Principle X). |
+| `source` | file, line, column | From the index built on the Ajv read; used in every error message. |
 
-**Regras de validação**:
+**Validation rules**:
 
-- V-01 Schema DTCG 2025.10 (`format.json`, `resolver.json`) sem erro (FR-002).
-- V-02 Literal só em `primitive` (FR-003). Composto (sombra, tipografia, borda) em `semantic` ou
-  `component` não pode ter subvalor literal.
-- V-03 Alias resolve para token existente, sem ciclo, em todas as permutações (FR-004).
-- V-04 Direção de referência: `primitive → primitive`; `semantic → primitive | semantic`;
+- V-01 DTCG 2025.10 schema (`format.json`, `resolver.json`) with no error (FR-002).
+- V-02 Literal only in `primitive` (FR-003). A composite (shadow, typography, border) in `semantic` or
+  `component` cannot have a literal subvalue.
+- V-03 An alias resolves to an existing token, cycle-free, in all permutations (FR-004).
+- V-04 Reference direction: `primitive → primitive`; `semantic → primitive | semantic`;
   `component → semantic | component | primitive` (FR-004).
-- V-05 `$ref` (JSON Pointer) proibido fora de `primitive`; `$root` proibido; `$extends` só na forma
-  com chaves (D1).
-- V-06 Nome segue a gramática da convenção, por categoria, com segmentos em ordem fixa (FR-005;
+- V-05 `$ref` (JSON Pointer) forbidden outside `primitive`; `$root` forbidden; `$extends` only in the keyed
+  form (D1).
+- V-06 The name follows the convention grammar, per category, with segments in a fixed order (FR-005;
   [contracts/token-source.md](contracts/token-source.md)).
-- V-07 Eixo coerente com os contextos que definem o token: `brand` só em sets de contexto de marca,
-  `mode` só em sets de contexto de modo, `invariant` só em sets compartilhados (D7).
-- V-08 Variação nos dois eixos num único token é erro; a forma aceita é token de eixo modo cujo
-  valor em cada modo é alias para o token `brand-mode-source` correspondente
-  (`color.bg.surface` → `{brand.color.bg.surface.light}` no modo `light`), com as mesmas chaves em
-  toda marca (FR-033). Todo token sob `brand.` é `brand-mode-source`, tem eixo `brand` e termina num
-  id de modo.
-- V-09 Sets compartilhados não têm valores de eixo marca ou modo (paridade não mascarada, D1).
-- V-10 `hex` informado em cor dentro do gamut sRGB deve igualar a quantização de 8 bits dos
-  componentes (D5).
+- V-07 The axis is consistent with the contexts that define the token: `brand` only in brand-context sets,
+  `mode` only in mode-context sets, `invariant` only in shared sets (D7).
+- V-08 Variation on both axes in a single token is an error; the accepted form is a mode-axis token whose
+  value in each mode is an alias to the corresponding `brand-mode-source` token
+  (`color.bg.surface` → `{brand.color.bg.surface.light}` in `light` mode), with the same keys across
+  every brand (FR-033). Every token under `brand.` is a `brand-mode-source`, has a `brand` axis, and ends in a
+  mode id.
+- V-09 Shared sets have no brand- or mode-axis values (parity not masked, D1).
+- V-10 A `hex` given for a color within the sRGB gamut must equal the 8-bit quantization of the
+  components (D5).
 
-## Camada
+## Layer
 
-Enum `primitive`, `semantic`, `component` (TOK-02). Define literal permitido e direção de referência
-(V-02, V-04). Estilos de componente só consomem `semantic` (com `role = public`) e `component`
+The enum `primitive`, `semantic`, `component` (TOK-02). It defines the allowed literal and the reference direction
+(V-02, V-04). Component styles only consume `semantic` (with `role = public`) and `component`
 (TOK-03, FR-022).
 
-## Categoria
+## Category
 
-Enum fechado do TOK-10, com o `$type` DTCG permitido:
+A closed enum from TOK-10, with the allowed DTCG `$type`:
 
-| Categoria (1º segmento) | `$type` permitido |
+| Category (1st segment) | Allowed `$type` |
 | --- | --- |
 | `color` | `color` |
-| `typography` | `fontFamily`, `fontWeight`, `dimension`, `number` (só tokens atômicos; o composto `typography` não é publicável, decisão do plano) |
+| `typography` | `fontFamily`, `fontWeight`, `dimension`, `number` (atomic tokens only; the composite `typography` is not publishable, a plan decision) |
 | `space` | `dimension` |
-| `size` (dimensão) | `dimension` |
+| `size` (dimension) | `dimension` |
 | `radius` | `dimension` |
-| `border` | `border`, `strokeStyle` (só em forma de string), `dimension` |
+| `border` | `border`, `strokeStyle` (string form only), `dimension` |
 | `shadow` | `shadow` |
 | `motion` | `duration`, `cubicBezier`, `transition` |
 | `z-index` | `number` |
 | `breakpoint` | `dimension` |
 | `opacity` | `number` |
 
-Regra: cada categoria tem ao menos um token `semantic` publicado (V-11, FR-006). Os nomes exatos dos
-primeiros segmentos são fixados na convenção de nomenclatura (TOK-04) e só mudam por versão major.
+Rule: each category has at least one published `semantic` token (V-11, FR-006). The exact names of the
+first segments are fixed in the naming convention (TOK-04) and only change by major version.
 
-## Escala de alturas de controle
+## Control-height scale
 
-Conjunto fechado e ordenado de tokens `semantic` da categoria `size` sob um grupo reservado (ex.:
-`size.control.<passo>`), com o mesmo conjunto de passos em toda permutação (FR-007, TOK-13).
+A closed and ordered set of `semantic` tokens of the `size` category under a reserved group (e.g.,
+`size.control.<step>`), with the same set of steps across every permutation (FR-007, TOK-13).
 
-- V-12 Todo token cujo nome indica altura de controle pertence à escala; nenhum passo fora dela.
-- O relatório de build lista a escala resolvida por permutação (FR-008).
-- O manifesto de tokens marca `scale: "control-height"` nos membros, para a regra de lint (FR-023).
+- V-12 Every token whose name indicates a control height belongs to the scale; no step outside it.
+- The build report lists the resolved scale per permutation (FR-008).
+- The token manifest marks `scale: "control-height"` on the members, for the lint rule (FR-023).
 
-## Marca
+## Brand
 
-| Campo | Tipo | Regra |
+| Field | Type | Rule |
 | --- | --- | --- |
-| `id` | string ASCII kebab | Contexto do modificador `brand`; vira valor de `data-<prefixo>-brand` e nome do arquivo `brand-<id>.css`. |
-| `default` | booleano | Exatamente uma marca padrão, indicada pelo requerente (CMP-24). Até lá, a marca sintética A nos testes. |
-| `sets` | arquivos | Só tokens semânticos de eixo `brand` (incluindo os `brand.*`). Todos os primitivos ficam em `src/primitive/`; o build deriva quais são exclusivos de uma marca pelas referências e os emite no arquivo dela (`placement: brand-exclusive`, [contracts/build-manifests.md](contracts/build-manifests.md)). |
+| `id` | ASCII kebab string | Context of the `brand` modifier; becomes the `data-<prefixo>-brand` value and the `brand-<id>.css` file name. |
+| `default` | boolean | Exactly one default brand, indicated by the requester (CMP-24). Until then, synthetic brand A in the tests. |
+| `sets` | files | Only brand-axis semantic tokens (including the `brand.*` ones). All primitives stay in `src/primitive/`; the build derives which ones are brand-exclusive from the references and emits them in that brand's file (`placement: brand-exclusive`, [contracts/build-manifests.md](contracts/build-manifests.md)). |
 
-Adicionar uma marca = novo contexto no resolver + novos arquivos de tokens; nenhum outro arquivo
-muda (FR-009, SC-005). Marcas sintéticas (A, B, C) existem só em fixtures e exemplos (QA-15).
+Adding a brand = a new context in the resolver + new token files; no other file
+changes (FR-009, SC-005). Synthetic brands (A, B, C) exist only in fixtures and examples (QA-15).
 
-## Modo
+## Mode
 
-Enum `light`, `dark`; padrão `light` (premissa do spec, Assumptions). Valor de
-`data-<prefixo>-mode`. Um novo modo exigiria regenerar o resolvedor CSS e muda a API (major).
+The enum `light`, `dark`; default `light` (spec premise, Assumptions). Value of
+`data-<prefixo>-mode`. A new mode would require regenerating the CSS resolver and changes the API (major).
 
-## Permutação (combinação de tema)
+## Permutation (theme combination)
 
-Par marca × modo. Para cada permutação o build tem o mapa resolvido token → valor final.
+A brand × mode pair. For each permutation the build has the resolved map token → final value.
 
-- V-13 Toda permutação tem exatamente o mesmo conjunto de chaves de tokens `semantic` (FR-011,
-  SC-004); a paridade também é verificada por contexto (o que cada marca e cada modo contribuem).
-- O build falha se a lista de permutações vier indefinida (limite do parser) ou incompleta.
+- V-13 Every permutation has exactly the same set of `semantic` token keys (FR-011,
+  SC-004); parity is also verified per context (what each brand and each mode contribute).
+- The build fails if the permutation list comes back undefined (parser limit) or incomplete.
 
-## Escopo de tema (runtime)
+## Theme scope (runtime)
 
-Elemento HTML com `data-<prefixo>-brand`, `data-<prefixo>-mode` ou ambos.
+An HTML element with `data-<prefixo>-brand`, `data-<prefixo>-mode`, or both.
 
-- Resolução por eixo: vale o escopo mais próximo daquele eixo (FR-012).
-- Sem atributo no elemento nem em ancestral: marca padrão e modo padrão (FR-013).
-- Valor inexistente ou de marca não importada: mantém o valor do ancestral mais próximo (FR-014).
-- Mecanismo: [contracts/css-output.md](contracts/css-output.md).
+- Resolution per axis: the nearest scope of that axis wins (FR-012).
+- No attribute on the element or on an ancestor: default brand and default mode (FR-013).
+- A nonexistent value or a brand not imported: keeps the value of the nearest ancestor (FR-014).
+- Mechanism: [contracts/css-output.md](contracts/css-output.md).
 
-## Par de contraste
+## Contrast pair
 
-Item do manifesto versionado de contraste (FR-019).
+An item of the versioned contrast manifest (FR-019).
 
-| Campo | Tipo | Regra |
+| Field | Type | Rule |
 | --- | --- | --- |
-| `id` | string | Único; manifesto ordenado por `id`. |
-| `fg` | ref de token | Só `semantic` público ou `component`; nunca primitivo ou literal. |
-| `bg` | lista ordenada de refs ou nome de conjunto de superfícies | Pilha de baixo para cima; a base precisa ser opaca ou ser um conjunto de superfícies. |
-| `state` | enum vocabulário de estados | `default`, `hover`, `active`, `focus-visible`, `selected`, `invalid`, `disabled`, `inactive` (vocabulário versionado, compartilhado com a regra do FR-021). |
-| `kind` | `text` \| `non-text` | Define o mínimo (4,5 ou 3 sob WCAG 2.2 AA). |
-| `group` | string opcional | Pares do mesmo grupo "any-of": o grupo passa se ao menos um membro atinge o mínimo. |
-| `exempt` | `"wcag-inactive"` opcional | Permitido só com `state` `disabled` ou `inactive`; medido e reportado, não falha. |
+| `id` | string | Unique; the manifest is ordered by `id`. |
+| `fg` | token ref | Only public `semantic` or `component`; never a primitive or literal. |
+| `bg` | ordered list of refs or a surface-set name | Stack bottom to top; the base must be opaque or be a surface set. |
+| `state` | state-vocabulary enum | `default`, `hover`, `active`, `focus-visible`, `selected`, `invalid`, `disabled`, `inactive` (versioned vocabulary, shared with the FR-021 rule). |
+| `kind` | `text` \| `non-text` | Defines the minimum (4.5 or 3 under WCAG 2.2 AA). |
+| `group` | optional string | Pairs of the same "any-of" group: the group passes if at least one member reaches the minimum. |
+| `exempt` | optional `"wcag-inactive"` | Allowed only with `state` `disabled` or `inactive`; measured and reported, does not fail. |
 
-- V-14 Toda referência existe em toda permutação (complementa V-13).
-- V-15 Par sem `exempt`, fora de grupo, abaixo do mínimo em qualquer permutação falha o build
+- V-14 Every reference exists in every permutation (complements V-13).
+- V-15 A pair without `exempt`, outside a group, below the minimum in any permutation fails the build
   (FR-020, SC-008).
-- V-16 Pilha sem base opaca, ou conjunto de superfícies vazio no modo, é erro.
+- V-16 A stack without an opaque base, or an empty surface set in the mode, is an error.
 
-## Conjunto de superfícies
+## Surface set
 
-Nome (`@surfaces`, `@raised` etc.) → lista de tokens de superfície opaca por modo. O checker expande
-um caso medido por superfície; todos precisam passar.
+A name (`@surfaces`, `@raised`, etc.) → a list of opaque surface tokens per mode. The checker expands
+one measured case per surface; all must pass.
 
-## Limiares de contraste
+## Contrast thresholds
 
-Seção do arquivo versionado de limiares do QA-14: `{ "level": "WCAG22-AA", "text": 4.5,
-"nonText": 3 }`. O checker confere que os valores batem com o nível declarado (A11Y-01); alteração
-exige a aprovação do QA-14.
+A section of the versioned thresholds file of QA-14: `{ "level": "WCAG22-AA", "text": 4.5,
+"nonText": 3 }`. The checker confirms that the values match the declared level (A11Y-01); a change
+requires the QA-14 approval.
 
-## Artefatos gerados
+## Generated artifacts
 
-Todos derivados, deterministas (FR-015, SC-002) e fora do controle de versão, exceto o relatório de
-API de tokens, versionado de propósito e conferido por drift (QA-08). Formato dos manifestos e do
-relatório: [contracts/build-manifests.md](contracts/build-manifests.md).
+All derived, deterministic (FR-015, SC-002) and outside version control, except the token
+API report, versioned on purpose and checked by drift (QA-08). Manifest and
+report format: [contracts/build-manifests.md](contracts/build-manifests.md).
 
-| Artefato | Conteúdo | Consumidor |
+| Artifact | Content | Consumer |
 | --- | --- | --- |
-| `dist/css/base.css` | Ordem das camadas, primitivos compartilhados, toggles de modo, resolvedor | Apps |
-| `dist/css/brand-<id>.css` | Tokens de eixo marca e primitivos exclusivos da marca | Apps |
-| `dist/esm/index.js` + `.d.ts` | Referências `var(--<prefixo>-*)` de todos os tokens públicos | Apps |
-| `dist/esm/values.js` + `.d.ts` | Mapas de valores por marca × modo | Apps, testes |
-| `dist/meta/tokens.manifest.json` | Token → cssName, camada, categoria, eixo, papel, cadeia de alias, escala | Lint, contraste |
-| `dist/meta/sync-manifest.json` | Estado desejado para a ferramenta de design | design-sync |
-| `dist/meta/report.json` e `.md` | Contagem por categoria, escala por permutação | CI, aceite |
-| `api/tokens.api.json` | Superfície pública (nomes, tipos, entradas) | Verificação de API (GOV-01) |
+| `dist/css/base.css` | Layer order, shared primitives, mode toggles, resolver | Apps |
+| `dist/css/brand-<id>.css` | Brand-axis tokens and brand-exclusive primitives | Apps |
+| `dist/esm/index.js` + `.d.ts` | `var(--<prefixo>-*)` references of all public tokens | Apps |
+| `dist/esm/values.js` + `.d.ts` | Value maps by brand × mode | Apps, tests |
+| `dist/meta/tokens.manifest.json` | Token → cssName, layer, category, axis, role, alias chain, scale | Lint, contrast |
+| `dist/meta/sync-manifest.json` | Desired state for the design tool | design-sync |
+| `dist/meta/report.json` and `.md` | Count by category, scale per permutation | CI, acceptance |
+| `api/tokens.api.json` | Public surface (names, types, entries) | API check (GOV-01) |
 
-## Variável da ferramenta de design
+## Design-tool variable
 
-Espelho de um token na ferramenta (snapshot normalizado pelo adaptador).
+A mirror of a token in the tool (snapshot normalized by the adapter).
 
-| Campo | Regra |
+| Field | Rule |
 | --- | --- |
-| `path` | Mesmos segmentos do token; separador da ferramenta definido na convenção (FR-028). |
-| `collection` | Uma por eixo: Primitivos, Marca, Modo, Semânticos invariantes, Componentes (FR-029). |
-| `modes` | Marcas (coleção Marca), `light`/`dark` (coleção Modo); demais sem modos. |
-| `value` | Literal ou alias por caminho, por modo. |
-| `key` | Chave do token guardada em campo da ferramenta (ex.: descrição ou code syntax), para detectar renomeação manual. |
-| `nativeRef` | Identificador opaco da ferramenta. |
+| `path` | Same segments as the token; the tool's separator defined in the convention (FR-028). |
+| `collection` | One per axis: Primitives, Brand, Mode, Invariant semantics, Components (FR-029). |
+| `modes` | Brands (Brand collection), `light`/`dark` (Mode collection); the rest without modes. |
+| `value` | Literal or alias by path, per mode. |
+| `key` | The token key stored in a tool field (e.g., description or code syntax), to detect a manual rename. |
+| `nativeRef` | Opaque tool identifier. |
 
-Toda variável corresponde a um token real; não existe variável auxiliar (FR-033, DSN-04).
+Every variable corresponds to a real token; there is no auxiliary variable (FR-033, DSN-04).
 
-## Execução de sincronização
+## Sync run
 
 ```text
-planned ──--dry-run──► dry-run                         (nada aplicado; plano e log emitidos)
+planned ──--dry-run──► dry-run                         (nothing applied; plan and log emitted)
    │
-   └──apply──► verify(diff vazio) ──► verified
+   └──apply──► verify(empty diff) ──► verified
         │            │
-        └──erro──► failed ◄──verify(diff não vazio)    failed ──► alerta ao dono (FR-026)
+        └──error──► failed ◄──verify(non-empty diff)   failed ──► alert to the owner (FR-026)
 ```
 
-Estados registrados no log: `planned`, `dry-run`, `verified`, `failed`
+States recorded in the log: `planned`, `dry-run`, `verified`, `failed`
 ([contracts/design-sync.md](contracts/design-sync.md)).
 
-| Campo | Regra |
+| Field | Rule |
 | --- | --- |
-| `version` | Versão publicada de origem (tag principal) ou execução manual sinalizada. |
-| `changes[]` | Variáveis criadas, alteradas, renomeadas de volta e removidas, ordenadas por caminho. |
-| `restored[]` | Edições manuais desfeitas (FR-027), distinguidas de mudanças de release. |
-| `digests` | sha256 do manifesto de origem e do snapshot da ferramenta. |
-| Envelope | Timestamp e URL da execução, fora do conteúdo canônico (conteúdo byte a byte idêntico). |
+| `version` | Source published version (main tag) or a flagged manual run. |
+| `changes[]` | Variables created, changed, renamed back, and removed, ordered by path. |
+| `restored[]` | Manual edits undone (FR-027), distinguished from release changes. |
+| `digests` | sha256 of the source manifest and of the tool snapshot. |
+| Envelope | Timestamp and run URL, outside the canonical content (byte-for-byte identical content). |
 
-## Divergência
+## Divergence
 
-| Campo | Regra |
+| Field | Rule |
 | --- | --- |
-| `fingerprint` | sha256(tipo \| caminho \| modo \| ferramenta); deduplica itens. |
+| `fingerprint` | sha256(type \| path \| mode \| tool); deduplicates items. |
 | `kind` | `missing`, `extra`, `value`, `alias`, `name`, `hierarchy`, `type`. |
-| `owner` | Papel dono da sincronização (arquivo de donos, FR-026). |
-| `due` | Data de detecção + SLA de configuração versionada. |
-| `state` | `open` → `resolved` (fecha sozinho quando a próxima execução vê diff vazio) → `open` de novo se a mesma impressão digital reaparecer (o tracker reabre o item existente). |
+| `owner` | The sync owner role (owners file, FR-026). |
+| `due` | Detection date + the SLA from the versioned configuration. |
+| `state` | `open` → `resolved` (closes itself when the next run sees an empty diff) → `open` again if the same fingerprint reappears (the tracker reopens the existing item). |
 
-Gerada pela verificação agendada, ao menos semanal e a cada versão publicada (FR-030, SC-011).
+Generated by the scheduled check, at least weekly and on each published version (FR-030, SC-011).
 
-## Achado de lint
+## Lint finding
 
-Saída das regras de estilo (FR-021 a FR-024): `{ file, line, column, code, message }`, com `code`
-num conjunto estável ([contracts/lint-rules.md](contracts/lint-rules.md)). Fixtures comparam
-multiconjuntos de `{file, line, column, code}`.
+Output of the style rules (FR-021 to FR-024): `{ file, line, column, code, message }`, with `code`
+in a stable set ([contracts/lint-rules.md](contracts/lint-rules.md)). Fixtures compare
+multisets of `{file, line, column, code}`.
