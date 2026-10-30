@@ -8,29 +8,29 @@ const desired: DesiredVar[] = [
 ]
 
 describe('design-sync core (US6)', () => {
-  it('cria variáveis ausentes na ferramenta', async () => {
+  it('creates missing variables in the tool', async () => {
     const plan = diff(desired, [])
     expect(plan.map((o) => o.op)).toEqual(['create', 'create'])
   })
 
-  it('sincroniza até verificar (diff vazio)', async () => {
+  it('syncs until verified (empty diff)', async () => {
     const tool = new InMemoryDesignTool()
     const res = await sync(tool, desired)
     expect(res.state).toBe('verified')
     expect(await tool.readSnapshot()).toHaveLength(2)
   })
 
-  it('restaura edição manual no destino (DSN-03)', async () => {
+  it('restores manual edit in the destination (DSN-03)', async () => {
     const tool = new InMemoryDesignTool()
     await sync(tool, desired)
-    tool.simulateManualEdit('color/bg/surface', 'ADULTERADO')
+    tool.simulateManualEdit('color/bg/surface', 'TAMPERED')
     const res = await sync(tool, desired)
     expect(res.restored).toContain('color/bg/surface')
     const v = (await tool.readSnapshot()).find((x) => x.name === 'color/bg/surface')!
     expect(v.value).toBe('color:mode')
   })
 
-  it('detecta renomeação por chave em vez de recriar (DSN-04)', async () => {
+  it('detects rename by key instead of recreating (DSN-04)', async () => {
     const tool = new InMemoryDesignTool()
     await sync(tool, desired)
     tool.simulateRename('color/fg/default', 'color/fg/legacy')
@@ -39,7 +39,7 @@ describe('design-sync core (US6)', () => {
     expect(plan.some((o) => o.op === 'create' && o.name === 'color/fg/default')).toBe(false)
   })
 
-  it('remove variável extra não gerenciada', async () => {
+  it('removes unmanaged extra variable', async () => {
     const tool = new InMemoryDesignTool()
     await sync(tool, desired)
     tool.simulateExtraVariable('color/zzz/extra', 'x')
@@ -47,21 +47,21 @@ describe('design-sync core (US6)', () => {
     expect(plan.some((o) => o.op === 'delete' && o.name === 'color/zzz/extra')).toBe(true)
   })
 
-  it('cada op vira divergência rastreável com fingerprint estável (DSN-11)', () => {
+  it('each op becomes a traceable divergence with a stable fingerprint (DSN-11)', () => {
     const d = detect(diff(desired, []))
     expect(d).toHaveLength(2)
     expect(d[0]!.fingerprint).toMatch(/^[0-9a-f]{16}$/)
     expect(detect(diff(desired, []))[0]!.fingerprint).toBe(d[0]!.fingerprint)
   })
 
-  it('falha de aplicação resulta em state failed (injeção de falha)', async () => {
+  it('apply failure results in state failed (fault injection)', async () => {
     const tool = new InMemoryDesignTool()
     tool.faults.failAfterOperations = 1
     const res = await sync(tool, desired)
     expect(res.state).toBe('failed')
   })
 
-  it('a porta não expõe operação ferramenta → repositório', () => {
+  it('the port does not expose a tool → repository operation', () => {
     const tool = new InMemoryDesignTool()
     const ops = Object.getOwnPropertyNames(Object.getPrototypeOf(tool))
     expect(ops).not.toContain('writeToRepo')
