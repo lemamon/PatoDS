@@ -2,6 +2,7 @@
   "name": "@patods/root",
   "version": "0.0.0",
   "private": true,
+  "license": "MIT",
   "packageManager": "pnpm@11.28.6",
   "devEngines": {
     "packageManager": {
