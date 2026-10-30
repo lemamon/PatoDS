@@ -1,60 +1,60 @@
-# Contrato: regras de lint de estilos
+# Contract: style lint rules
 
-**Feature**: [spec.md](../spec.md) | **Pesquisa**: [research.md](../research.md) (D5, D6) |
-**Modelo**: [data-model.md](../data-model.md) | **Contraste**: [contrast-manifest.md](contrast-manifest.md) |
-**ADR**: [ADR-16](../../../docs/adr/ADR-16-lint-tokens-e-testes.md) e
-[ADR-15](../../../docs/adr/ADR-15-cor-e-contraste.md) (Propostos) | **Data**: 2026-10-21
+**Feature**: [spec.md](../spec.md) | **Research**: [research.md](../research.md) (D5, D6) |
+**Model**: [data-model.md](../data-model.md) | **Contrast**: [contrast-manifest.md](contrast-manifest.md) |
+**ADR**: [ADR-16](../../../docs/adr/ADR-16-lint-tokens-e-testes.md) and
+[ADR-15](../../../docs/adr/ADR-15-cor-e-contraste.md) (Proposed) | **Date**: 2026-10-21
 
-Este contrato define as duas regras Stylelint do pacote privado `@<prefixo>/stylelint-plugin`
-(`tools/stylelint-plugin`): `<prefixo>/design-tokens`, que barra token primitivo, valor literal e
-altura de controle fora da escala (FR-022, FR-023, FR-024; TOK-03, TOK-13), e
-`<prefixo>/contrast-pairs`, que barra par de cores de frente e fundo ausente do manifesto de
-contraste (FR-021; A11Y-09). Define também o harness de fixtures, o gate no CI e as restrições que
-as regras impõem à feature do núcleo. Nesta feature as regras são entregues e provadas sobre
-fixtures; passam a valer no núcleo de estilos quando ele existir (feature de componentes). Os
-trechos são formatos, assinaturas e exemplos de CSS; nenhuma implementação é definida aqui.
-`<prefixo>` é o marcador da constituição (TODO(PREFIXO)).
+This contract defines the two Stylelint rules of the private package `@<prefixo>/stylelint-plugin`
+(`tools/stylelint-plugin`): `<prefixo>/design-tokens`, which blocks a primitive token, a literal value
+and a control height outside the scale (FR-022, FR-023, FR-024; TOK-03, TOK-13), and
+`<prefixo>/contrast-pairs`, which blocks a foreground/background color pair missing from the contrast
+manifest (FR-021; A11Y-09). It also defines the fixtures harness, the CI gate and the restrictions the
+rules impose on the core feature. In this feature the rules are delivered and proven over fixtures; they
+take effect in the style core when it exists (components feature). The snippets are formats, signatures
+and CSS examples; no implementation is defined here.
+`<prefixo>` is the constitution's marker (TODO(PREFIXO)).
 
-## 1. Premissas e garantias
+## 1. Assumptions and guarantees
 
-**Premissas assumidas** (nenhuma é decidida aqui):
+**Assumptions made** (none is decided here):
 
-| Decisão em aberto | Premissa usada | Efeito neste contrato |
+| Open decision | Assumption used | Effect in this contract |
 | --- | --- | --- |
-| Prefixo do projeto | `<prefixo>` como marcador (TODO(PREFIXO)) | O namespace das regras, o prefixo da anotação de contraste e os atributos `data-<prefixo>-*` acompanham a emenda da constituição. A regra lê o prefixo real do manifesto de tokens. |
-| Nível de conformidade alvo (A11Y-01) | WCAG 2.2 AA | Vocabulário de estados, isenção de inativos e grupos de foco do manifesto de contraste. |
-| Contrato de DOM (CMP-14) e arquivo de orientação | Ainda não existem (feature de componentes) | Esta feature entrega só registros de controles de fixture (seção 3.7). |
-| Marcas da versão 1.0 | Marcas sintéticas A e B até a entrega dos valores (QA-15) | O manifesto de tokens usado pelas fixtures vem do build real sobre essas marcas. |
-| Plataforma de CI | GitHub Actions (inferida do ENG-18, pendente de confirmação) | Relatório JSON publicado como artefato e retido como evidência (ACE-02). |
+| Project prefix | `<prefixo>` as a marker (TODO(PREFIXO)) | The rules' namespace, the contrast annotation prefix and the `data-<prefixo>-*` attributes follow the constitution amendment. The rule reads the real prefix from the token manifest. |
+| Target conformance level (A11Y-01) | WCAG 2.2 AA | State vocabulary, exemption of inactives and focus groups of the contrast manifest. |
+| DOM contract (CMP-14) and guidance file | Do not exist yet (components feature) | This feature delivers only fixture control registries (section 3.7). |
+| Version 1.0 brands | Synthetic brands A and B until the values are delivered (QA-15) | The token manifest used by the fixtures comes from the real build over those brands. |
+| CI platform | GitHub Actions (inferred from ENG-18, pending confirmation) | JSON report published as an artifact and retained as evidence (ACE-02). |
 
-A lista de navegadores (ENG-08) não afeta estas regras, que são análise estática.
+The browser list (ENG-08) does not affect these rules, which are static analysis.
 
-**Garantias**:
+**Guarantees**:
 
-- G-1 (FR-023): primitivo, literal e altura de controle são verificados pela **mesma** regra,
-  `<prefixo>/design-tokens`, como exige o texto do FR-023.
-- G-2: cada aviso carrega um código estável (seções 3.5 e 4.6). O conjunto de códigos é exportado
-  pelo plugin; renomear ou remover código exige registro no ADR-16.
-- G-3: para as mesmas entradas, os avisos são os mesmos, sem depender da ordem dos arquivos, de
-  rede ou de relógio.
-- G-4 (Princípio I): nenhuma lista de tokens é escrita à mão. Nomes, camadas, papéis, cadeias de
-  alias e a escala de alturas vêm do manifesto gerado pelo build.
+- G-1 (FR-023): primitive, literal and control height are checked by the **same** rule,
+  `<prefixo>/design-tokens`, as the text of FR-023 requires.
+- G-2: each warning carries a stable code (sections 3.5 and 4.6). The set of codes is exported by the
+  plugin; renaming or removing a code requires a record in ADR-16.
+- G-3: for the same inputs, the warnings are the same, without depending on file order, network or
+  clock.
+- G-4 (Principle I): no token list is hand-written. Names, layers, roles, alias chains and the
+  control-height scale come from the manifest generated by the build.
 
-## 2. Pacote, entradas e formato do achado
+## 2. Package, entries and finding format
 
-### 2.1 Pacote
+### 2.1 Package
 
-- `@<prefixo>/stylelint-plugin`, `private: true`, ESM, sobre stylelint 17.16.x, com
-  `@csstools/css-tokenizer` e `@csstools/css-parser-algorithms` 4.x para valores e
-  `postcss-selector-parser` 7.x para seletores (D6).
-- Camada `tools`. Única aresta de workspace: `@<prefixo>/tokens` como devDependency, só pelo
-  subcaminho `./meta/*` (ENG-01). Não é dependência de runtime de nenhum pacote de UI.
+- `@<prefixo>/stylelint-plugin`, `private: true`, ESM, on stylelint 17.16.x, with
+  `@csstools/css-tokenizer` and `@csstools/css-parser-algorithms` 4.x for values and
+  `postcss-selector-parser` 7.x for selectors (D6).
+- Layer `tools`. Single workspace edge: `@<prefixo>/tokens` as a devDependency, only via the subpath
+  `./meta/*` (ENG-01). It is not a runtime dependency of any UI package.
 
 ```ts
-// Superfície pública do plugin (assinaturas)
+// Public surface of the plugin (signatures)
 import type { Plugin } from 'stylelint';
 
-declare const plugins: Plugin[];               // as duas regras
+declare const plugins: Plugin[];               // the two rules
 export default plugins;
 
 export type DesignTokensCode =
@@ -70,60 +70,59 @@ export declare const designTokensCodes: readonly DesignTokensCode[];
 export declare const contrastPairsCodes: readonly ContrastPairsCode[];
 ```
 
-### 2.2 Caminhos nas opções e erros de configuração
+### 2.2 Paths in the options and configuration errors
 
-- Caminho relativo resolve a partir do diretório do arquivo de configuração do Stylelint que o
-  declara; caminho absoluto é aceito; especificador de pacote (por exemplo,
-  `@<prefixo>/tokens/meta/tokens.manifest.json`) resolve a partir do pacote do plugin, que declara a
-  dependência.
-- Arquivo ausente, JSON inválido, `version` não suportado (envelope `format`/`version`,
-  [build-manifests.md](build-manifests.md)) ou opção desconhecida produzem aviso
-  de opção inválida do Stylelint. A CLI do Stylelint sai com código diferente de zero, e nenhum
-  aviso de lint é emitido para o arquivo.
+- A relative path resolves from the directory of the Stylelint configuration file that declares it; an
+  absolute path is accepted; a package specifier (for example,
+  `@<prefixo>/tokens/meta/tokens.manifest.json`) resolves from the plugin's package, which declares the
+  dependency.
+- A missing file, invalid JSON, unsupported `version` (envelope `format`/`version`,
+  [build-manifests.md](build-manifests.md)) or an unknown option produces an invalid-option warning from
+  Stylelint. The Stylelint CLI exits with a non-zero code, and no lint warning is emitted for the file.
 
-### 2.3 Manifesto de tokens consumido
+### 2.3 Token manifest consumed
 
-As duas regras leem `dist/meta/tokens.manifest.json` de `@<prefixo>/tokens`. O formato normativo
-está em [build-manifests.md](build-manifests.md); as regras usam, por token: caminho, `cssName`, camada (`primitive`,
-`semantic`, `component`), categoria, `$type`, papel (`public` ou `brand-mode-source`), cadeia de
-alias, pertença à escala de alturas (`scale: "control-height"`) e, para tokens compostos de borda e
-sombra, as referências dos subvalores de cor. Variáveis privadas com segmento `_` (os toggles
-`--<prefixo>-_on-light` e `--<prefixo>-_on-dark`) não constam do manifesto.
+Both rules read `dist/meta/tokens.manifest.json` of `@<prefixo>/tokens`. The normative format is in
+[build-manifests.md](build-manifests.md); the rules use, per token: path, `cssName`, layer (`primitive`,
+`semantic`, `component`), category, `$type`, role (`public` or `brand-mode-source`), alias chain,
+membership in the control-height scale (`scale: "control-height"`) and, for composite border and shadow
+tokens, the references of the color subvalues. Private variables with the segment `_` (the toggles
+`--<prefixo>-_on-light` and `--<prefixo>-_on-dark`) do not appear in the manifest.
 
-**Token permitido em CSS de componente**: token `semantic` com papel `public`, ou token
-`component` (TOK-03, data-model "Camada"). Todo o resto é proibido: primitivo, token do grupo
-reservado `brand.` (papel `brand-mode-source`), variável privada e qualquer nome fora do manifesto,
-com ou sem prefixo.
+**Token allowed in component CSS**: a `semantic` token with role `public`, or a `component` token
+(TOK-03, data-model "Layer"). Everything else is forbidden: a primitive, a token of the reserved
+`brand.` group (role `brand-mode-source`), a private variable and any name outside the manifest, with or
+without a prefix.
 
-### 2.4 Formato do achado
+### 2.4 Finding format
 
-O achado lógico é `{ file, line, column, code, message }` ([modelo de dados](../data-model.md),
-"Achado de lint"). No relatório JSON do Stylelint, cada aviso tem `rule`, `line`, `column` e
-`text`; o código fica no início do texto:
+The logical finding is `{ file, line, column, code, message }` ([data model](../data-model.md),
+"Lint finding"). In Stylelint's JSON report, each warning has `rule`, `line`, `column` and `text`; the
+code sits at the start of the text:
 
 ```text
-<code>: <mensagem legível> (<prefixo>/design-tokens)
+<code>: <readable message> (<prefixo>/design-tokens)
 ```
 
-Linha e coluna começam em 1. Uma regra nunca emite dois avisos com o mesmo código na mesma posição;
-quando uma posição afeta mais de um caso (por exemplo, dois estados), a mensagem lista todos.
+Line and column start at 1. A rule never emits two warnings with the same code at the same position;
+when a position affects more than one case (for example, two states), the message lists them all.
 
-## 3. Regra `<prefixo>/design-tokens`
+## 3. Rule `<prefixo>/design-tokens`
 
-Aplica-se a todo arquivo selecionado pela configuração do gate como CSS de componente (seção 6).
-Não se aplica ao CSS gerado em `packages/tokens/dist/css/`, que tem lint próprio no build
-([css-output.md](css-output.md)), nem ao CSS da app de exemplo.
+Applies to every file selected by the gate configuration as component CSS (section 6). It does not apply
+to the CSS generated in `packages/tokens/dist/css/`, which has its own lint in the build
+([css-output.md](css-output.md)), nor to the example app's CSS.
 
-### 3.1 Opções
+### 3.1 Options
 
 ```ts
 interface DesignTokensOptions {
   manifestPath: string;                       // tokens.manifest.json
-  controlRegistryPath: string;                // registro de controles (seção 3.7)
-  governedProperties?: GovernedPropertiesMap; // padrão: mapa v1 versionado no plugin (seção 3.2)
+  controlRegistryPath: string;                // control registry (section 3.7)
+  governedProperties?: GovernedPropertiesMap; // default: v1 map versioned in the plugin (section 3.2)
   controlHeightProperties?: ReadonlyArray<
     'height' | 'min-height' | 'block-size' | 'min-block-size' | 'max-height' | 'max-block-size'
-  >;                                          // padrão: height, min-height, block-size, min-block-size
+  >;                                          // default: height, min-height, block-size, min-block-size
 }
 
 type TokenCategory = 'color' | 'typography' | 'space' | 'size' | 'radius' | 'border'
@@ -131,107 +130,106 @@ type TokenCategory = 'color' | 'typography' | 'space' | 'size' | 'radius' | 'bor
 
 interface GovernedPropertiesMap {
   schemaVersion: 1;
-  properties: Record<string, TokenCategory>;                        // propriedade → categoria
-  literalKeywords: Partial<Record<TokenCategory, readonly string[]>>; // palavras com valor de categoria
+  properties: Record<string, TokenCategory>;                        // property → category
+  literalKeywords: Partial<Record<TokenCategory, readonly string[]>>; // words with a category value
 }
 ```
 
-O mapa padrão vive no plugin (arquivo versionado, nome proposto
-`tools/stylelint-plugin/src/governed-properties.json`). A configuração do gate usa o padrão;
-mudar o mapa é mudança do plugin, revisada no PR e registrada no ADR-16.
+The default map lives in the plugin (versioned file, proposed name
+`tools/stylelint-plugin/src/governed-properties.json`). The gate configuration uses the default;
+changing the map is a plugin change, reviewed in the PR and recorded in ADR-16.
 
-### 3.2 Propriedades governadas (mapa v1)
+### 3.2 Governed properties (v1 map)
 
-| Categoria | Propriedades |
+| Category | Properties |
 | --- | --- |
 | `color` | `color`, `background-color`, `background`, `border-color`, `border-{top,right,bottom,left}-color`, `border-{block,inline}-color`, `border-{block,inline}-{start,end}-color`, `outline-color`, `text-decoration-color`, `text-emphasis-color`, `caret-color`, `accent-color`, `column-rule-color`, `fill`, `stroke`, `-webkit-text-fill-color` |
 | `space` | `margin`, `margin-*`, `padding`, `padding-*`, `gap`, `row-gap`, `column-gap`, `scroll-margin*`, `scroll-padding*` |
-| `size` | `width`, `height`, `inline-size`, `block-size` e as variantes `min-*` e `max-*` de cada uma |
-| `radius` | `border-radius` e as longhands de canto, físicas e lógicas |
-| `border` | `border`, `border-{top,right,bottom,left}`, `border-{block,inline}`, `border-{block,inline}-{start,end}`, `border-width` e longhands `*-width`, `outline`, `outline-width`, `outline-offset` |
+| `size` | `width`, `height`, `inline-size`, `block-size` and the `min-*` and `max-*` variants of each |
+| `radius` | `border-radius` and the corner longhands, physical and logical |
+| `border` | `border`, `border-{top,right,bottom,left}`, `border-{block,inline}`, `border-{block,inline}-{start,end}`, `border-width` and `*-width` longhands, `outline`, `outline-width`, `outline-offset` |
 | `shadow` | `box-shadow`, `text-shadow` |
 | `typography` | `font`, `font-family`, `font-size`, `font-weight`, `line-height`, `letter-spacing` |
 | `motion` | `transition`, `transition-duration`, `transition-delay`, `transition-timing-function`, `animation`, `animation-duration`, `animation-delay`, `animation-timing-function` |
 | `z-index` | `z-index` |
 | `opacity` | `opacity` |
-| `breakpoint` | Nenhuma propriedade; vale para `@media` e `@container` (seção 3.6) |
+| `breakpoint` | No property; applies to `@media` and `@container` (section 3.6) |
 
-`literalKeywords` padrão: `typography`: `normal`, `bold`, `bolder`, `lighter`, `xx-small`,
-`x-small`, `small`, `medium`, `large`, `x-large`, `xx-large`, `xxx-large`, `smaller`, `larger` e as
-famílias genéricas (`serif`, `sans-serif`, `monospace`, `cursive`, `fantasy`, `system-ui`,
-`ui-serif`, `ui-sans-serif`, `ui-monospace`, `ui-rounded`, `math`, `emoji`, `fangsong`) e fontes
-de sistema (`caption`, `icon`, `menu`, `message-box`, `small-caption`, `status-bar`); `motion`:
+Default `literalKeywords`: `typography`: `normal`, `bold`, `bolder`, `lighter`, `xx-small`,
+`x-small`, `small`, `medium`, `large`, `x-large`, `xx-large`, `xxx-large`, `smaller`, `larger` and the
+generic families (`serif`, `sans-serif`, `monospace`, `cursive`, `fantasy`, `system-ui`,
+`ui-serif`, `ui-sans-serif`, `ui-monospace`, `ui-rounded`, `math`, `emoji`, `fangsong`) and system
+fonts (`caption`, `icon`, `menu`, `message-box`, `small-caption`, `status-bar`); `motion`:
 `ease`, `ease-in`, `ease-out`, `ease-in-out`, `linear`, `step-start`, `step-end`; `border`: `thin`,
 `medium`, `thick`.
 
-Não governadas no mapa v1 (lista registrada para a feature do núcleo): deslocamentos de
-posicionamento (`inset*`, `top`, `right`, `bottom`, `left`), `transform` e `translate`,
-`flex-basis`, `grid-*`, `aspect-ratio`, `border-style`, `background-image`, `mask*` e `filter`.
-Declarações de custom property são sempre tratadas pelo subcódigo `token-definition`, qualquer que
-seja o mapa.
+Not governed in the v1 map (list recorded for the core feature): positioning offsets
+(`inset*`, `top`, `right`, `bottom`, `left`), `transform` and `translate`,
+`flex-basis`, `grid-*`, `aspect-ratio`, `border-style`, `background-image`, `mask*` and `filter`.
+Custom property declarations are always handled by the `token-definition` subcode, whatever the map is.
 
-### 3.3 O que é valor literal
+### 3.3 What is a literal value
 
-O valor de cada declaração é decomposto em folhas. Leitura de "valor literal" do TOK-03 adotada
-por esta regra (registrada como restrição na seção 7):
+The value of each declaration is decomposed into leaves. The reading of "literal value" of TOK-03
+adopted by this rule (recorded as a restriction in section 7):
 
-**Allowlist de palavras-chave** (sempre aceitas, em qualquer propriedade): `transparent`,
-`currentcolor`, `auto`, `none`, `0` e as palavras-chave globais do CSS (`inherit`, `initial`,
-`unset`, `revert`, `revert-layer`). Identificadores são comparados sem diferenciar maiúsculas
-(`currentColor` é aceito). `0` inclui zero com unidade (`0px`, `0%`, `0s`).
+**Keyword allowlist** (always accepted, in any property): `transparent`,
+`currentcolor`, `auto`, `none`, `0` and the global CSS keywords (`inherit`, `initial`,
+`unset`, `revert`, `revert-layer`). Identifiers are compared case-insensitively
+(`currentColor` is accepted). `0` includes zero with a unit (`0px`, `0%`, `0s`).
 
-| Folha | Em propriedade governada | Em propriedade não governada |
+| Leaf | In a governed property | In a non-governed property |
 | --- | --- | --- |
-| `var()` de token permitido | Aceita | Aceita |
-| `var()` de outro nome | `primitive-token`, `brand-mode-source-token` ou `unknown-token` | Idem |
-| Palavra da allowlist | Aceita | Aceita |
-| `calc()`, `min()`, `max()`, `clamp()` | Avaliadas folha a folha; número sem unidade é aceito só como operando de `*` ou `/` | Avaliadas folha a folha |
-| Cor hexadecimal; função de cor (`rgb`, `rgba`, `hsl`, `hsla`, `hwb`, `lab`, `lch`, `oklab`, `oklch`, `color`, `color-mix`, `light-dark`, `contrast-color`, inclusive sintaxe relativa) | `literal-value` | `literal-value` |
-| Cor nomeada (lista do CSS, exceto `transparent` e `currentcolor`) | `literal-value` | `literal-value` só como argumento de função de gradiente |
-| Cor de sistema (`Canvas`, `CanvasText`, `ButtonText`, `Highlight` e as demais) | Aceita só dentro de `@media (forced-colors: active)`; fora dele, `literal-value` | Aceita |
-| Dimensão não nula (qualquer unidade, inclusive `%`, tempo, ângulo) | `literal-value` | Aceita |
-| Número puro não nulo (fora do caso de `calc`) | `literal-value` | Aceita |
-| Função de easing (`cubic-bezier()`, `steps()`, `linear()`) | `literal-value` | Aceita |
-| Palavra de `literalKeywords` da categoria da propriedade | `literal-value` | Aceita |
-| String entre aspas | `literal-value` | Aceita |
-| Outra função (`url()`, `image-set()`, `env()`, `attr()`) | `literal-value` | Aceita |
-| Outro identificador (nome de propriedade em `transition`, `solid`, `inset`, nome de animação) | Aceito (estrutural) | Aceito |
+| `var()` of an allowed token | Accepted | Accepted |
+| `var()` of another name | `primitive-token`, `brand-mode-source-token` or `unknown-token` | Same |
+| Allowlist word | Accepted | Accepted |
+| `calc()`, `min()`, `max()`, `clamp()` | Evaluated leaf by leaf; a unitless number is accepted only as an operand of `*` or `/` | Evaluated leaf by leaf |
+| Hexadecimal color; color function (`rgb`, `rgba`, `hsl`, `hsla`, `hwb`, `lab`, `lch`, `oklab`, `oklch`, `color`, `color-mix`, `light-dark`, `contrast-color`, including relative syntax) | `literal-value` | `literal-value` |
+| Named color (CSS list, except `transparent` and `currentcolor`) | `literal-value` | `literal-value` only as an argument of a gradient function |
+| System color (`Canvas`, `CanvasText`, `ButtonText`, `Highlight` and the others) | Accepted only inside `@media (forced-colors: active)`; outside it, `literal-value` | Accepted |
+| Non-zero dimension (any unit, including `%`, time, angle) | `literal-value` | Accepted |
+| Non-zero pure number (outside the `calc` case) | `literal-value` | Accepted |
+| Easing function (`cubic-bezier()`, `steps()`, `linear()`) | `literal-value` | Accepted |
+| Word from the property category's `literalKeywords` | `literal-value` | Accepted |
+| Quoted string | `literal-value` | Accepted |
+| Other function (`url()`, `image-set()`, `env()`, `attr()`) | `literal-value` | Accepted |
+| Other identifier (property name in `transition`, `solid`, `inset`, animation name) | Accepted (structural) | Accepted |
 
-### 3.4 Ordem de avaliação e posição dos avisos
+### 3.4 Evaluation order and warning position
 
-Para cada declaração, nesta ordem:
+For each declaration, in this order:
 
-1. Custom property (`--*`, com qualquer nome): `token-definition` na posição da propriedade; o
-   valor não é analisado. As at-rules `@property` e `@custom-media` recebem o mesmo código na
-   posição da at-rule.
-2. Folhas do valor (seção 3.3). Cada `var()` é classificado pelo nome; as folhas do seu fallback
-   seguem os mesmos critérios da propriedade, mas um literal ali recebe `var-fallback-literal` em
-   vez de `literal-value`; um `var()` aninhado no fallback é classificado normalmente. O aviso de
-   folha fica na coluna do início da folha (no `var()`, o início da função).
-3. Altura de controle: só se o passo 2 não gerou aviso para a declaração (seção 3.7). Aviso
-   `control-height` na coluna do início do valor.
+1. Custom property (`--*`, with any name): `token-definition` at the property's position; the value is
+   not analyzed. The at-rules `@property` and `@custom-media` receive the same code at the at-rule's
+   position.
+2. Value leaves (section 3.3). Each `var()` is classified by the name; the leaves of its fallback follow
+   the same criteria as the property, but a literal there receives `var-fallback-literal` instead of
+   `literal-value`; a `var()` nested in the fallback is classified normally. The leaf warning sits at the
+   column of the leaf's start (in a `var()`, the start of the function).
+3. Control height: only if step 2 produced no warning for the declaration (section 3.7). The
+   `control-height` warning sits at the column of the value's start.
 
-Depois de percorrer o arquivo: `unclassified-component` e `control-height-missing` (seção 3.7).
-Consequência da ordem: uma altura literal num controle (`height: 28px`) gera só `literal-value`;
-`height: auto` ou um token fora da escala gera `control-height`; um primitivo gera só
+After walking the file: `unclassified-component` and `control-height-missing` (section 3.7).
+Consequence of the order: a literal height in a control (`height: 28px`) produces only `literal-value`;
+`height: auto` or a token outside the scale produces `control-height`; a primitive produces only
 `primitive-token`.
 
-Declarações dentro de `@font-face` e `@page` não são analisadas. Declarações dentro de
-`@keyframes` são analisadas como as demais.
+Declarations inside `@font-face` and `@page` are not analyzed. Declarations inside `@keyframes` are
+analyzed like the others.
 
-### 3.5 Subcódigos
+### 3.5 Subcodes
 
 #### `primitive-token`
 
-Dispara com `var()` de token da camada primitiva, em qualquer propriedade.
+Fires with a `var()` of a primitive-layer token, in any property.
 
 ```css
-/* inválido */
+/* invalid */
 .<prefixo>-badge {
   background-color: var(--<prefixo>-color-blue-500);   /* ← primitive-token */
   padding: var(--<prefixo>-space-2);                   /* ← primitive-token */
 }
-/* válido */
+/* valid */
 .<prefixo>-badge {
   background-color: var(--<prefixo>-color-bg-accent);
   padding: var(--<prefixo>-space-inset-sm);
@@ -240,15 +238,15 @@ Dispara com `var()` de token da camada primitiva, em qualquer propriedade.
 
 #### `brand-mode-source-token`
 
-Dispara com `var()` de token do grupo reservado `brand.` (papel `brand-mode-source`). Esses tokens
-são fontes de um token de eixo modo (FR-033) e ignorariam o escopo de modo mais próximo.
+Fires with a `var()` of a token of the reserved `brand.` group (role `brand-mode-source`). These tokens
+are sources of a mode-axis token (FR-033) and would ignore the nearest mode scope.
 
 ```css
-/* inválido */
+/* invalid */
 .<prefixo>-card {
   background-color: var(--<prefixo>-brand-color-bg-surface-light);   /* ← brand-mode-source-token */
 }
-/* válido: o token público de eixo modo resolve marca e modo pelo escopo mais próximo */
+/* valid: the public mode-axis token resolves brand and mode by the nearest scope */
 .<prefixo>-card {
   background-color: var(--<prefixo>-color-bg-surface);
 }
@@ -256,18 +254,18 @@ são fontes de um token de eixo modo (FR-033) e ignorariam o escopo de modo mais
 
 #### `unknown-token`
 
-Dispara com `var()` de qualquer nome que não seja token `semantic` público nem `component` no
-manifesto, com ou sem prefixo, inclusive variáveis privadas e referências a custom properties
-locais.
+Fires with a `var()` of any name that is neither a public `semantic` token nor a `component` token in
+the manifest, with or without a prefix, including private variables and references to local custom
+properties.
 
 ```css
-/* inválido */
+/* invalid */
 .<prefixo>-card {
-  color: var(--brand-blue);                          /* ← unknown-token: sem prefixo, fora do manifesto */
-  padding: var(--<prefixo>-space-inset-mdd);         /* ← unknown-token: nome inexistente */
-  border-color: var(--<prefixo>-_on-dark);           /* ← unknown-token: variável privada */
+  color: var(--brand-blue);                          /* ← unknown-token: no prefix, outside the manifest */
+  padding: var(--<prefixo>-space-inset-mdd);         /* ← unknown-token: nonexistent name */
+  border-color: var(--<prefixo>-_on-dark);           /* ← unknown-token: private variable */
 }
-/* válido */
+/* valid */
 .<prefixo>-card {
   color: var(--<prefixo>-color-fg-default);
   padding: var(--<prefixo>-space-inset-md);
@@ -276,20 +274,20 @@ locais.
 
 #### `literal-value`
 
-Dispara com folha literal conforme a seção 3.3, inclusive em parâmetros de `@media` e
-`@container` (seção 3.6).
+Fires with a literal leaf per section 3.3, including in parameters of `@media` and
+`@container` (section 3.6).
 
 ```css
-/* inválido */
+/* invalid */
 .<prefixo>-card {
   color: #1a1a1a;                       /* ← literal-value */
   padding: 12px;                        /* ← literal-value */
   border-radius: 4px;                   /* ← literal-value */
   z-index: 10;                          /* ← literal-value */
   font-weight: bold;                    /* ← literal-value */
-  transition: opacity 150ms ease;       /* ← literal-value (150ms) e literal-value (ease) */
+  transition: opacity 150ms ease;       /* ← literal-value (150ms) and literal-value (ease) */
 }
-/* válido */
+/* valid */
 .<prefixo>-card {
   color: var(--<prefixo>-color-fg-default);
   padding: var(--<prefixo>-space-inset-md);
@@ -302,15 +300,15 @@ Dispara com folha literal conforme a seção 3.3, inclusive em parâmetros de `@
 
 #### `var-fallback-literal`
 
-Dispara com literal no fallback de `var()`. Tokens públicos sempre têm valor (FR-013), então o
-fallback literal só esconde um literal.
+Fires with a literal in a `var()` fallback. Public tokens always have a value (FR-013), so the literal
+fallback only hides a literal.
 
 ```css
-/* inválido */
+/* invalid */
 .<prefixo>-card {
   color: var(--<prefixo>-color-fg-default, #1a1a1a);   /* ← var-fallback-literal */
 }
-/* válido */
+/* valid */
 .<prefixo>-card {
   color: var(--<prefixo>-color-fg-default);
 }
@@ -318,12 +316,12 @@ fallback literal só esconde um literal.
 
 #### `token-definition`
 
-Dispara com qualquer declaração de custom property em CSS de componente, com qualquer nome e
-qualquer valor, e com `@property` e `@custom-media`. Protege o FR-001 (nenhum token fora da fonte
-única) e impõe a proibição de remapear custom properties em variantes (seção 7, R-1).
+Fires with any custom property declaration in component CSS, with any name and any value, and with
+`@property` and `@custom-media`. It protects FR-001 (no token outside the single source) and enforces
+the ban on remapping custom properties in variants (section 7, R-1).
 
 ```css
-/* inválido */
+/* invalid */
 .<prefixo>-button--danger {
   --<prefixo>-color-button-bg-default: var(--<prefixo>-color-bg-danger);   /* ← token-definition */
 }
@@ -332,7 +330,7 @@ qualquer valor, e com `@property` e `@custom-media`. Protege o FR-001 (nenhum to
 }
 @custom-media --bp-md (min-width: 768px);                                  /* ← token-definition */
 
-/* válido: a variante troca a própria declaração por outro token de componente */
+/* valid: the variant swaps its own declaration for another component token */
 .<prefixo>-button--danger {
   background-color: var(--<prefixo>-color-button-bg-danger);
 }
@@ -340,43 +338,42 @@ qualquer valor, e com `@property` e `@custom-media`. Protege o FR-001 (nenhum to
 
 #### `control-height`
 
-Dispara quando uma propriedade de `controlHeightProperties`, numa regra que dimensiona a caixa de
-um controle (seção 3.7), não tem como valor exatamente um `var()` de token permitido marcado com
-`scale: "control-height"` no manifesto de tokens (FR-007). O build marca assim os membros da escala
-`size.control.<passo>` e os tokens de componente com propriedade `control-height`, que são alias
-direto de um membro ([token-source.md](token-source.md), seção 8.6).
+Fires when a property of `controlHeightProperties`, in a rule that sizes the box of a control
+(section 3.7), does not have as its value exactly a `var()` of an allowed token marked with
+`scale: "control-height"` in the token manifest (FR-007). The build marks the members of the scale
+`size.control.<step>` and the component tokens with a `control-height` property, which are a direct
+alias of a member ([token-source.md](token-source.md), section 8.6).
 
 ```css
-/* registro: .<prefixo>-button (root) e .<prefixo>-button--sm (sizing) de um controle */
-/* inválido */
+/* registry: .<prefixo>-button (root) and .<prefixo>-button--sm (sizing) of a control */
+/* invalid */
 .<prefixo>-button--sm {
-  block-size: var(--<prefixo>-size-icon-md);       /* ← control-height: token fora da escala */
+  block-size: var(--<prefixo>-size-icon-md);       /* ← control-height: token outside the scale */
 }
 .<prefixo>-button {
   min-block-size: auto;                            /* ← control-height */
 }
-/* válido */
+/* valid */
 .<prefixo>-button--sm {
   block-size: var(--<prefixo>-size-control-sm);
 }
 .<prefixo>-button {
-  block-size: var(--<prefixo>-size-button-control-height-md);  /* componente: alias de size.control.md */
+  block-size: var(--<prefixo>-size-button-control-height-md);  /* component: alias of size.control.md */
 }
 ```
 
 #### `control-height-missing`
 
-Dispara quando o seletor `root` ou um seletor `sizing` de um controle registrado para o arquivo não
-tem, no próprio arquivo, regra de composto único (sem combinador, sem pseudoclasse e sem
-pseudoelemento) que declare uma propriedade de `controlHeightProperties` com valor válido da
-escala. Cobre o controle dimensionado só por `padding-block` e `line-height` e a variante de
-tamanho escrita como classe isolada. Posição: início do seletor da primeira regra cujo composto
-mais à direita contém o seletor registrado; sem essa regra, linha 1, coluna 1. Um aviso por seletor
-registrado.
+Fires when the `root` selector or a `sizing` selector of a control registered for the file does not
+have, in the file itself, a single-compound rule (no combinator, no pseudo-class and no pseudo-element)
+that declares a property of `controlHeightProperties` with a valid value from the scale. It covers a
+control sized only by `padding-block` and `line-height` and a size variant written as an isolated class.
+Position: the start of the selector of the first rule whose rightmost compound contains the registered
+selector; without that rule, line 1, column 1. One warning per registered selector.
 
 ```css
-/* registro: .<prefixo>-input (root) e .<prefixo>-input--lg (sizing) de um controle */
-/* inválido */
+/* registry: .<prefixo>-input (root) and .<prefixo>-input--lg (sizing) of a control */
+/* invalid */
 .<prefixo>-input {                                 /* ← control-height-missing (root) */
   padding-block: var(--<prefixo>-space-inset-sm);
   line-height: var(--<prefixo>-typography-line-height-body);
@@ -384,7 +381,7 @@ registrado.
 .<prefixo>-input--lg {                             /* ← control-height-missing (sizing) */
   padding-block: var(--<prefixo>-space-inset-md);
 }
-/* válido */
+/* valid */
 .<prefixo>-input {
   min-block-size: var(--<prefixo>-size-control-md);
 }
@@ -395,70 +392,70 @@ registrado.
 
 #### `unclassified-component`
 
-Dispara (a) uma vez, em linha 1, coluna 1, quando o arquivo analisado não é o `file` de nenhuma
-entrada do registro; ou (b) em cada seletor de classe ou de atributo `data-<prefixo>-*`, em qualquer
-composto do arquivo (inclusive dentro de `:is()`, `:where()`, `:not()` e `:has()`), que não aparece
-em nenhum composto registrado de nenhuma entrada. No caso (a), os avisos do caso (b) não são
-emitidos para o arquivo. A classificação usa a lista explícita do registro, nunca um padrão de nome
-de classe, porque a convenção de classes (CMP-05, CMP-14) ainda não está fechada.
+Fires (a) once, at line 1, column 1, when the analyzed file is not the `file` of any registry entry; or
+(b) on each class selector or `data-<prefixo>-*` attribute selector, in any compound of the file
+(including inside `:is()`, `:where()`, `:not()` and `:has()`), that does not appear in any registered
+compound of any entry. In case (a), the warnings of case (b) are not emitted for the file. The
+classification uses the registry's explicit list, never a class-name pattern, because the class
+convention (CMP-05, CMP-14) is not yet settled.
 
 ```css
-/* registro: entrada button com root .<prefixo>-button e part .<prefixo>-button__icon */
-/* inválido */
+/* registry: button entry with root .<prefixo>-button and part .<prefixo>-button__icon */
+/* invalid */
 .<prefixo>-button__spinner {                       /* ← unclassified-component */
   inline-size: var(--<prefixo>-size-icon-sm);
 }
-/* válido: a classe passa a constar de classes.parts da entrada button */
+/* valid: the class now appears in classes.parts of the button entry */
 ```
 
-### 3.6 `@media` e `@container`
+### 3.6 `@media` and `@container`
 
-`var()` não é válido em condição de media query, então valor de breakpoint não pode vir de token por
-`var()`. Regra:
+`var()` is not valid in a media query condition, so a breakpoint value cannot come from a token via
+`var()`. Rule:
 
-- Nos parâmetros de `@media` e `@container`, número, dimensão, razão e resolução não nulos são
-  `literal-value`, inclusive na sintaxe de intervalo (`(width >= 48rem)`).
-- Tipos de mídia, operadores, nomes de recurso, valores por palavra-chave (`hover`, `none`, `fine`,
-  `coarse`, `dark`, `light`, `reduce`, `active`, `more`, `portrait`, `landscape`) e nomes de
-  container são aceitos.
-- Referência a custom media (`(--nome)`) é aceita só quando `--nome` é o `cssName` de um token
-  público da categoria `breakpoint` (por exemplo, `(--<prefixo>-breakpoint-viewport-md)`);
-  primitivo gera `primitive-token`, e outro nome, `unknown-token`. A geração e a compilação dessas
-  definições são decisão da feature do núcleo (D6).
-- Consulta `style()` em `@container` é tratada como declaração: o nome segue as regras de `var()`
-  e o valor, as de folha.
-- Parâmetros de `@supports`, `@layer` e `@import` não são analisados.
+- In the parameters of `@media` and `@container`, a non-zero number, dimension, ratio and resolution are
+  `literal-value`, including in the range syntax (`(width >= 48rem)`).
+- Media types, operators, feature names, keyword values (`hover`, `none`, `fine`,
+  `coarse`, `dark`, `light`, `reduce`, `active`, `more`, `portrait`, `landscape`) and container
+  names are accepted.
+- A custom media reference (`(--name)`) is accepted only when `--name` is the `cssName` of a public
+  token of the `breakpoint` category (for example, `(--<prefixo>-breakpoint-viewport-md)`);
+  a primitive produces `primitive-token`, and another name, `unknown-token`. The generation and the
+  compilation of those definitions are a decision of the core feature (D6).
+- A `style()` query in `@container` is handled as a declaration: the name follows the `var()` rules and
+  the value follows the leaf rules.
+- Parameters of `@supports`, `@layer` and `@import` are not analyzed.
 
 ```css
-/* inválido */
+/* invalid */
 @media (min-width: 768px) { /* ... */ }                        /* ← literal-value */
 @container card (inline-size > 30rem) { /* ... */ }            /* ← literal-value */
-/* válido */
+/* valid */
 @media (--<prefixo>-breakpoint-viewport-md) { /* ... */ }
 @media (prefers-reduced-motion: reduce) { /* ... */ }
 ```
 
-### 3.7 Registro de controles
+### 3.7 Control registry
 
-O registro diz quais seletores dimensionam a caixa de cada controle interativo. Em produção ele é
-**derivado** do contrato de DOM (CMP-14) ou do arquivo de orientação de uso, nunca mantido à mão
-(Princípio I); a derivação é entregue pela feature de componentes. Esta feature entrega só registros
-de fixture.
+The registry says which selectors size the box of each interactive control. In production it is
+**derived** from the DOM contract (CMP-14) or from the usage guidance file, never hand-maintained
+(Principle I); the derivation is delivered by the components feature. This feature delivers only fixture
+registries.
 
 ```ts
 interface ControlRegistry {
-  $schema: string;                    // nome proposto: tools/stylelint-plugin/schemas/control-registry.schema.json
+  $schema: string;                    // proposed name: tools/stylelint-plugin/schemas/control-registry.schema.json
   schemaVersion: 1;
   source: 'fixture' | 'dom-contract' | 'orientation';
   components: ReadonlyArray<{
-    id: string;                       // kebab, único; lista ordenada por id
+    id: string;                       // kebab, unique; list ordered by id
     kind: 'control' | 'non-control';
-    file: string;                     // CSS do componente, relativo à raiz, POSIX; único no registro
+    file: string;                     // component CSS, relative to the root, POSIX; unique in the registry
     classes: {
-      root: readonly string[];        // compostos da caixa do componente (control: ao menos um)
-      sizing: readonly string[];      // variantes que definem a altura da caixa (non-control: vazio)
-      other: readonly string[];       // demais modificadores e estados da caixa
-      parts: readonly string[];       // partes internas, que não são a caixa do controle
+      root: readonly string[];        // compounds of the component box (control: at least one)
+      sizing: readonly string[];      // variants that define the box height (non-control: empty)
+      other: readonly string[];       // other modifiers and states of the box
+      parts: readonly string[];       // inner parts, which are not the control box
     };
   }>;
 }
@@ -485,161 +482,159 @@ interface ControlRegistry {
 }
 ```
 
-Regras do registro:
+Registry rules:
 
-- Cada item de `classes` é um seletor composto formado só por seletores de classe e de atributo
-  `data-<prefixo>-*`, comparado de forma normalizada (aspas duplas, simples ordenados no composto).
-  Um mesmo composto aparece uma única vez no registro.
-- `source: "fixture"` só é aceito para arquivos sob `tools/stylelint-plugin/fixtures/`; aplicado a
-  outro arquivo, é erro de configuração (seção 2.2). O gate do núcleo usa registro com `source`
-  `dom-contract` ou `orientation`.
+- Each item of `classes` is a compound selector formed only by class selectors and `data-<prefixo>-*`
+  attribute selectors, compared in a normalized form (double quotes, simple selectors ordered in the
+  compound). The same compound appears only once in the registry.
+- `source: "fixture"` is accepted only for files under `tools/stylelint-plugin/fixtures/`; applied to
+  another file, it is a configuration error (section 2.2). The core gate uses a registry with `source`
+  `dom-contract` or `orientation`.
 
-Semântica:
+Semantics:
 
-- **Regra que dimensiona a caixa de um controle**: regra com ao menos um seletor complexo (depois
-  de resolver aninhamento e expandir `:is()` e `:where()`) cujo composto mais à direita contém um
-  simples classificado como `root`, `sizing` ou `other` de uma entrada `control`, não contém simples
-  classificado como `parts` e não tem pseudoelemento. Pseudoclasses são permitidas: uma altura
-  alterada em `:hover` também precisa vir da escala. Essas regras recebem a verificação
-  `control-height`.
-- **Presença**: para cada composto `root` e `sizing` de uma entrada `control` cujo `file` é o
-  arquivo analisado, exige-se a regra de composto único descrita em `control-height-missing`.
-- **Exaustividade**: `unclassified-component` garante que nenhuma classe nem atributo de
-  componente escape da classificação, o que fecha o falso negativo silencioso de uma anotação
-  esquecida (alternativa rejeitada em D6).
+- **A rule that sizes the box of a control**: a rule with at least one complex selector (after resolving
+  nesting and expanding `:is()` and `:where()`) whose rightmost compound contains a simple selector
+  classified as `root`, `sizing` or `other` of a `control` entry, does not contain a simple selector
+  classified as `parts` and has no pseudo-element. Pseudo-classes are allowed: a height changed in
+  `:hover` must also come from the scale. These rules receive the `control-height` check.
+- **Presence**: for each `root` and `sizing` compound of a `control` entry whose `file` is the analyzed
+  file, the single-compound rule described in `control-height-missing` is required.
+- **Exhaustiveness**: `unclassified-component` ensures that no component class nor attribute escapes the
+  classification, which closes the silent false negative of a forgotten annotation (alternative rejected
+  in D6).
 
-## 4. Regra `<prefixo>/contrast-pairs`
+## 4. Rule `<prefixo>/contrast-pairs`
 
-Confere que todo par de frente e fundo usado num estilo de componente consta do manifesto de
-contraste (FR-021, A11Y-09). Reutiliza a resolução `var()` → token da seção 2.3. A medição das
-razões é feita pela checagem de [contrast-manifest.md](contrast-manifest.md); esta regra só exige a
-presença da tupla.
+Checks that every foreground/background pair used in a component style appears in the contrast manifest
+(FR-021, A11Y-09). It reuses the `var()` → token resolution of section 2.3. The measurement of the
+ratios is done by the check of [contrast-manifest.md](contrast-manifest.md); this rule only requires the
+presence of the tuple.
 
-### 4.1 Opções
+### 4.1 Options
 
 ```ts
 interface ContrastPairsOptions {
   manifestPath: string;              // tokens.manifest.json
-  contrastManifestPath: string;      // packages/tokens/contrast/manifest.json no núcleo
-  surfacesPath: string;              // packages/tokens/contrast/surfaces.json no núcleo
-  controlRegistryPath: string;       // o mesmo registro da seção 3.7
-  stateMap?: StateMap;               // padrão: mapa v1 versionado no plugin (seção 4.3)
-  colorProperties?: ColorPropertyMap;// padrão: mapa v1 versionado no plugin (seção 4.2)
+  contrastManifestPath: string;      // packages/tokens/contrast/manifest.json in the core
+  surfacesPath: string;              // packages/tokens/contrast/surfaces.json in the core
+  controlRegistryPath: string;       // the same registry as section 3.7
+  stateMap?: StateMap;               // default: v1 map versioned in the plugin (section 4.3)
+  colorProperties?: ColorPropertyMap;// default: v1 map versioned in the plugin (section 4.2)
 }
 
 type State = 'default' | 'hover' | 'active' | 'focus-visible'
-  | 'selected' | 'invalid' | 'disabled' | 'inactive';   // lido de manifest.schema.json
+  | 'selected' | 'invalid' | 'disabled' | 'inactive';   // read from manifest.schema.json
 
 interface StateMap {
   schemaVersion: 1;
-  selectors: ReadonlyArray<{ selector: string; state: State | 'none' }>; // pseudoclasse ou atributo
-  stateLike: readonly string[];      // seletores tratados como estado; sem mapeamento → unmapped-state
-  precedence: readonly State[];      // ordem de precedência quando há mais de um estado
+  selectors: ReadonlyArray<{ selector: string; state: State | 'none' }>; // pseudo-class or attribute
+  stateLike: readonly string[];      // selectors treated as state; without a mapping → unmapped-state
+  precedence: readonly State[];      // precedence order when there is more than one state
 }
 
 interface ColorPropertyMap {
   schemaVersion: 1;
-  text: readonly string[];           // frente de texto, interior
-  nonText: readonly string[];        // frente não textual, interior
-  border: readonly string[];         // frente não textual de borda: só em controles ou em focus-visible
-  edge: readonly string[];           // anel e contorno: exigem anotação sempre
-  focusEdge: readonly string[];      // como edge, mas só no estado focus-visible
-  background: readonly string[];     // fundo (componente de cor)
-  backgroundImage: readonly string[];// imagem de fundo
+  text: readonly string[];           // text foreground, interior
+  nonText: readonly string[];        // non-text foreground, interior
+  border: readonly string[];         // non-text border foreground: only in controls or in focus-visible
+  edge: readonly string[];           // ring and outline: always require an annotation
+  focusEdge: readonly string[];      // like edge, but only in the focus-visible state
+  background: readonly string[];     // background (color component)
+  backgroundImage: readonly string[];// background image
 }
 ```
 
-O manifesto de contraste e os conjuntos são validados pelos schemas de `packages/tokens/contrast/`
-([contrast-manifest.md](contrast-manifest.md), seções 3 e 4). Os nomes de estado do `stateMap`
-precisam pertencer ao vocabulário de `manifest.schema.json`.
+The contrast manifest and the sets are validated by the schemas of `packages/tokens/contrast/`
+([contrast-manifest.md](contrast-manifest.md), sections 3 and 4). The state names of the `stateMap`
+must belong to the vocabulary of `manifest.schema.json`.
 
-### 4.2 Propriedades de cor (mapa v1)
+### 4.2 Color properties (v1 map)
 
-| Grupo | Propriedades | Tipo do par |
+| Group | Properties | Pair type |
 | --- | --- | --- |
-| `text` | `color`, `-webkit-text-fill-color` | `text` (ou `non-text` com `as non-text`, seção 4.4) |
+| `text` | `color`, `-webkit-text-fill-color` | `text` (or `non-text` with `as non-text`, section 4.4) |
 | `nonText` | `fill`, `stroke`, `accent-color` | `non-text` |
-| `border` | `border-color`, longhands `border-*-color`, e o componente de cor de `border` e `border-*` | `non-text`; só em regra que dimensiona ou estiliza um controle (simples de entrada `control`, inclusive `parts`) ou no estado `focus-visible` |
-| `edge` | `outline`, `outline-color` | `non-text`; anotação obrigatória |
-| `focusEdge` | `box-shadow` | `non-text`; só quando a declaração efetiva vem de regra `focus-visible`; anotação obrigatória; a frente é a cor da última camada da sombra |
-| `background` | `background-color`, componente de cor de `background` | Fundo do sujeito |
-| `backgroundImage` | `background-image`, camadas de imagem de `background` | Imagem sob texto é `unresolvable-color` |
+| `border` | `border-color`, `border-*-color` longhands, and the color component of `border` and `border-*` | `non-text`; only in a rule that sizes or styles a control (simple selector of a `control` entry, including `parts`) or in the `focus-visible` state |
+| `edge` | `outline`, `outline-color` | `non-text`; annotation required |
+| `focusEdge` | `box-shadow` | `non-text`; only when the effective declaration comes from a `focus-visible` rule; annotation required; the foreground is the color of the shadow's last layer |
+| `background` | `background-color`, color component of `background` | Background of the subject |
+| `backgroundImage` | `background-image`, image layers of `background` | An image under text is `unresolvable-color` |
 
-Restringir bordas a controles segue o Understanding 1.4.11: a borda é exigida quando identifica um
-componente de interface; em componentes que não são controles ela é tratada como decorativa. Essa
-leitura fica registrada na seção 7 (R-7).
+Restricting borders to controls follows Understanding 1.4.11: the border is required when it identifies a
+UI component; in components that are not controls it is treated as decorative. This reading is recorded
+in section 7 (R-7).
 
-Resolução do valor de uma declaração de cor:
+Resolution of a color declaration's value:
 
-- `var()` de token permitido de `$type` `color`: esse token.
-- `var()` de token composto de borda ou sombra: a referência do subvalor de cor no manifesto de
-  tokens (na sombra, a da última camada).
-- `currentcolor` numa propriedade não textual: o token de `color` efetivo do sujeito no estado; sem
-  ele, `unresolvable-color`.
-- `transparent`: nenhuma cor (frente sem par; fundo ausente).
-- Palavra-chave global (`inherit`, `initial`, `unset`, `revert`, `revert-layer`): declaração tratada
-  como ausente.
-- Qualquer outro valor (literal, função de cor, `color-mix()`, `light-dark()`, sintaxe relativa,
-  `var()` de nome não permitido, de outra categoria ou de custom property local): `unresolvable-color`.
+- `var()` of an allowed token of `$type` `color`: that token.
+- `var()` of a composite border or shadow token: the reference of the color subvalue in the token
+  manifest (in the shadow, that of the last layer).
+- `currentcolor` in a non-text property: the effective `color` token of the subject in the state;
+  without it, `unresolvable-color`.
+- `transparent`: no color (foreground without a pair; background absent).
+- A global keyword (`inherit`, `initial`, `unset`, `revert`, `revert-layer`): the declaration treated as
+  absent.
+- Any other value (literal, color function, `color-mix()`, `light-dark()`, relative syntax,
+  `var()` of a non-allowed name, of another category or of a local custom property): `unresolvable-color`.
 
-### 4.3 Sujeito, estado e contexto
+### 4.3 Subject, state and context
 
-**Normalização dos seletores**: resolver o aninhamento; expandir listas de seletores e os
-argumentos de `:is()` e `:where()` em seletores complexos separados.
+**Selector normalization**: resolve the nesting; expand selector lists and the arguments of `:is()` and
+`:where()` into separate complex selectors.
 
-**Sujeito**: o seletor complexo depois de remover os segmentos de estado de todos os compostos,
-serializado de forma normalizada (espaços colapsados, simples ordenados em cada composto).
-Pseudoelementos fazem parte do sujeito (`::placeholder` é sujeito distinto). Pseudoclasses
-estruturais (`:first-child`, `:nth-*`, `:empty`, `:has()`, `:not()` de seletor sem estado) também
-fazem parte do sujeito.
+**Subject**: the complex selector after removing the state segments from all compounds, serialized in a
+normalized form (collapsed spaces, simple selectors ordered in each compound). Pseudo-elements are part
+of the subject (`::placeholder` is a distinct subject). Structural pseudo-classes (`:first-child`,
+`:nth-*`, `:empty`, `:has()`, `:not()` of a stateless selector) are also part of the subject.
 
-**Estado**: vem dos segmentos removidos, pelo mapa v1:
+**State**: comes from the removed segments, per the v1 map:
 
-| Seletor | Estado |
+| Selector | State |
 | --- | --- |
 | `:hover` | `hover` |
 | `:active` | `active` |
 | `:focus-visible`, `:focus`, `:focus-within` | `focus-visible` |
-| `:checked`, `:indeterminate`, `[aria-selected="true"]`, `[aria-checked="true"]`, `[aria-checked="mixed"]`, `[aria-pressed="true"]`, `[aria-current]` (exceto `="false"`) | `selected` |
+| `:checked`, `:indeterminate`, `[aria-selected="true"]`, `[aria-checked="true"]`, `[aria-checked="mixed"]`, `[aria-pressed="true"]`, `[aria-current]` (except `="false"`) | `selected` |
 | `:invalid`, `:user-invalid`, `[aria-invalid="true"]` | `invalid` |
 | `:disabled`, `[disabled]`, `[aria-disabled="true"]` | `disabled` |
-| `[data-<prefixo>-state="<estado>"]`, com estado do vocabulário | o próprio estado |
-| `:enabled`, `:link`, `:any-link` e `:not(<seletor só de estado>)` | `none`: removido do sujeito, sem estado |
+| `[data-<prefixo>-state="<state>"]`, with a state from the vocabulary | the state itself |
+| `:enabled`, `:link`, `:any-link` and `:not(<state-only selector>)` | `none`: removed from the subject, with no state |
 
-`stateLike` v1 (estado sem mapeamento, que gera `unmapped-state`): `:visited`, `:target`,
+`stateLike` v1 (a state without a mapping, which produces `unmapped-state`): `:visited`, `:target`,
 `:target-within`, `:open`, `:popover-open`, `:modal`, `:placeholder-shown`, `:read-only`,
-`:read-write`, `:autofill`, todo `[aria-*]` não listado acima e `[data-<prefixo>-state]` com valor
-fora do vocabulário. O atributo `data-<prefixo>-state` é ilustrativo: o mapa é versionado e será
-alinhado ao contrato de DOM (CMP-14) quando ele existir.
+`:read-write`, `:autofill`, every `[aria-*]` not listed above and `[data-<prefixo>-state]` with a value
+outside the vocabulary. The attribute `data-<prefixo>-state` is illustrative: the map is versioned and
+will be aligned with the DOM contract (CMP-14) when it exists.
 
-Precedência, quando um seletor tem mais de um estado mapeado: `disabled` > `inactive` > `invalid` >
-`selected` > `focus-visible` > `active` > `hover` > `default`. Vale o estado de maior precedência.
+Precedence, when a selector has more than one mapped state: `disabled` > `inactive` > `invalid` >
+`selected` > `focus-visible` > `active` > `hover` > `default`. The state of highest precedence applies.
 
-**Contexto**: a cadeia de at-rules condicionais e de escopo que envolve a regra (`@media`,
-`@container`, `@supports`, `@scope`), com parâmetros normalizados. `@layer` é transparente. Blocos
-`@media (forced-colors: active)` são ignorados (seção 4.7).
+**Context**: the chain of conditional and scope at-rules that wraps the rule (`@media`,
+`@container`, `@supports`, `@scope`), with normalized parameters. `@layer` is transparent. Blocks
+`@media (forced-colors: active)` are ignored (section 4.7).
 
-**Declaração efetiva** de uma propriedade num sujeito, contexto C e estado S, da menor para a maior
-precedência: regras sem condição no estado `default`; regras do contexto C no `default`; regras sem
-condição no estado S; regras do contexto C no estado S. Dentro do mesmo grupo, vale a última no
-arquivo; `!important` vence declaração normal da mesma propriedade. É uma aproximação da cascata
-que não calcula especificidade completa; divergências ficam cobertas pelo axe (seção 4.8).
+**Effective declaration** of a property in a subject, context C and state S, from lowest to highest
+precedence: unconditional rules in the `default` state; rules of context C in `default`; unconditional
+rules in state S; rules of context C in state S. Within the same group, the last in the file applies;
+`!important` wins over a normal declaration of the same property. It is an approximation of the cascade
+that does not compute full specificity; divergences are covered by axe (section 4.8).
 
-### 4.4 Anotação de fundo
+### 4.4 Background annotation
 
-Gramática (o comentário inteiro; `<prefixo>` é o prefixo real):
+Grammar (the whole comment; `<prefixo>` is the real prefix):
 
 ```text
-anotação  = "<prefixo>-contrast:" ws "on" ws pilha [ ws "as" ws "non-text" ]
-pilha     = base { ws camada }
-base      = conjunto | token
-camada    = token
-conjunto  = "@" segmento-kebab              ; nome de surfaces.json
-token     = "--<prefixo>-" nome             ; cssName de token público de cor
+annotation = "<prefixo>-contrast:" ws "on" ws stack [ ws "as" ws "non-text" ]
+stack      = base { ws layer }
+base       = set | token
+layer      = token
+set        = "@" kebab-segment              ; name from surfaces.json
+token      = "--<prefixo>-" name            ; cssName of a public color token
 ```
 
-A forma `on <token> | @<conjunto>` usada na pesquisa descreve a alternativa da base (token **ou**
-conjunto); a barra vertical não é sintaxe da anotação. Exemplos:
+The form `on <token> | @<set>` used in the research describes the base alternative (token **or** set);
+the vertical bar is not annotation syntax. Examples:
 
 ```css
 /* <prefixo>-contrast: on --<prefixo>-color-bg-surface */
@@ -648,48 +643,47 @@ conjunto); a barra vertical não é sintaxe da anotação. Exemplos:
 /* <prefixo>-contrast: on @surfaces as non-text */
 ```
 
-- **Posição**: o comentário é o nó irmão imediatamente anterior à declaração de cor que anota, na
-  mesma regra, com só espaço em branco entre os dois. Uma anotação descreve o que fica **por baixo
-  ou por fora** do sujeito, de baixo para cima.
-- **Herança entre estados**: a anotação de uma propriedade vale para a declaração efetiva dessa
-  propriedade em todos os estados; se a declaração efetiva no estado S não tem anotação, vale a da
-  declaração da mesma propriedade no estado `default`.
-- **`as non-text`**: só numa declaração de `color` cujo sujeito não renderiza texto (por exemplo,
-  ícone que herda `currentcolor`); muda o tipo do par para `non-text`.
-- **Anotação em declaração de fundo**: marca o fundo como objeto gráfico não textual (trilho,
-  indicador, marcador); o par passa a ser a cor desse fundo sobre a pilha anotada.
+- **Position**: the comment is the sibling node immediately before the color declaration it annotates,
+  in the same rule, with only whitespace between the two. An annotation describes what sits **below or
+  outside** the subject, from bottom to top.
+- **Inheritance between states**: the annotation of a property applies to the effective declaration of
+  that property in every state; if the effective declaration in state S has no annotation, that of the
+  same property's declaration in the `default` state applies.
+- **`as non-text`**: only in a `color` declaration whose subject does not render text (for example, an
+  icon that inherits `currentcolor`); it changes the pair type to `non-text`.
+- **Annotation on a background declaration**: it marks the background as a non-text graphic object
+  (track, indicator, marker); the pair becomes the color of that background over the annotated stack.
 
-### 4.5 Formação dos pares e casamento com o manifesto
+### 4.5 Pair formation and matching with the manifest
 
-Para cada sujeito, contexto e estado presentes no arquivo:
+For each subject, context and state present in the file:
 
-1. **Frente interior** (`text`, `nonText`, `border`): pilha = anotação efetiva (se houver) seguida do
-   fundo efetivo do sujeito no estado (se houver e não for `transparent`). Sem nenhum dos dois:
+1. **Interior foreground** (`text`, `nonText`, `border`): stack = effective annotation (if any) followed
+   by the subject's effective background in the state (if any and not `transparent`). With neither:
    `missing-background`.
-2. **Frente de borda externa** (`edge`, `focusEdge`): pilha = anotação efetiva. Sem anotação:
-   `missing-background`, mesmo que o sujeito declare fundo.
-3. **Fundo gráfico** (declaração de fundo anotada): frente = cor do fundo; pilha = anotação; tipo
-   `non-text`.
-4. **Fundo sem frente**: declaração de fundo não anotada, num estado e contexto em que o sujeito não
-   tem frente de texto efetiva: `missing-foreground` na declaração de fundo. Segue a falha F24 do
-   WCAG (fundo sem cor de frente, ou o inverso).
-5. **Imagem sob texto**: imagem de fundo diferente de `none` num estado em que o sujeito tem frente
-   de texto: `unresolvable-color` na declaração da imagem.
+2. **Outer border foreground** (`edge`, `focusEdge`): stack = effective annotation. Without an
+   annotation: `missing-background`, even if the subject declares a background.
+3. **Graphic background** (annotated background declaration): foreground = background color; stack =
+   annotation; type `non-text`.
+4. **Background without a foreground**: a non-annotated background declaration, in a state and context
+   where the subject has no effective text foreground: `missing-foreground` at the background
+   declaration. It follows WCAG failure F24 (a background with no foreground color, or the reverse).
+5. **Image under text**: a background image other than `none` in a state where the subject has a text
+   foreground: `unresolvable-color` at the image declaration.
 
-   Uma declaração de cor com valor irresolvível conta como presente nos passos 4 e 5 (não gera
-   `missing-foreground`), mas não forma par: o aviso dela é o `unresolvable-color` da folha.
-6. **Avaliação única**: no estado `default` sem condição, todos os pares são avaliados. Num estado S
-   ou contexto C, um par só é avaliado se ao menos uma das declarações de que depende vem de regra
-   do estado S e, quando há condição, ao menos uma vem de regra do contexto C. Um par que não muda
-   num estado é coberto pelo par do `default`, e o manifesto não precisa repeti-lo.
-7. **Tupla canônica**: (caminho do token de frente, pilha como lista de caminhos de token, com o
-   `@conjunto` na base quando houver, estado, tipo). Ela precisa ser igual à tupla de um par do
-   manifesto, com `bg` normalizado para lista. `group`, `exempt` e `description` não entram no
-   casamento: par isento conta como presente.
-8. **Posição do aviso de par**: a declaração de que o par depende que vem do grupo de maior
-   precedência da seção 4.3; em empate, a declaração de frente.
+   A color declaration with an unresolvable value counts as present in steps 4 and 5 (does not produce
+   `missing-foreground`), but does not form a pair: its warning is the `unresolvable-color` of the leaf.
+6. **Single evaluation**: in the `default` state with no condition, all pairs are evaluated. In a state S
+   or context C, a pair is evaluated only if at least one of the declarations it depends on comes from a
+   rule of state S and, when there is a condition, at least one comes from a rule of context C. A pair
+   that does not change in a state is covered by the `default` pair, and the manifest need not repeat it.
+7. **Canonical tuple**: (foreground token path, stack as a list of token paths, with the `@set` at the
+   base when present, state, type). It must equal the tuple of a manifest pair, with `bg` normalized to a
+   list. `group`, `exempt` and `description` do not enter the matching: an exempt pair counts as present.
+8. **Pair warning position**: the declaration the pair depends on that comes from the highest-precedence
+   group of section 4.3; on a tie, the foreground declaration.
 
-Exemplo de fusão por sujeito e estado:
+Example of merging by subject and state:
 
 ```css
 .<prefixo>-button {
@@ -701,44 +695,45 @@ Exemplo de fusão por sujeito e estado:
 }
 ```
 
-Pares exigidos no manifesto: (`color.button.fg.default`, [`color.button.bg.default`], `default`,
-`text`), com aviso possível na declaração de `color`; e (`color.button.fg.default`,
-[`color.button.bg.hover`], `hover`, `text`), com aviso possível no `background-color` do `:hover`.
+Pairs required in the manifest: (`color.button.fg.default`, [`color.button.bg.default`], `default`,
+`text`), with a possible warning at the `color` declaration; and (`color.button.fg.default`,
+[`color.button.bg.hover`], `hover`, `text`), with a possible warning at the `background-color` of the
+`:hover`.
 
-### 4.6 Subcódigos
+### 4.6 Subcodes
 
-Posições: `pair-not-in-manifest` conforme o passo 8 da seção 4.5; `missing-background` no início da
-declaração de frente; `missing-foreground` no início da declaração de fundo; `unresolvable-color` no
-início da folha (na imagem sob texto, no início da declaração); `invalid-annotation` no início do
-comentário; `unmapped-state` no início do segmento de seletor.
+Positions: `pair-not-in-manifest` per step 8 of section 4.5; `missing-background` at the start of the
+foreground declaration; `missing-foreground` at the start of the background declaration;
+`unresolvable-color` at the start of the leaf (in an image under text, at the start of the declaration);
+`invalid-annotation` at the start of the comment; `unmapped-state` at the start of the selector segment.
 
 #### `pair-not-in-manifest`
 
-Dispara quando a tupla canônica de um par não existe no manifesto (cenário 4 da User Story 4).
+Fires when a pair's canonical tuple does not exist in the manifest (scenario 4 of User Story 4).
 
 ```css
-/* inválido: o manifesto não tem (color.fg.muted, [color.bg.raised], default, text) */
+/* invalid: the manifest does not have (color.fg.muted, [color.bg.raised], default, text) */
 .<prefixo>-tag {
   color: var(--<prefixo>-color-fg-muted);              /* ← pair-not-in-manifest */
   background-color: var(--<prefixo>-color-bg-raised);
 }
-/* válido: o par passa a constar do manifesto (e a checagem de contraste o mede) */
+/* valid: the pair now appears in the manifest (and the contrast check measures it) */
 ```
 
 #### `missing-background`
 
-Dispara com frente interior sem fundo no sujeito e sem anotação, e com anel ou contorno sem
-anotação.
+Fires with an interior foreground without a background on the subject and without an annotation, and
+with a ring or outline without an annotation.
 
 ```css
-/* inválido */
+/* invalid */
 .<prefixo>-link {
   color: var(--<prefixo>-color-fg-link);               /* ← missing-background */
 }
 .<prefixo>-button:focus-visible {
   outline: var(--<prefixo>-border-stroke-focus);              /* ← missing-background */
 }
-/* válido */
+/* valid */
 .<prefixo>-link {
   /* <prefixo>-contrast: on @surfaces */
   color: var(--<prefixo>-color-fg-link);
@@ -751,14 +746,14 @@ anotação.
 
 #### `missing-foreground`
 
-Dispara com fundo não anotado num sujeito sem frente de texto efetiva naquele estado.
+Fires with a non-annotated background on a subject without an effective text foreground in that state.
 
 ```css
-/* inválido */
+/* invalid */
 .<prefixo>-card {
   background-color: var(--<prefixo>-color-bg-raised);   /* ← missing-foreground */
 }
-/* válido: declarar a frente no mesmo sujeito, ou anotar o fundo como objeto gráfico */
+/* valid: declare the foreground in the same subject, or annotate the background as a graphic object */
 .<prefixo>-card {
   color: var(--<prefixo>-color-fg-default);
   background-color: var(--<prefixo>-color-bg-raised);
@@ -771,20 +766,20 @@ Dispara com fundo não anotado num sujeito sem frente de texto efetiva naquele e
 
 #### `unresolvable-color`
 
-Dispara com expressão de cor que não resolve estaticamente para um token permitido (seção 4.2) e
-com imagem sob texto. Nunca há silêncio: o que a regra não resolve é erro.
+Fires with a color expression that does not statically resolve to an allowed token (section 4.2) and
+with an image under text. There is never silence: what the rule does not resolve is an error.
 
 ```css
-/* inválido */
+/* invalid */
 .<prefixo>-badge {
   color: color-mix(in srgb, var(--<prefixo>-color-fg-default) 80%, transparent);   /* ← unresolvable-color */
   background-color: var(--<prefixo>-color-bg-accent);
   background-image: linear-gradient(var(--<prefixo>-color-bg-accent), var(--<prefixo>-color-bg-raised)); /* ← unresolvable-color */
 }
 .<prefixo>-checkbox__box {
-  border-color: currentcolor;                          /* ← unresolvable-color: parte de controle sem color */
+  border-color: currentcolor;                          /* ← unresolvable-color: control part without color */
 }
-/* válido */
+/* valid */
 .<prefixo>-badge {
   color: var(--<prefixo>-color-fg-on-accent);
   background-color: var(--<prefixo>-color-bg-accent);
@@ -793,68 +788,67 @@ com imagem sob texto. Nunca há silêncio: o que a regra não resolve é erro.
 
 #### `invalid-annotation`
 
-Dispara com anotação de sintaxe inválida; com token inexistente, não público ou que não é cor; com
-`@conjunto` inexistente ou fora da base; com `as non-text` fora de declaração de `color`; e com
-anotação órfã (que não precede imediatamente uma declaração de cor). Anotação inválida é
-desconsiderada na formação dos pares, então a declaração anotada segue as regras sem anotação e
-costuma gerar também `missing-background`.
+Fires with an annotation of invalid syntax; with a nonexistent, non-public token or one that is not a
+color; with a nonexistent `@set` or one outside the base; with `as non-text` outside a `color`
+declaration; and with an orphan annotation (one that does not immediately precede a color declaration).
+An invalid annotation is disregarded in pair formation, so the annotated declaration follows the rules
+without an annotation and usually also produces `missing-background`.
 
 ```css
-/* inválido */
+/* invalid */
 .<prefixo>-link {
-  /* <prefixo>-contrast: over @surfaces */             /* ← invalid-annotation: sintaxe */
+  /* <prefixo>-contrast: over @surfaces */             /* ← invalid-annotation: syntax */
   color: var(--<prefixo>-color-fg-link);               /* ← missing-background */
 }
 .<prefixo>-tag {
-  /* <prefixo>-contrast: on --<prefixo>-color-gray-50 */  /* ← invalid-annotation: primitivo */
+  /* <prefixo>-contrast: on --<prefixo>-color-gray-50 */  /* ← invalid-annotation: primitive */
   color: var(--<prefixo>-color-fg-muted);              /* ← missing-background */
-  /* <prefixo>-contrast: on @cards */                  /* ← invalid-annotation: órfã e conjunto inexistente */
+  /* <prefixo>-contrast: on @cards */                  /* ← invalid-annotation: orphan and nonexistent set */
 }
 ```
 
 #### `unmapped-state`
 
-Dispara, numa regra que declara propriedade de cor, com segmento de seletor da lista `stateLike`
-sem mapeamento para o vocabulário. A regra com estado não mapeado fica fora da formação de pares.
-Força a decisão explícita de ampliar o vocabulário (versionado,
-[contrast-manifest.md](contrast-manifest.md), seção 5) em vez de deixar o estado sem par.
+Fires, in a rule that declares a color property, with a selector segment from the `stateLike` list
+without a mapping to the vocabulary. The rule with an unmapped state is kept out of pair formation. It
+forces the explicit decision to widen the vocabulary (versioned,
+[contrast-manifest.md](contrast-manifest.md), section 5) instead of leaving the state without a pair.
 
 ```css
-/* inválido */
+/* invalid */
 .<prefixo>-link:visited {                              /* ← unmapped-state */
   color: var(--<prefixo>-color-fg-link);
 }
-/* válido: regra de :visited sem propriedade de cor, ou vocabulário ampliado antes */
+/* valid: a :visited rule without a color property, or the vocabulary widened beforehand */
 ```
 
-### 4.7 Estados isentos e `forced-colors`
+### 4.7 Exempt states and `forced-colors`
 
-- Seletores de estado desabilitado ou inativo **nunca** são ignorados. O par correspondente
-  precisa constar do manifesto, normalmente com `exempt: "wcag-inactive"`: medido e reportado, sem
-  falhar a checagem (FR-020). Assim a cobertura do A11Y-09 ("todo par usado no núcleo consta do
-  manifesto") vale também para esses estados.
-- Blocos `@media` cuja condição exige `forced-colors: active` (sem negação), e tudo o que eles
-  contêm, inclusive anotações, são ignorados por esta regra: no modo de cores forçadas o sistema
-  operacional substitui a paleta, e os pares de marca e modo não se aplicam.
+- Selectors of a disabled or inactive state are **never** ignored. The corresponding pair must appear in
+  the manifest, usually with `exempt: "wcag-inactive"`: measured and reported, without failing the check
+  (FR-020). That way the A11Y-09 coverage ("every pair used in the core appears in the manifest") also
+  holds for those states.
+- `@media` blocks whose condition requires `forced-colors: active` (without negation), and everything
+  they contain, including annotations, are ignored by this rule: in forced-colors mode the operating
+  system replaces the palette, and the brand and mode pairs do not apply.
 
-### 4.8 Limites da análise estática
+### 4.8 Limits of static analysis
 
-A regra não vê o aninhamento de DOM entre componentes, sobrescritas da app consumidora, estilos
-inline, `opacity`, filtros e modos de mistura em ancestrais, nem imagens. A fusão por sujeito
-aproxima a cascata, e uma anotação pode estar errada. Esses limites são cobertos pelo motor de
-regras em navegador real do A11Y-02 e pela conferência de amostras de
-[contrast-manifest.md](contrast-manifest.md) (seção 11). Anotações são revisadas no PR, com o dono
-de acessibilidade como dono do manifesto (GOV-09).
+The rule does not see the DOM nesting between components, overrides by the consuming app, inline styles,
+`opacity`, filters and blend modes in ancestors, nor images. The merge by subject approximates the
+cascade, and an annotation may be wrong. These limits are covered by the real-browser rules engine of
+A11Y-02 and by the sample verification of [contrast-manifest.md](contrast-manifest.md) (section 11).
+Annotations are reviewed in the PR, with the accessibility owner as the manifest owner (GOV-09).
 
-## 5. Harness de fixtures
+## 5. Fixtures harness
 
-Prova os FR-021 e FR-024 e o SC-009: 100% dos erros esperados e zero falsos positivos.
+Proves FR-021 and FR-024 and SC-009: 100% of the expected errors and zero false positives.
 
 ```text
 tools/stylelint-plugin/fixtures/
-├── registry.fixture.json        # registro de controles, source "fixture", cobre todo arquivo abaixo
+├── registry.fixture.json        # control registry, source "fixture", covers every file below
 ├── contrast/
-│   ├── manifest.json            # pares sintéticos, validados pelo schema de packages/tokens/contrast
+│   ├── manifest.json            # synthetic pairs, validated by the schema of packages/tokens/contrast
 │   └── surfaces.json
 ├── design-tokens/
 │   ├── valid/*.css
@@ -863,30 +857,30 @@ tools/stylelint-plugin/fixtures/
 │   ├── valid/*.css
 │   └── invalid/*.css
 └── gate-probe/
-    └── probe.css                # violação proposital que prova o bloqueio do gate (seção 6)
+    └── probe.css                # deliberate violation that proves the gate block (section 6)
 ```
 
-O manifesto de tokens das fixtures é o `tokens.manifest.json` real de `@<prefixo>/tokens`, gerado
-pelo build sobre as marcas sintéticas A e B (QA-15); as fixtures referenciam só tokens que existem
-nele, sem lista escrita à mão. Renomear token publicado quebra as fixtures, o que é desejado
-(mudança major, Princípio X).
+The fixtures' token manifest is the real `tokens.manifest.json` of `@<prefixo>/tokens`, generated by the
+build over the synthetic brands A and B (QA-15); the fixtures reference only tokens that exist in it,
+with no hand-written list. Renaming a published token breaks the fixtures, which is desired (major
+change, Principle X).
 
-**Comentário de expectativa** (só em `invalid/`):
+**Expectation comment** (only in `invalid/`):
 
 ```text
-expectativa = "/*" ws "expect:" ws item { ws? "," ws? item } ws "*/"
-item        = código "@" coluna
+expectation = "/*" ws "expect:" ws item { ws? "," ws? item } ws "*/"
+item        = code "@" column
 ```
 
-- A linha esperada é a linha em que o comentário começa; a coluna é obrigatória, contada a partir
-  de 1, porque o casamento inclui a coluna.
-- Repetir o mesmo `código@coluna` no comentário significa dois avisos esperados.
-- O comentário fica no fim da linha, depois do `;` ou da `{`, para não se interpor entre uma
-  anotação de contraste e a declaração que ela anota.
-- Para avisos em linha 1, coluna 1 (`unclassified-component` de arquivo não registrado,
-  `control-height-missing` sem regra), o comentário fica na linha 1.
+- The expected line is the line where the comment begins; the column is required, counted from 1,
+  because the matching includes the column.
+- Repeating the same `code@column` in the comment means two expected warnings.
+- The comment sits at the end of the line, after the `;` or the `{`, so as not to come between a contrast
+  annotation and the declaration it annotates.
+- For warnings at line 1, column 1 (`unclassified-component` of an unregistered file,
+  `control-height-missing` without a rule), the comment sits on line 1.
 
-Exemplo (`design-tokens/invalid/literal-value.css`):
+Example (`design-tokens/invalid/literal-value.css`):
 
 ```css
 /* tools/stylelint-plugin/fixtures/design-tokens/invalid/literal-value.css */
@@ -897,7 +891,7 @@ Exemplo (`design-tokens/invalid/literal-value.css`):
 }
 ```
 
-Exemplo (`contrast-pairs/invalid/missing-background.css`):
+Example (`contrast-pairs/invalid/missing-background.css`):
 
 ```css
 /* tools/stylelint-plugin/fixtures/contrast-pairs/invalid/missing-background.css */
@@ -906,33 +900,32 @@ Exemplo (`contrast-pairs/invalid/missing-background.css`):
 }
 ```
 
-**Regras do harness** (Vitest, ambiente Node, via `stylelint.lint()` com `cache: false` e
+**Harness rules** (Vitest, Node environment, via `stylelint.lint()` with `cache: false` and
 `ignoreDisables: true`):
 
-1. Cada regra roda isolada, com uma configuração que habilita só ela e aponta para os dados de
-   fixture.
-2. Todo arquivo de `valid/` produz zero avisos de qualquer tipo, inclusive aviso de opção inválida,
-   erro de parse e aviso de depreciação. Arquivo de `valid/` com comentário `expect:` é erro do
-   harness.
-3. Para cada arquivo de `invalid/`, o multiconjunto de `{file, line, column, code}` dos avisos reais
-   é igual ao multiconjunto das expectativas. Aviso a mais, a menos ou duplicado falha o teste.
-   Arquivo de `invalid/` sem expectativa, ou com código desconhecido, é erro do harness.
-4. Cobertura: todo código de `designTokensCodes` aparece em ao menos uma fixture inválida de
-   `design-tokens/`, e todo código de `contrastPairsCodes`, em `contrast-pairs/`.
-5. Combinação: os arquivos de `valid/` das duas regras passam também com as duas regras habilitadas
-   juntas (é o que o gate executa), o que prova zero falsos positivos cruzados.
-6. Fixtures obrigatórias além da cobertura mínima: variante de tamanho escrita como classe isolada
-   e controle dimensionado só por padding (D6, correção do revisor); nomes sem prefixo
-   (`--brand-blue`); remapeamento de custom property em variante; estado desabilitado com par isento
-   presente (válido) e ausente (inválido); fundo translúcido do mesmo sujeito sem anotação de base
-   opaca (`pair-not-in-manifest`); `@media (forced-colors: active)` com cores de sistema (válido).
+1. Each rule runs in isolation, with a configuration that enables only it and points to the fixture
+   data.
+2. Every file in `valid/` produces zero warnings of any kind, including an invalid-option warning, a
+   parse error and a deprecation warning. A `valid/` file with an `expect:` comment is a harness error.
+3. For each file in `invalid/`, the multiset of `{file, line, column, code}` of the real warnings equals
+   the multiset of the expectations. An extra, missing or duplicated warning fails the test. An
+   `invalid/` file with no expectation, or with an unknown code, is a harness error.
+4. Coverage: every code of `designTokensCodes` appears in at least one invalid fixture of
+   `design-tokens/`, and every code of `contrastPairsCodes`, in `contrast-pairs/`.
+5. Combination: the `valid/` files of the two rules also pass with the two rules enabled together (which
+   is what the gate runs), which proves zero cross false positives.
+6. Required fixtures beyond the minimum coverage: a size variant written as an isolated class and a
+   control sized only by padding (D6, reviewer correction); names without a prefix
+   (`--brand-blue`); custom property remapping in a variant; a disabled state with an exempt pair present
+   (valid) and absent (invalid); a translucent background of the same subject without an opaque-base
+   annotation (`pair-not-in-manifest`); `@media (forced-colors: active)` with system colors (valid).
 
-## 6. Gate no CI
+## 6. CI gate
 
-Configuração do gate (esboço do arquivo da raiz `stylelint.config.mjs`):
+Gate configuration (sketch of the root file `stylelint.config.mjs`):
 
 ```js
-// stylelint.config.mjs (raiz): configuração do gate
+// stylelint.config.mjs (root): gate configuration
 export default {
   plugins: ['@<prefixo>/stylelint-plugin'],
   overrides: [
@@ -954,13 +947,13 @@ export default {
         }],
       },
     },
-    // Feature do núcleo: acrescenta um override para o CSS do núcleo, com o registro derivado
-    // (source "dom-contract" ou "orientation") e o manifesto real de packages/tokens/contrast/.
+    // Core feature: adds an override for the core CSS, with the derived registry
+    // (source "dom-contract" or "orientation") and the real manifest of packages/tokens/contrast/.
   ],
 };
 ```
 
-Execução (`pnpm lint:styles`, tarefa raiz do turbo que depende de `@<prefixo>/tokens#tokens:build`):
+Execution (`pnpm lint:styles`, root turbo task that depends on `@<prefixo>/tokens#tokens:build`):
 
 ```text
 stylelint "tools/stylelint-plugin/fixtures/*/valid/*.css" \
@@ -968,75 +961,73 @@ stylelint "tools/stylelint-plugin/fixtures/*/valid/*.css" \
   --formatter json --output-file reports/lint-styles/stylelint.json
 ```
 
-- `--ignore-disables` (equivalente a `ignoreDisables: true`): nenhum comentário
-  `stylelint-disable` contorna o gate.
-- `--max-warnings 0`: qualquer aviso falha, além dos erros.
-- Relatório JSON em `reports/lint-styles/stylelint.json` (diretório proposto, fora do controle de
-  versão, publicado como artefato do CI): é o relatório de zero violações do TOK-03 e evidência
-  ligada na matriz do ACE-02. Sem cache do Stylelint no gate.
-- Entrada vazia não é permitida: um glob sem arquivos falha.
-- Códigos de saída: os da CLI do Stylelint, exceção documentada em [tools-cli.md](tools-cli.md)
-  (seção 6): 0 sem problema; 2 com problema de regra (equivale ao 1 canônico); 64 erro de uso e 78
-  configuração inválida (equivalem ao 2); 1 erro inesperado (equivale ao 3). O CI trata qualquer
-  código diferente de zero como falha.
-- Alvos nesta feature: as fixtures válidas e a sonda. O CSS da app de exemplo não é estilo de
-  componente (o TOK-03 trata de estilo de componente), não tem entrada no registro de controles nem
-  pares no manifesto de contraste, e por isso fica fora do gate, como registra também a seção 6 de
-  [tools-cli.md](tools-cli.md).
-- **Violação proposital** (constituição, "Rastreabilidade e aceite"): um passo do CI roda o mesmo
-  comando sobre `tools/stylelint-plugin/fixtures/gate-probe/probe.css`, que começa com
-  `/* stylelint-disable */` e contém um literal, e exige código de saída diferente de zero. Prova o
-  bloqueio e o efeito de `--ignore-disables`.
-- Na feature do núcleo, o glob do CSS do núcleo entra no mesmo comando, e o check passa a ser
-  obrigatório na proteção de branch com relatório de zero violações (FR-024, TOK-03).
+- `--ignore-disables` (equivalent to `ignoreDisables: true`): no `stylelint-disable` comment bypasses the
+  gate.
+- `--max-warnings 0`: any warning fails, besides the errors.
+- JSON report in `reports/lint-styles/stylelint.json` (proposed directory, outside version control,
+  published as a CI artifact): it is the zero-violations report of TOK-03 and evidence linked in the
+  ACE-02 matrix. No Stylelint cache in the gate.
+- Empty input is not allowed: a glob with no files fails.
+- Exit codes: those of the Stylelint CLI, a documented exception in [tools-cli.md](tools-cli.md)
+  (section 6): 0 with no problem; 2 with a rule problem (equivalent to the canonical 1); 64 use error and
+  78 invalid configuration (equivalent to 2); 1 unexpected error (equivalent to 3). CI treats any non-zero
+  code as a failure.
+- Targets in this feature: the valid fixtures and the probe. The example app's CSS is not a component
+  style (TOK-03 is about component style), has no entry in the control registry nor pairs in the contrast
+  manifest, and is therefore outside the gate, as section 6 of [tools-cli.md](tools-cli.md) also records.
+- **Deliberate violation** (constitution, "Traceability and acceptance"): a CI step runs the same command
+  over `tools/stylelint-plugin/fixtures/gate-probe/probe.css`, which begins with
+  `/* stylelint-disable */` and contains a literal, and requires a non-zero exit code. It proves the
+  block and the effect of `--ignore-disables`.
+- In the core feature, the core CSS glob enters the same command, and the check becomes required on the
+  branch protection with a zero-violations report (FR-024, TOK-03).
 
-## 7. Restrições registradas para a feature do núcleo
+## 7. Restrictions recorded for the core feature
 
-Restrições que estas regras impõem ao núcleo de estilos, registradas no ADR-16 e no ADR-15 para o
-aceitante:
+Restrictions that these rules impose on the style core, recorded in ADR-16 and ADR-15 for the acceptor:
 
-- **R-1 Sem remapeamento de custom properties em variantes.** CSS de componente não declara custom
-  property (`token-definition`). Variante troca a própria declaração por outro token de componente
-  (`.<prefixo>-button--danger { background-color: var(--<prefixo>-color-button-bg-danger) }`); os
-  tokens de cada variante nascem na fonte DTCG.
-- **R-2 Allowlist de palavras-chave como leitura de "valor literal" (TOK-03).** Só `transparent`,
-  `currentcolor`, `auto`, `none`, `0` (inclusive com unidade) e as palavras-chave globais são
-  aceitas onde a propriedade é governada. Consequências: porcentagens (`width: 100%`), números como
-  `opacity: 1`, `z-index: 1` e `line-height: 1`, `normal`, `bold`, palavras de easing, famílias
-  genéricas, cores nomeadas, `env()` e `url()` em propriedade governada são literais. Cores de
-  sistema só dentro de `@media (forced-colors: active)`.
-- **R-3 Breakpoints.** Nenhum literal em `@media` ou `@container`; o caminho é custom media com o
-  nome de um token de breakpoint, cuja geração e compilação a feature do núcleo decide.
-- **R-4 Altura de controle.** Toda raiz de controle e toda variante de tamanho declaram `height`,
-  `min-height`, `block-size` ou `min-block-size` com token da escala, direto ou por token de
-  componente que é alias dela. Padding e line-height sozinhos não bastam.
-- **R-5 Registro derivado.** O registro de controles do núcleo é gerado do contrato de DOM (CMP-14)
-  ou do arquivo de orientação; registro mantido à mão não é aceito (Princípio I).
-- **R-6 Pares de contraste explícitos.** Toda frente tem fundo no mesmo sujeito ou anotação; todo
-  fundo tem frente de texto no mesmo sujeito ou anotação de objeto gráfico (F24); contorno e anel de
-  foco sempre têm anotação; estado só por seletor mapeado; estado desabilitado nunca é omitido;
-  `color-mix()`, `light-dark()`, cor relativa e gradiente ou imagem sob texto não são usados em
-  estilo de componente.
-- **R-7 Bordas.** O contraste de borda é exigido em controles (e em `focus-visible`); em
-  componentes que não são controles a borda é tratada como decorativa (leitura do Understanding
-  1.4.11, a confirmar com o aceitante).
-- **R-8 Propriedades não governadas no mapa v1** (seção 3.2). Incluí-las depois é mudança
-  versionada do plugin, revisada no PR.
+- **R-1 No remapping of custom properties in variants.** Component CSS does not declare a custom property
+  (`token-definition`). A variant swaps its own declaration for another component token
+  (`.<prefixo>-button--danger { background-color: var(--<prefixo>-color-button-bg-danger) }`); the tokens
+  of each variant are born in the DTCG source.
+- **R-2 Keyword allowlist as the reading of "literal value" (TOK-03).** Only `transparent`,
+  `currentcolor`, `auto`, `none`, `0` (including with a unit) and the global keywords are accepted where
+  the property is governed. Consequences: percentages (`width: 100%`), numbers such as `opacity: 1`,
+  `z-index: 1` and `line-height: 1`, `normal`, `bold`, easing words, generic families, named colors,
+  `env()` and `url()` in a governed property are literals. System colors only inside
+  `@media (forced-colors: active)`.
+- **R-3 Breakpoints.** No literal in `@media` or `@container`; the path is custom media with the name of
+  a breakpoint token, whose generation and compilation the core feature decides.
+- **R-4 Control height.** Every control root and every size variant declares `height`, `min-height`,
+  `block-size` or `min-block-size` with a token from the scale, directly or via a component token that is
+  an alias of it. Padding and line-height alone are not enough.
+- **R-5 Derived registry.** The core's control registry is generated from the DOM contract (CMP-14) or
+  from the guidance file; a hand-maintained registry is not accepted (Principle I).
+- **R-6 Explicit contrast pairs.** Every foreground has a background on the same subject or an
+  annotation; every background has a text foreground on the same subject or a graphic-object annotation
+  (F24); outline and focus ring always have an annotation; state only via a mapped selector; a disabled
+  state is never omitted; `color-mix()`, `light-dark()`, relative color and a gradient or image under
+  text are not used in a component style.
+- **R-7 Borders.** Border contrast is required in controls (and in `focus-visible`); in components that
+  are not controls the border is treated as decorative (reading of Understanding 1.4.11, to be confirmed
+  with the acceptor).
+- **R-8 Properties not governed in the v1 map** (section 3.2). Including them later is a versioned plugin
+  change, reviewed in the PR.
 
-## 8. Testes e rastreabilidade
+## 8. Tests and traceability
 
-| Teste | Onde | Prova |
+| Test | Where | Proves |
 | --- | --- | --- |
-| Unitários da classificação de folhas, da resolução `var()` → token, da cadeia de alias até a escala, da normalização de seletores, da fusão por sujeito e estado e do parser da anotação | `tools/stylelint-plugin`, Vitest | QA-02 |
-| Harness de fixtures (seção 5) | `tools/stylelint-plugin`, Vitest | FR-021, FR-024, SC-009, US5 cenários 1 a 4, US4 cenário 4 |
-| Gate e violação proposital (seção 6) | CI, `pnpm lint:styles` | FR-022, FR-023, TOK-03, TOK-13 |
-| Aresta de camada do plugin (`tools` → `tokens` só por `./meta/*`) | `pnpm check:layers` | ENG-01 |
+| Unit tests of leaf classification, of the `var()` → token resolution, of the alias chain up to the scale, of selector normalization, of the merge by subject and state and of the annotation parser | `tools/stylelint-plugin`, Vitest | QA-02 |
+| Fixtures harness (section 5) | `tools/stylelint-plugin`, Vitest | FR-021, FR-024, SC-009, US5 scenarios 1 to 4, US4 scenario 4 |
+| Gate and deliberate violation (section 6) | CI, `pnpm lint:styles` | FR-022, FR-023, TOK-03, TOK-13 |
+| Plugin layer edge (`tools` → `tokens` only via `./meta/*`) | `pnpm check:layers` | ENG-01 |
 
-| ID | Coberto por |
+| ID | Covered by |
 | --- | --- |
-| FR-021, A11Y-09 | Seção 4 (regra de pares) e seção 5 |
-| FR-022, TOK-03 | Seções 3.2 a 3.6 |
-| FR-023, TOK-13 | Seções 3.5 (`control-height`, `control-height-missing`) e 3.7 |
-| FR-024 | Seções 5 e 6 |
-| FR-001 (defesa em profundidade) | `token-definition`; a varredura do repositório é `repo-checks scan-tokens` |
-| ACE-02 | Relatório JSON do gate ligado na matriz de rastreabilidade |
+| FR-021, A11Y-09 | Section 4 (pairs rule) and section 5 |
+| FR-022, TOK-03 | Sections 3.2 to 3.6 |
+| FR-023, TOK-13 | Sections 3.5 (`control-height`, `control-height-missing`) and 3.7 |
+| FR-024 | Sections 5 and 6 |
+| FR-001 (defense in depth) | `token-definition`; the repository scan is `repo-checks scan-tokens` |
+| ACE-02 | Gate JSON report linked in the traceability matrix |
