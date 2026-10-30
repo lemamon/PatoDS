@@ -1,5 +1,5 @@
 {
-  "$description": "Tokens semânticos invariantes (eixo invariant, V-07): mesmos valores em toda marca e modo. Aliam primitivos.",
+  "$description": "Invariant semantic tokens (invariant axis, V-07): same values across every brand and mode. Alias primitives.",
   "color": {
     "$type": "color",
     "border": {
