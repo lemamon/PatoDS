@@ -94,6 +94,6 @@ export async function sync(port: DesignToolPort, desired: DesiredVar[], opts: { 
   }
   const after = await port.readSnapshot()
   const residual = diff(desired, after)
-  if (residual.length > 0) return { state: 'failed', plan, restored, error: 'verificação falhou: diff não vazio após aplicar' }
+  if (residual.length > 0) return { state: 'failed', plan, restored, error: 'verification failed: diff not empty after applying' }
   return { state: 'verified', plan, restored }
 }
