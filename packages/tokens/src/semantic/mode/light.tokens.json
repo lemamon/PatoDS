@@ -1,5 +1,5 @@
 {
-  "$description": "Tokens semânticos de eixo modo, modo claro (FR-033): aliam o token brand.* correspondente no modo light.",
+  "$description": "Mode-axis semantic tokens, light mode (FR-033): alias the corresponding brand.* token in light mode.",
   "color": {
     "$type": "color",
     "bg": {
