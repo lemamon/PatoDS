@@ -1,18 +1,18 @@
 # @patods/tokens
 
-Fonte única de design tokens do PatoDS, em formato W3C DTCG 2025.10, compilada para CSS por marca e
-módulos ESM tipados. Marca e modo (claro/escuro) são eixos independentes, selecionados por atributos
-de dados. `patods` é o valor provisório do prefixo do projeto (ver `TODO(PREFIXO)` na constituição).
+Single source of PatoDS design tokens, in W3C DTCG 2025.10 format, compiled to per-brand CSS and
+typed ESM modules. Brand and mode (light/dark) are independent axes, selected by data
+attributes. `patods` is the provisional value of the project prefix (see `TODO(PREFIXO)` in the constitution).
 
-## Instalação
+## Installation
 
 ```bash
 pnpm add @patods/tokens
 ```
 
-## Uso mínimo
+## Minimal usage
 
-Importe o CSS base e o da marca, e selecione marca e modo por atributo:
+Import the base CSS and the brand CSS, and select brand and mode by attribute:
 
 ```html
 <link rel="stylesheet" href="@patods/tokens/css/base.css" />
@@ -23,7 +23,7 @@ Importe o CSS base e o da marca, e selecione marca e modo por atributo:
 </body>
 ```
 
-Referências tipadas e mapas de valores em TypeScript:
+Typed references and value maps in TypeScript:
 
 ```ts
 import { tokens } from '@patods/tokens'
@@ -33,7 +33,7 @@ element.style.color = tokens['color.fg.default'] // "var(--patods-color-fg-defau
 const surfaceDark = values.a.dark['color.bg.surface'] // "#101216"
 ```
 
-## Documentação completa
+## Full documentation
 
-Especificação da feature: [specs/001-design-tokens-themes](../../specs/001-design-tokens-themes/spec.md).
-Contrato dos pacotes gerados: [contracts/](../../specs/001-design-tokens-themes/contracts/).
+Feature specification: [specs/001-design-tokens-themes](../../specs/001-design-tokens-themes/spec.md).
+Contract of the generated packages: [contracts/](../../specs/001-design-tokens-themes/contracts/).
