@@ -1,5 +1,5 @@
 {
-  "$description": "Camada primitiva: únicos tokens com valor literal (TOK-02, V-02). Invariantes de marca e modo (V-07). O primeiro segmento é sempre uma categoria do TOK-10 (V-06).",
+  "$description": "Primitive layer: the only tokens with a literal value (TOK-02, V-02). Brand and mode invariants (V-07). The first segment is always a category from TOK-10 (V-06).",
   "color": {
     "$type": "color",
     "white": { "$value": { "colorSpace": "srgb", "components": [1, 1, 1], "hex": "#ffffff" } },
