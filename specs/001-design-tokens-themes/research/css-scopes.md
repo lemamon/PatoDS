@@ -16,7 +16,7 @@ WHY IT IS CORRECT
 - Mode toggles are declared only on mode scopes (plus the defaults), so they come from the nearest mode scope.
 - The resolver runs again on every element that is a scope for either axis. Each public token there = f(nearest brand raw, nearest mode toggle).
 - An element that is not a scope inherits from its nearest scope element. Nothing changed in between, so the values are right.
-- This literally meets TOK-14 / FR-012: "cada escopo redeclara os tokens semânticos".
+- This literally meets TOK-14 / FR-012: "each scope redeclares the semantic tokens".
 - FR-014: an invalid value (data-brand="zzz", "", mode "sepia", or a brand whose CSS is not imported) still matches the resolver, which uses attribute presence. No brand or mode rule matches it, so the resolver recomputes from the inherited inputs and gets the ancestor's values. No variable is left unset.
 - Toggles select any token type: colors, multi-layer shadow lists (commas are fine inside var() fallbacks and raw values), opacity numbers, dimensions.
 - SSR: pure CSS keyed on attributes that are already in the server HTML. No JS, no flash.
@@ -75,7 +75,7 @@ GENERATOR RULES
 - Sort by token name, use fixed formatting and no timestamps, so output is byte-identical (FR-015).
 - Keep the private `_` segment out of ESM/.d.ts, the DOM contract and the API report.
 - Primitives never appear in scope rules. Whether to emit them at all is a separate decision.
-- Prefix and default brand are generator parameters; their values are pending with the requerente.
+- Prefix and default brand are generator parameters; their values are pending with the requester.
 
 EVIDENCE
 - I built a harness (scratchpad scope-test/gen.mjs, page.mjs, run.mjs) and ran it on Playwright builds of Chromium 156, Firefox 157 and WebKit 26.4.
@@ -133,7 +133,7 @@ REAL-BROWSER TEST MUST COVER (every engine in the list nightly, one engine per P
 - FR-016 / TOK-06: ESM exports only public var(--<prefixo>-*) names. The private _ namespace is excluded from types. Value maps per brand×mode come from the same resolved data.
 - FR-017 / ENG-06 / SC-006: Each brand file holds only its own brand selectors plus byte-identical brand-neutral blocks; :root appears only in the default file. Import order does not matter. A CI selector audit and the example-app runtime check (public tokens non-empty) enforce it.
 - FR-018 / TOK-07 / US3-3: Swapping attributes at runtime updates values without reload or component code (verified with random runtime mutations). Adding a brand only adds token source files; the generator emits a new file.
-- ADR-03 / Principle III / MIG-14: All rules live in @layer <prefixo>.tokens, so unlayered app CSS still overrides. Every published file starts with the same canonical layer-order statement; layer names follow the núcleo's published layer contract.
+- ADR-03 / Principle III / MIG-14: All rules live in @layer <prefixo>.tokens, so unlayered app CSS still overrides. Every published file starts with the same canonical layer-order statement; layer names follow the core's published layer contract.
 - ENG-08: Uses only custom properties, var() fallback, :where/:is/:not with complex arguments, @layer and color-scheme, all Baseline widely available. Floor = the @layer floor already required by ADR-03, so the CSS compat lint stays green for any list at or above it.
 - Principle IX / ENG-07 / ENG-16 / ENG-17 / ENG-21 / ENG-24: No new dependency, no install scripts, no license exposure. It is a formatter inside the already-chosen token tool.
 - A11Y-09: Contrast checks read the per-brand×mode resolved values, unaffected by the CSS mechanism. color-scheme on mode scopes keeps native widgets readable in dark subtrees.
@@ -157,7 +157,7 @@ REAL-BROWSER TEST MUST COVER (every engine in the list nightly, one engine per P
 
 
 ## ADR
-ADR-NN: Escopos de marca e modo em CSS: toggles de variável, valores brutos por marca e resolvedor de tokens em cada escopo
+ADR-NN: Brand and mode scopes in CSS: variable toggles, per-brand raw values and a token resolver on every scope
 
 ## SOURCES
 - https://drafts.csswg.org/css-variables-1/ — A custom property's computed value is its specified value with var() substituted, and it inherits. The initial value is the guaranteed-invalid value; a var() fallback is used when the referenced value is guaranteed-invalid; `--foo:;` is a valid empty value.
@@ -181,14 +181,14 @@ ADR-NN: Escopos de marca e modo em CSS: toggles de variável, valores brutos por
 
 # VERIFICATION: needs_changes
 - [major] CLAIM: requirement_fit for FR-013, FR-014, FR-017 and SC-006/ENG-06: no unset variables (verified), and each brand file holds only its own brand selectors.
-  PROBLEM: This is true only for public tokens. By design, every scope leaves one private toggle guaranteed-invalid (`initial`) and the other empty. I re-ran the harness and added a probe: getPropertyValue returns "" for BOTH --px-_on-light and --px-_on-dark on html in Chromium 156.0.8078.4, Firefox 157 and WebKit 26.4. The spec text says otherwise. FR-013: "nenhuma variável PODE ficar sem valor". FR-014 and SC-006 say "zero variáveis sem valor". ENG-06 says "Essa app não tem variáveis CSS sem valor". The harness oracle checks only public tokens, so '(verified)' overclaims. Same pattern for FR-017/ENG-06 "só seletores dessa marca": every brand file carries brand-neutral selectors ([data-<prefixo>-mode=...] and :where([data-<prefixo>-brand],[data-<prefixo>-mode])). The result treats both as test-scoping choices (risk #1), but they reinterpret contractual acceptance wording. A naive acceptance scanner (ACE-01/ACE-02, FR-031) would fail Phase 1.
-  CORRECTION: Make the operational definitions explicit in the spec (via /speckit-clarify, in FR-013/FR-014/FR-017/SC-006) and in the ADR's Consequences, and bind matching CI checks in the traceability matrix. (1) 'Variável sem valor' means: any public --<prefixo>-* name (without `_`) that is empty or guaranteed-invalid on any element, or any var() reference without a fallback that resolves that way. The private --<prefixo>-_on-* toggles are excluded by naming rule. (2) 'Só seletores dessa marca' means: every brand-valued attribute selector names only that brand; :root appears only in the default file; brand-neutral blocks are byte-identical across files. Do not claim literal compliance until this is recorded.
+  PROBLEM: This is true only for public tokens. By design, every scope leaves one private toggle guaranteed-invalid (`initial`) and the other empty. I re-ran the harness and added a probe: getPropertyValue returns "" for BOTH --px-_on-light and --px-_on-dark on html in Chromium 156.0.8078.4, Firefox 157 and WebKit 26.4. The spec text says otherwise. FR-013: "no variable MAY be left without a value". FR-014 and SC-006 say "zero variables without a value". ENG-06 says "This app has no CSS variables without a value". The harness oracle checks only public tokens, so '(verified)' overclaims. Same pattern for FR-017/ENG-06 "only that brand's selectors": every brand file carries brand-neutral selectors ([data-<prefixo>-mode=...] and :where([data-<prefixo>-brand],[data-<prefixo>-mode])). The result treats both as test-scoping choices (risk #1), but they reinterpret contractual acceptance wording. A naive acceptance scanner (ACE-01/ACE-02, FR-031) would fail Phase 1.
+  CORRECTION: Make the operational definitions explicit in the spec (via /speckit-clarify, in FR-013/FR-014/FR-017/SC-006) and in the ADR's Consequences, and bind matching CI checks in the traceability matrix. (1) 'Variable without a value' means: any public --<prefixo>-* name (without `_`) that is empty or guaranteed-invalid on any element, or any var() reference without a fallback that resolves that way. The private --<prefixo>-_on-* toggles are excluded by naming rule. (2) 'Only that brand's selectors' means: every brand-valued attribute selector names only that brand; :root appears only in the default file; brand-neutral blocks are byte-identical across files. Do not claim literal compliance until this is recorded.
 - [minor] CLAIM: Evidence: computed public tokens compared against a DOM-walk oracle, 0 failures.
   PROBLEM: The oracle runs norm() (trim and collapse whitespace), which hides the fact that every public mode-dependent token computes with stray whitespace in all 3 engines: light "#ffffff ", dark " #101010", shadow "0 0 0 2px #ffffff, 0 0 0 4px #0055cc ". The cause is the space between the two var() toggles. CSS consumption is unaffected, but these consumers see padded strings: JS readers of getComputedStyle, consumer style()/if() queries, DOM-contract and snapshot extraction, and exact-match runtime checks.
   CORRECTION: Emit the two toggles with no separator: `var(--<prefixo>-_on-light, L)var(--<prefixo>-_on-dark, D)`. I patched the harness this way and compared exact strings with no trimming: 0 failures across all 6 configs × 3 seeds, with and without the minified `--x:;` form, in Chromium 156, Firefox 157 and WebKit 26.4. esbuild 0.21.5 minification keeps both `--x: ;` and the adjacent var()s. Make the oracle and the case-17 test compare exact strings, and add a generator lint for the no-separator form.
 - [minor] CLAIM: Browser floor = the @layer floor that ADR-03 already imposes: Chrome/Edge 99, Firefox 97, Safari 15.4.
-  PROBLEM: The browser list is an open requerente decision (Premissas: 'navegadores em lista versionada (ex.: browserslist)'). Worded as 'Browser floor =', it reads as fixing the list. The floor is also a static compat claim and was not tested: all evidence ran on Playwright pre-release builds (Chromium 156 dev, Firefox 157 Nightly, WebKit 26.4). The Chrome-99 claim for `--x:;` rests on Svelte PR 7303, which says only that the fix 'will be released in Chrome 99'.
-  CORRECTION: Rephrase: 'The mechanism needs nothing beyond @layer, which ADR-03 already requires (web-features: Chrome/Edge 99, Firefox 97, Safari 15.4). The project browser list stays the open decision under its premissa.' State that floor compatibility is enforced by the ENG-08 CSS compat lint, not by real-browser tests at floor versions.
+  PROBLEM: The browser list is an open requester decision (Assumptions: 'browsers in a versioned list (e.g. browserslist)'). Worded as 'Browser floor =', it reads as fixing the list. The floor is also a static compat claim and was not tested: all evidence ran on Playwright pre-release builds (Chromium 156 dev, Firefox 157 Nightly, WebKit 26.4). The Chrome-99 claim for `--x:;` rests on Svelte PR 7303, which says only that the fix 'will be released in Chrome 99'.
+  CORRECTION: Rephrase: 'The mechanism needs nothing beyond @layer, which ADR-03 already requires (web-features: Chrome/Edge 99, Firefox 97, Safari 15.4). The project browser list stays the open decision under its assumption.' State that floor compatibility is enforced by the ENG-08 CSS compat lint, not by real-browser tests at floor versions.
 - [minor] CLAIM: Primitives never appear in scope rules. Whether to emit them at all is a separate decision.
   PROBLEM: FR-016/TOK-06 requires ESM var(--<prefixo>-*) references for ALL tokens, so primitives must exist as CSS custom properties or those references dangle, which itself breaks ENG-06. Placement interacts with this topic. Non-default brand files may not contain :root, so primitives emitted only at :root leave a B-only app without them. A shared palette emitted into every brand file can leak primitives used only by brand B into brand A's bundle (also ENG-06). Per FR-004, primitives are brand- and mode-invariant, so the mechanism can carry them.
   CORRECTION: Keep the emission choice as a dependent decision, but write down its constraints: references must resolve (FR-016); no B-exclusive variables in A's file (ENG-06); no :root in non-default files (FR-013). Primitives, being invariant, go either in a brand-neutral selector present in every brand file (filtered to the primitives that brand references) or in a separate shared file. Drop 'never in scope rules'.
@@ -201,9 +201,9 @@ ADR-NN: Escopos de marca e modo em CSS: toggles de variável, valores brutos por
 - [minor] CLAIM: Risk: consumer override at :root is shadowed again at each nested scope; document override on the scope element.
   PROBLEM: Incomplete. I verified in all 3 engines that a semantic override on a non-scope element (style="--px-color-accent: …") changes --px-color-accent for its descendants but NOT --px-button-bg, because the component alias stays frozen at the nearest scope element. Any nested scope also reverts the override.
   CORRECTION: Document both effects: alias staleness for overrides on non-scope elements, and the revert at nested scopes. The supported pattern is to override on a scope element, unlayered, and to override component tokens directly.
-- [minor] CLAIM: Every published file starts with the same canonical layer-order statement; layer names follow the núcleo's published layer contract.
-  PROBLEM: MIG-14 makes the layer order the núcleo's published contract, with a CI check against the distributed @layer statement. Having the tokens package (the lowest layer) hard-code the full order, including núcleo layer names, creates two sources for one fact.
-  CORRECTION: Keep one source for the layer list (for example a generated constant owned by the lowest layer and consumed by the núcleo), and extend the MIG-14 CI check to the token CSS files.
+- [minor] CLAIM: Every published file starts with the same canonical layer-order statement; layer names follow the core's published layer contract.
+  PROBLEM: MIG-14 makes the layer order the core's published contract, with a CI check against the distributed @layer statement. Having the tokens package (the lowest layer) hard-code the full order, including core layer names, creates two sources for one fact.
+  CORRECTION: Keep one source for the layer list (for example a generated constant owned by the lowest layer and consumed by the core), and extend the MIG-14 CI check to the token CSS files.
 - [minor] CLAIM: Source: https://lea0.verou.me/2020/10/the-var-space-hack-to-toggle-multiple-values-with-one-custom-property
   PROBLEM: Wrong host. lea0.verou.me returns an expired TLS certificate.
   CORRECTION: Cite https://lea.verou.me/blog/2020/10/the-var-space-hack-to-toggle-multiple-values-with-one-custom-property/ (Lea Verou, 2020-10-12).
@@ -214,11 +214,11 @@ Keep option (b): pure CSS with no new npm dependency, all in @layer <prefixo>.to
 (a) Emit the resolver with no whitespace between the toggles: `var(--<prefixo>-_on-light, L)var(--<prefixo>-_on-dark, D)`. Computed token strings then match the reference exactly; I verified this in Chromium 156, Firefox 157 and WebKit 26.4, minified and unminified. Make the oracle and tests compare exact strings with no trimming.
 
 (b) Before the ADR is accepted, record in the spec (FR-013/FR-014/FR-017/SC-006, via /speckit-clarify) and in the ADR the operational definitions:
-- 'Variável sem valor' covers public --<prefixo>-* names (without `_`) and var() references without a fallback. The private _on-* toggles are by design guaranteed-invalid or empty and are excluded.
-- 'Só seletores dessa marca' means brand-valued attribute selectors name only that brand, :root appears only in the default file, and brand-neutral blocks are byte-identical.
+- 'Variable without a value' covers public --<prefixo>-* names (without `_`) and var() references without a fallback. The private _on-* toggles are by design guaranteed-invalid or empty and are excluded.
+- 'Only that brand's selectors' means brand-valued attribute selectors name only that brand, :root appears only in the default file, and brand-neutral blocks are byte-identical.
 Bind both checks in the traceability matrix.
 
-(c) State the browser impact as 'requires nothing beyond @layer (ADR-03)'. The browser list stays the open decision under its premissa.
+(c) State the browser impact as 'requires nothing beyond @layer (ADR-03)'. The browser list stays the open decision under its assumption.
 
 (d) Primitive emission remains a dependent decision with these constraints: FR-016 references must resolve; no B-exclusive variables in A's file; no :root in non-default files. Primitives are invariant per FR-004, so they go in a neutral block filtered per brand, or in a shared file.
 
