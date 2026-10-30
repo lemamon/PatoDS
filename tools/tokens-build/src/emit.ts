@@ -5,7 +5,7 @@ export class UnserializableValueError extends Error {
   type: string
   id: string
   constructor(type: string, id: string) {
-    super(`Valor não serializável (unserializable-value): tipo "${type}" em "${id}" (S-04).`)
+    super(`Unserializable value (unserializable-value): type "${type}" in "${id}" (S-04).`)
     this.type = type
     this.id = id
   }
