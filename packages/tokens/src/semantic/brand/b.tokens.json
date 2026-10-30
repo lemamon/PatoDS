@@ -1,5 +1,5 @@
 {
-  "$description": "Marca sintética B. Tokens brand.* (role brand-mode-source, FR-033): fonte de eixo marca com um valor por modo.",
+  "$description": "Synthetic brand B. brand.* tokens (role brand-mode-source, FR-033): brand-axis source with one value per mode.",
   "brand": {
     "color": {
       "$type": "color",
