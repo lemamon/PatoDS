@@ -37,7 +37,7 @@ export class InMemoryDesignTool implements DesignToolPort {
     let applied = 0
     for (const op of plan) {
       if (this.faults.failAfterOperations !== undefined && applied >= this.faults.failAfterOperations) {
-        throw new Error(`falha simulada após ${applied} operações`)
+        throw new Error(`simulated failure after ${applied} operations`)
       }
       switch (op.op) {
         case 'create':
@@ -59,7 +59,7 @@ export class InMemoryDesignTool implements DesignToolPort {
   }
 
   async requestPublish(): Promise<'published' | { manual: string }> {
-    return this.caps.publish === 'api' ? 'published' : { manual: 'Publique a biblioteca manualmente.' }
+    return this.caps.publish === 'api' ? 'published' : { manual: 'Publish the library manually.' }
   }
 
   // Test helpers
