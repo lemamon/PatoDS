@@ -89,7 +89,7 @@ export function parseEmitted(s: string): { rgb: [number, number, number]; alpha:
     const scale = r > 1 || g > 1 || b > 1 ? 255 : 1
     return { rgb: [r / scale, g / scale, b / scale], alpha: a }
   }
-  throw new Error(`Cor emitida não reconhecida: ${s}`)
+  throw new Error(`Emitted color not recognized: ${s}`)
 }
 
 /** WCAG 2.x contrast ratio (no rounding). */
