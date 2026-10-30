@@ -1,4 +1,4 @@
-# Implementation Plan: Design tokens e temas
+# Implementation Plan: Design tokens and themes
 
 **Branch**: `001-design-tokens-themes` | **Date**: 2026-10-21 | **Spec**: [spec.md](spec.md)
 
@@ -6,92 +6,92 @@
 
 ## Summary
 
-Entregar a fonte única de tokens do PatoDS em DTCG 2025.10, com três camadas, marca e modo como
-modificadores ortogonais do Resolver, validação completa no CI, saídas determinísticas (CSS por
-marca com escopos aninhados, ESM tipado, manifestos, relatório), checagem de contraste em todas as
-combinações, lint de estilos guiado por manifesto e sincronização com a ferramenta de design em
-portas e adaptadores, sem escolher a ferramenta.
+Deliver the PatoDS single token source in DTCG 2025.10, with three layers, brand and mode as
+orthogonal modifiers of the Resolver, full CI validation, deterministic outputs (CSS per
+brand with nested scopes, typed ESM, manifests, report), contrast check across all
+combinations, manifest-driven style lint, and sync with the design tool in ports
+and adapters, without choosing the tool.
 
-Abordagem técnica ([research.md](research.md)):
+Technical approach ([research.md](research.md)):
 
-- Build sobre `@terrazzo/parser` como biblioteca, com regras e formatadores próprios rodando sobre
-  todas as permutações marca × modo (D1).
-- Monorepo pnpm 11 + Turborepo 2, Node 24 LTS na toolchain (D2).
-- CSS puro com toggles de espaço, um `base.css` neutro e um arquivo por marca, `@layer
+- Build on `@terrazzo/parser` as a library, with custom rules and formatters running over
+  all brand × mode permutations (D1).
+- pnpm 11 + Turborepo 2 monorepo, Node 24 LTS in the toolchain (D2).
+- Pure CSS with space toggles, a brand-neutral `base.css`, and one file per brand, `@layer
   <prefixo>.tokens` (D3).
-- Sincronização em portas e adaptadores com fake em memória; adaptador real só após a decisão do
-  requerente (D4).
-- colorjs.io atrás de adaptador único, WCAG 2.2 próprio, composição alfa sobre pilha opaca (D5).
-- Regra Stylelint própria, Vitest, tsc sobre tarball, Playwright em navegador real (D6).
-- Modelo da fonte que atende juntos FR-011, FR-012, FR-017, DSN-04 e DSN-05 (D7, FR-033).
+- Sync in ports and adapters with an in-memory fake; a real adapter only after the requester's
+  decision (D4).
+- colorjs.io behind a single adapter, custom WCAG 2.2, alpha compositing over an opaque stack (D5).
+- Custom Stylelint rule, Vitest, tsc over the tarball, Playwright in a real browser (D6).
+- A source model that satisfies FR-011, FR-012, FR-017, DSN-04, and DSN-05 together (D7, FR-033).
 
-Decisões registradas como ADR-11 a ADR-16 ([docs/adr/](../../docs/adr/README.md)), status
-Proposto até aprovação de dono (GOV-07, GOV-09).
+Decisions recorded as ADR-11 to ADR-16 ([docs/adr/](../../docs/adr/README.md)), status
+Proposed until owner approval (GOV-07, GOV-09).
 
 ## Technical Context
 
-**Language/Version**: TypeScript 6.0.x (compilador único de emissão) sobre Node.js 24.x LTS
-(`.node-version`). Piso de `engines` e da matriz ENG-08 pela premissa vigente: Node 22 LTS;
-"mais recente": Node 26 LTS a partir de 2026-10-28. Eixo TS 7.0.x só para `tsc` nos testes de tipos.
+**Language/Version**: TypeScript 6.0.x (single emission compiler) over Node.js 24.x LTS
+(`.node-version`). `engines` floor and the ENG-08 matrix per the current premise: Node 22 LTS;
+"latest": Node 26 LTS from 2026-10-28. TS 7.0.x axis only for `tsc` in the type tests.
 
-**Primary Dependencies**: `@terrazzo/parser` e `@terrazzo/token-tools` 2.9.0 (exatos, via
-`overrides`), `ajv` 8.x exato, `colorjs.io` 0.7.1, `stylelint` 17.16.x com `@csstools/*` 4.x e
-`postcss-selector-parser` 7.x. Todas como devDependencies de pacotes `tools/*`; o pacote publicado
-`@<prefixo>/tokens` não tem dependência de runtime.
+**Primary Dependencies**: `@terrazzo/parser` and `@terrazzo/token-tools` 2.9.0 (exact, via
+`overrides`), `ajv` 8.x exact, `colorjs.io` 0.7.1, `stylelint` 17.16.x with `@csstools/*` 4.x and
+`postcss-selector-parser` 7.x. All as devDependencies of `tools/*` packages; the published package
+`@<prefixo>/tokens` has no runtime dependency.
 
-**Storage**: arquivos versionados (fonte DTCG, manifestos, configurações em `quality/`); saídas
-geradas em `dist/` fora do controle de versão; log de sincronização como asset de release.
+**Storage**: versioned files (DTCG source, manifests, configurations in `quality/`); outputs
+generated in `dist/` outside version control; sync log as a release asset.
 
-**Testing**: Vitest 5.0.x (unidade, ambiente Node), `tsc --noEmit` + `expect-type` em projeto
-consumidor do tarball (TS 6.0.x e 7.0.x), `publint`, `@playwright/test` 1.64.x em imagem oficial
-fixada por digest, scripts próprios de determinismo, drift, varredura e camadas. TS 7.0.x entra só
-no projeto consumidor de tipos, por catálogo nomeado do pnpm (`catalogs.typescript7`), sem conflito
-com o `catalogMode: strict` do TS 6.0 da toolchain.
+**Testing**: Vitest 5.0.x (unit, Node environment), `tsc --noEmit` + `expect-type` in a tarball-consuming
+project (TS 6.0.x and 7.0.x), `publint`, `@playwright/test` 1.64.x on the official image
+pinned by digest, custom determinism, drift, scan, and layer scripts. TS 7.0.x enters only
+in the type-consumer project, via a pnpm named catalog (`catalogs.typescript7`), without conflict
+with the toolchain's TS 6.0 `catalogMode: strict`.
 
-**Target Platform**: navegadores da lista versionada (premissa ENG-08, valores pendentes); o
-mecanismo CSS exige só `@layer`, já exigido pelo ADR-03. CI em GitHub Actions (premissa a
-confirmar).
+**Target Platform**: browsers from the versioned list (ENG-08 premise, values pending); the
+CSS mechanism requires only `@layer`, already required by ADR-03. CI on GitHub Actions (premise to
+confirm).
 
-**Project Type**: biblioteca (pacote de tokens) + ferramentas de build e CI em monorepo.
+**Project Type**: library (token package) + build and CI tools in a monorepo.
 
-**Performance Goals**: build e validação curtos o bastante para o pipeline caber no limite do QA-11
-se ele for contratado (Desejável; premissa: mediana de 15 min no PR inteiro); CSS de tokens medido contra o orçamento de bundle do QA-07 (cerca de
-5,6 KB gzip por marca com 350 tokens sintéticos).
+**Performance Goals**: build and validation short enough for the pipeline to fit within the QA-11 limit
+if it is contracted (Desirable; premise: median of 15 min for the whole PR); token CSS measured against the QA-07 bundle budget (about
+5.6 KB gzip per brand with 350 synthetic tokens).
 
-**Constraints**: saída byte a byte idêntica entre builds, caminhos, fusos, locales, runners e Node
-piso/mais recente (FR-015, SC-002); nenhuma rede no build (`$ref` remoto bloqueado); nenhum token
-fora da fonte (FR-001); lockfile congelado e nenhum script de instalação fora da allowlist (ENG-16,
-ENG-24); nenhuma rotina importa variáveis da ferramenta para o repositório (FR-025).
+**Constraints**: byte-for-byte identical output between builds, paths, time zones, locales, runners, and Node
+floor/latest (FR-015, SC-002); no network in the build (remote `$ref` blocked); no token
+outside the source (FR-001); frozen lockfile and no install script outside the allowlist (ENG-16,
+ENG-24); no routine imports variables from the tool into the repository (FR-025).
 
-**Scale/Scope**: N marcas × 2 modos (N pendente com o requerente); 11 categorias; ordem de centenas
-de tokens; 1 pacote publicado e 6 pacotes privados de ferramenta.
+**Scale/Scope**: N brands × 2 modes (N pending with the requester); 11 categories; on the order of hundreds
+of tokens; 1 published package and 6 private tool packages.
 
-Sem NEEDS CLARIFICATION técnico em aberto: todos resolvidos em [research.md](research.md). Itens
-que só o requerente decide seguem premissas vigentes (research.md, "Perguntas ao requerente").
+No open technical NEEDS CLARIFICATION: all resolved in [research.md](research.md). Items
+that only the requester decides follow current premises (research.md, "Questions for the requester").
 
 ## Constitution Check
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-Avaliação inicial (antes da pesquisa) e reavaliação após o design (Phase 1). Todas as respostas
-"sim"; nenhuma violação.
+Initial assessment (before research) and reassessment after design (Phase 1). All answers
+"yes"; no violation.
 
-| # | Pergunta (Constituição, Fluxo Spec Kit) | Inicial | Pós-design | Evidência no design |
+| # | Question (Constitution, Spec Kit Flow) | Initial | Post-design | Evidence in the design |
 | --- | --- | --- | --- | --- |
-| 1 | Todo dado de componente ou de token vem das três fontes e todo consumidor o obtém do derivado, sem cópia à mão? (I) | Sim | Sim | Fonte DTCG única; CSS, ESM, manifestos e sync-manifest derivados; valores esperados dos testes vêm do mapa gerado; varredura do FR-001 |
-| 2 | Estilos consomem só semânticos ou de componente, e a sincronização segue a direção vigente com divergências detectadas? (II) | Sim | Sim | Lint `primitive-token`, `literal-value`, `brand-mode-source-token`; porta sem operação ferramenta → repositório; detecção semanal e por versão |
-| 3 | Pacotes de framework sem CSS, núcleo sem seletor de primitivo headless, interativos sobre headless? (III) | Sim | Sim | Não se aplica diretamente (sem componentes); CSS de tokens fica no pacote de tokens, em `@layer`, com prefixo |
-| 4 | Paridade de API, DOM e comportamento React/Vue mantida? (IV) | Sim | Sim | Tokens são neutros de framework; testes React/Vue de tema aninhado ficam na feature de componentes |
-| 5 | Cobertura de motor de regras, teclado, foco, reflow, alvo, contraste, declaração e exceções? (V) | Sim | Sim | Contraste de todos os pares em todas as permutações (FR-019 a FR-021); demais itens são de componentes |
-| 6 | SSR, RSC, CSP, i18n e uso sem provedor válidos? (VI) | Sim | Sim | CSS puro por atributos, sem JS e sem estilo injetado; combinação padrão sem provedor (FR-013) |
-| 7 | Testes em navegador real, matriz de motores, limiares do arquivo do QA-14? (VII) | Sim | Sim | Playwright em Chromium/Firefox/WebKit; mínimos de contraste em `quality/thresholds.json`; app de exemplo consome o tarball |
-| 8 | Dados para agentes do catálogo, ferramentas somente leitura? (VIII) | Sim | Sim | Não se aplica (catálogo e MCP em outras features); manifestos de tokens serão insumo do catálogo |
-| 9 | Dependências, segredos, publicação e ativos seguem a cadeia de suprimentos? (IX) | Sim | Sim | Pinos exatos, `minimumReleaseAge`, `allowBuilds`, política de licenças, actions por SHA, credenciais em environments, segredos fixos justificados |
-| 10 | SemVer, estágio e depreciação respeitados? (X) | Sim | Sim | Remoção ou renomeação de token = major; relatório de API de tokens versionado |
-| 11 | Fronteiras de camada válidas? (XI) | Sim | Sim | Tags `tokens`, `tools`, `apps` em `turbo.json`; ferramentas só como devDependency; `tools/color` folha |
-| 12 | Coexistência com legados sem conflito? (XII) | Sim | Sim | Prefixo em variáveis e atributos; `@layer <prefixo>.tokens`; ordem das camadas de fonte única (MIG-14) |
-| 13 | Documentação cobre React e Vue, gerada do catálogo, exemplos, README, links? (XIII) | Sim | Sim | README do pacote de tokens (DOC-08) e convenção de nomes; site e fundamentos na feature de docs |
-| 14 | Dentro do escopo e do Inventário, prioridade respeitada, premissas citadas? (Restrições) | Sim | Sim | TOK-12 condicional; premissas citadas em spec, research e ADRs; nenhuma decisão do requerente tomada |
+| 1 | Does all component or token data come from the three sources and does every consumer obtain it from the derived output, without a hand copy? (I) | Yes | Yes | Single DTCG source; CSS, ESM, manifests, and sync-manifest derived; the tests' expected values come from the generated map; FR-001 scan |
+| 2 | Do styles consume only semantics or components, and does the sync follow the current direction with divergences detected? (II) | Yes | Yes | Lint `primitive-token`, `literal-value`, `brand-mode-source-token`; port with no tool → repository operation; weekly and per-version detection |
+| 3 | Framework packages without CSS, core without a headless primitive selector, interactives over headless? (III) | Yes | Yes | Does not apply directly (no components); token CSS stays in the token package, in `@layer`, with a prefix |
+| 4 | API, DOM, and React/Vue behavior parity maintained? (IV) | Yes | Yes | Tokens are framework-neutral; React/Vue nested-theme tests stay in the components feature |
+| 5 | Coverage of rules engine, keyboard, focus, reflow, target, contrast, declaration, and exceptions? (V) | Yes | Yes | Contrast of all pairs in all permutations (FR-019 to FR-021); the rest are component items |
+| 6 | SSR, RSC, CSP, i18n, and provider-less use valid? (VI) | Yes | Yes | Pure CSS by attributes, with no JS and no injected style; default combination without a provider (FR-013) |
+| 7 | Tests in a real browser, engine matrix, thresholds from the QA-14 file? (VII) | Yes | Yes | Playwright on Chromium/Firefox/WebKit; contrast minimums in `quality/thresholds.json`; the example app consumes the tarball |
+| 8 | Data for catalog agents, read-only tools? (VIII) | Yes | Yes | Does not apply (catalog and MCP in other features); token manifests will be a catalog input |
+| 9 | Dependencies, secrets, publishing, and assets follow the supply chain? (IX) | Yes | Yes | Exact pins, `minimumReleaseAge`, `allowBuilds`, license policy, actions by SHA, credentials in environments, static secrets justified |
+| 10 | SemVer, stage, and deprecation respected? (X) | Yes | Yes | Removing or renaming a token = major; versioned token API report |
+| 11 | Layer boundaries valid? (XI) | Yes | Yes | Tags `tokens`, `tools`, `apps` in `turbo.json`; tools only as devDependency; `tools/color` a leaf |
+| 12 | Coexistence with legacy without conflict? (XII) | Yes | Yes | Prefix in variables and attributes; `@layer <prefixo>.tokens`; single-source layer order (MIG-14) |
+| 13 | Does documentation cover React and Vue, generated from the catalog, examples, README, links? (XIII) | Yes | Yes | README of the token package (DOC-08) and name convention; site and fundamentals in the docs feature |
+| 14 | Within scope and the Inventory, priority respected, premises cited? (Constraints) | Yes | Yes | TOK-12 conditional; premises cited in spec, research, and ADRs; no requester decision taken |
 
 ## Project Structure
 
@@ -99,11 +99,11 @@ Avaliação inicial (antes da pesquisa) e reavaliação após o design (Phase 1)
 
 ```text
 specs/001-design-tokens-themes/
-├── plan.md              # Este arquivo
-├── research.md          # Phase 0: decisões D1 a D7
-├── research/            # Relatórios brutos por tópico, com reverificação
-├── data-model.md        # Phase 1: entidades e regras V-01 a V-16
-├── quickstart.md        # Phase 1: guia de validação
+├── plan.md              # This file
+├── research.md          # Phase 0: decisions D1 to D7
+├── research/            # Raw reports by topic, with re-verification
+├── data-model.md        # Phase 1: entities and rules V-01 to V-16
+├── quickstart.md        # Phase 1: validation guide
 ├── contracts/           # Phase 1
 │   ├── token-source.md
 │   ├── css-output.md
@@ -117,119 +117,118 @@ specs/001-design-tokens-themes/
 │   └── requirements.md
 └── tasks.md             # Phase 2 (/speckit-tasks)
 
-docs/adr/                # ADR-11 a ADR-16 (Proposto)
+docs/adr/                # ADR-11 to ADR-16 (Proposed)
 ```
 
 ### Source Code (repository root)
 
 ```text
-package.json                 # scripts raiz via turbo; packageManager pnpm 11 exato
+package.json                 # root scripts via turbo; packageManager pnpm 11 exact
 pnpm-workspace.yaml          # workspaces, catalog strict, allowBuilds, minimumReleaseAge
-stylelint.config.mjs         # gate do lint de estilos (fixtures nesta feature)
-turbo.json                   # tarefas, globalDependencies, boundaries.tags (arquivo de camadas)
+stylelint.config.mjs         # style lint gate (fixtures in this feature)
+turbo.json                   # tasks, globalDependencies, boundaries.tags (layer file)
 .node-version                # 24.x
 .gitattributes               # LF
 quality/
-├── thresholds.json          # QA-14 (seção de contraste nesta feature)
+├── thresholds.json          # QA-14 (contrast section in this feature)
 ├── license-policy.json      # ENG-21
-└── scan-allowlist.json      # varredura do FR-001
+└── scan-allowlist.json      # FR-001 scan
 packages/
-└── tokens/                  # @<prefixo>/tokens (publicado)
+└── tokens/                  # @<prefixo>/tokens (published)
     ├── src/
     │   ├── tokens.resolver.json
-    │   ├── layers.json         # fonte única da ordem das camadas @layer
+    │   ├── layers.json         # single source of the @layer order
     │   ├── primitive/*.tokens.json
     │   ├── semantic/invariant.tokens.json
     │   ├── semantic/brand/<id>.tokens.json
     │   ├── semantic/mode/{light,dark}.tokens.json
     │   └── component/*.tokens.json
     ├── contrast/{manifest.json,surfaces.json,manifest.schema.json,surfaces.schema.json}
-    ├── schemas/dtcg-2025.10/  # cópias versionadas + SHA256SUMS + licença W3C
-    ├── api/tokens.api.json    # relatório de API versionado
-    └── dist/                  # gerado, fora do git
+    ├── schemas/dtcg-2025.10/  # versioned copies + SHA256SUMS + W3C license
+    ├── api/tokens.api.json    # versioned API report
+    └── dist/                  # generated, outside git
 tools/
-├── tokens-build/            # adaptador do parser, validadores, formatadores, writer
-├── color/                   # folha: toEmittedSrgb, WCAG, composição
-├── tokens-contrast/         # checker do manifesto de contraste
-├── stylelint-plugin/        # <prefixo>/design-tokens e <prefixo>/contrast-pairs + fixtures
-├── design-sync/             # núcleo, portas, fake em memória, adaptadores GitHub; design-sync.config.json (SLA)
-└── repo-checks/             # determinismo, drift, varredura do FR-001, camadas
+├── tokens-build/            # parser adapter, validators, formatters, writer
+├── color/                   # leaf: toEmittedSrgb, WCAG, compositing
+├── tokens-contrast/         # contrast-manifest checker
+├── stylelint-plugin/        # <prefixo>/design-tokens and <prefixo>/contrast-pairs + fixtures
+├── design-sync/             # core, ports, in-memory fake, GitHub adapters; design-sync.config.json (SLA)
+└── repo-checks/             # determinism, drift, FR-001 scan, layers
 apps/
-└── tokens-example/          # Vite 8 sem framework, instala o tarball; testes Playwright
+└── tokens-example/          # Vite 8 without a framework, installs the tarball; Playwright tests
 tests/
-└── types-consumer/          # tsc estrito sobre o tarball (TS 6.0 e 7.0)
+└── types-consumer/          # strict tsc over the tarball (TS 6.0 and 7.0)
 docs/
 ├── adr/
 └── tokens/convencao-de-nomes.md
 .github/
-├── CODEOWNERS               # donos por área, incluindo o papel dono da sincronização (DSN-02)
+├── CODEOWNERS               # owners by area, including the sync owner role (DSN-02)
 └── workflows/
-    ├── tokens-ci.yml        # validação, build, testes, checks (PR, noturno)
-    └── design-sync.yml      # pós-promoção, cron semanal, dispatch manual
+    ├── tokens-ci.yml        # validation, build, tests, checks (PR, nightly)
+    └── design-sync.yml      # post-promotion, weekly cron, manual dispatch
 ```
 
-**Structure Decision**: monorepo do ADR-09 com três camadas nesta feature: `tokens` (pacote
-publicado), `tools` (privados, só devDependency) e `apps` (consumidores do tarball). Esta é a
-primeira feature, então ela cria o esqueleto do monorepo (workspace, turbo, toolchain, arquivo de
-camadas com as tags que usa). Os checks completos do ENG-01 (fixtures em `.vue`, regras de import no
-ESLint) e o cache remoto do ENG-03 ficam na feature de CI e governança, que reaproveita esta base.
-Até o requerente entregar as marcas, `packages/tokens/src` usa marcas de espaço reservado (`a`,
-padrão, e `b`) com valores sintéticos; elas não são publicadas no registro.
+**Structure Decision**: the ADR-09 monorepo with three layers in this feature: `tokens` (published
+package), `tools` (private, devDependency only), and `apps` (tarball consumers). This is the
+first feature, so it creates the monorepo skeleton (workspace, turbo, toolchain, layer file
+with the tags it uses). The full ENG-01 checks (fixtures in `.vue`, import rules in
+ESLint) and the ENG-03 remote cache stay in the CI and governance feature, which reuses this
+base. Until the requester delivers the brands, `packages/tokens/src` uses placeholder brands (`a`,
+default, and `b`) with synthetic values; they are not published to the registry.
 
-## Phase 0: Research (concluída)
+## Phase 0: Research (completed)
 
-[research.md](research.md): sete decisões (D1 a D7), alternativas, riscos, ajustes ao spec e
-perguntas ao requerente. Cada tópico foi pesquisado na web e reverificado por revisor cético;
-relatórios brutos em [research/](research/).
+[research.md](research.md): seven decisions (D1 to D7), alternatives, risks, adjustments to the spec, and
+questions for the requester. Each topic was researched on the web and re-verified by a skeptical reviewer; raw
+reports in [research/](research/).
 
-## Phase 1: Design & Contracts (concluída)
+## Phase 1: Design & Contracts (completed)
 
-- [data-model.md](data-model.md): entidades do spec, campos, regras V-01 a V-16, estados da
-  sincronização e da divergência.
-- [contracts/](contracts/): fonte DTCG e convenção, CSS gerado, ESM gerado, manifestos e relatório
-  do build, manifesto de contraste, regras de lint, sincronização e CLIs.
-- [quickstart.md](quickstart.md): cenários de validação por user story, com comandos e resultados
-  esperados.
-- ADR-11 a ADR-16 em [docs/adr/](../../docs/adr/README.md).
-- Spec ajustado com as clarificações da pesquisa e do design (seção Clarifications; FR-009, FR-013,
-  FR-017, FR-020, SC-005, SC-006 e novo FR-033).
-- Decisões de fechamento (research.md, D8): ordem das camadas em `src/layers.json`; só tokens
-  atômicos publicáveis (sem `typography` composto); relatório de API regenerado conta como arquivo de
-  tokens no diff de nova marca.
+- [data-model.md](data-model.md): spec entities, fields, rules V-01 to V-16, states of the
+  sync and the divergence.
+- [contracts/](contracts/): DTCG source and convention, generated CSS, generated ESM, manifests and the build
+  report, contrast manifest, lint rules, sync, and CLIs.
+- [quickstart.md](quickstart.md): validation scenarios per user story, with commands and expected
+  results.
+- ADR-11 to ADR-16 in [docs/adr/](../../docs/adr/README.md).
+- Spec adjusted with the clarifications from research and design (Clarifications section; FR-009, FR-013,
+  FR-017, FR-020, SC-005, SC-006, and new FR-033).
+- Closing decisions (research.md, D8): layer order in `src/layers.json`; only atomic tokens
+  publishable (no composite `typography`); the regenerated API report counts as a token
+  file in the new-brand diff.
 
-## Implementation Strategy (insumo para /speckit-tasks)
+## Implementation Strategy (input for /speckit-tasks)
 
-Ordem sugerida, alinhada às prioridades das user stories:
+Suggested order, aligned to the user story priorities:
 
-1. **Fundação** (bloqueia tudo): `git init`, esqueleto do monorepo (pnpm, turbo, toolchain,
-   `quality/`, arquivo de camadas), CI mínimo com actions por SHA, cópias dos schemas DTCG.
-2. **US1 (P1)**: `tools/tokens-build validate` com índice de origem, regras V-01 a V-13, relatório;
-   fonte inicial com marcas de espaço reservado; varredura do FR-001.
-3. **US2 (P2)**: formatadores CSS (`base.css`, `brand-<id>.css`) e ESM; manifestos; determinismo e
-   drift; app de exemplo do tarball com os casos de navegador real; testes de tipos.
-4. **US3 (P3)**: teste de marca adicional (C) com diff restrito à fonte; troca em runtime.
-5. **US4 (P4)**: `tools/color`, manifesto de contraste, `tools/tokens-contrast`, amostras em
-   navegador real com axe.
-6. **US5 (P5)**: `tools/stylelint-plugin` com fixtures e gate.
-7. **US6 (P6)**: `tools/design-sync` (núcleo, portas, fake, suíte de contrato, adaptadores GitHub),
-   workflow com gatilhos; adaptador real após a decisão do requerente.
-8. **Fechamento**: entradas na matriz de rastreabilidade (FR-031), README do pacote, convenção de
-   nomes, revisão de conformidade com a constituição.
+1. **Foundation** (blocks everything): `git init`, the monorepo skeleton (pnpm, turbo, toolchain,
+   `quality/`, layer file), minimal CI with actions by SHA, copies of the DTCG schemas.
+2. **US1 (P1)**: `tools/tokens-build validate` with a source index, rules V-01 to V-13, report;
+   initial source with placeholder brands; FR-001 scan.
+3. **US2 (P2)**: CSS formatters (`base.css`, `brand-<id>.css`) and ESM; manifests; determinism and
+   drift; tarball example app with the real-browser cases; type tests.
+4. **US3 (P3)**: additional brand (C) test with a diff restricted to the source; runtime switching.
+5. **US4 (P4)**: `tools/color`, contrast manifest, `tools/tokens-contrast`, real-browser samples with axe.
+6. **US5 (P5)**: `tools/stylelint-plugin` with fixtures and gate.
+7. **US6 (P6)**: `tools/design-sync` (core, ports, fake, contract suite, GitHub adapters),
+   workflow with triggers; real adapter after the requester's decision.
+8. **Closing**: entries in the traceability matrix (FR-031), package README, name
+   convention, constitution conformance review.
 
-Paralelizável depois da fundação: US4 (`tools/color`) e US6 (`tools/design-sync`) não tocam os
-arquivos de US2 e US3 até a integração com o manifesto.
+Parallelizable after the foundation: US4 (`tools/color`) and US6 (`tools/design-sync`) do not touch the
+US2 and US3 files until the manifest integration.
 
-## Riscos principais
+## Main risks
 
-| Risco | Mitigação |
+| Risk | Mitigation |
 | --- | --- |
-| Bus factor e cadência do Terrazzo | Adaptador fino, versão exata, saídas de ouro, test-suite oficial DTCG, Style Dictionary como troca |
-| `turbo boundaries` experimental | Check de manifesto pnpm e regras de import no ESLint como checks obrigatórios |
-| Interpretação de "variável sem valor" no aceite do ENG-06 | Definição operacional no spec, confirmação com o aceitante |
-| Ferramenta de design sem escrita automática no plano contratado | Capacidades `manual` e `agent-mcp` criam item rastreável; decisão e eventual pedido de mudança com o requerente |
-| Determinismo entre versões de Node e ICU | Ordenação própria por code point; comparação entre Node piso e mais recente |
-| Licenças transitivas fora de MIT/Apache/BSD | Política do ENG-21 com o conjunto real (MPL-2.0 só dev, MIT-0, CC0, Python-2.0, W3C) e override revisado do `svg-tags` |
+| Terrazzo bus factor and cadence | Thin adapter, exact version, golden outputs, official DTCG test suite, Style Dictionary as a swap |
+| `turbo boundaries` experimental | pnpm manifest check and import rules in ESLint as required checks |
+| Interpretation of "variable without a value" in the ENG-06 acceptance | Operational definition in the spec, confirmation with the acceptor |
+| Design tool without automatic writing in the contracted plan | `manual` and `agent-mcp` capabilities create a trackable item; decision and eventual change request with the requester |
+| Determinism across Node and ICU versions | Custom code-point ordering; comparison between floor and latest Node |
+| Transitive licenses outside MIT/Apache/BSD | ENG-21 policy with the real set (MPL-2.0 dev only, MIT-0, CC0, Python-2.0, W3C) and reviewed `svg-tags` override |
 
 ## Complexity Tracking
 
-Nenhuma violação da constituição a justificar.
+No constitution violation to justify.
