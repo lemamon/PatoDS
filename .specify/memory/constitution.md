@@ -1,476 +1,476 @@
 <!--
 Sync Impact Report
-- Versão: (template sem versão) → 1.0.0
-- Princípios: todos novos (I a XIII); nenhum renomeado ou removido.
-  I. Três fontes declaradas, todo o resto derivado; II. Tokens DTCG como fonte única da aparência;
-  III. Núcleo agnóstico, implementação nativa por framework; IV. Paridade React e Vue verificada
-  por máquina; V. Acessibilidade verificável (INEGOCIÁVEL); VI. Componentes robustos por padrão;
-  VII. Qualidade comprovada em navegador real, com portões bloqueantes; VIII. Agentes de IA
-  consomem o catálogo, nunca adivinham; IX. Cadeia de suprimentos e publicação seguras;
-  X. Versionamento previsível e ciclo de vida explícito; XI. Monorepo com fronteiras de camada
-  impostas; XII. Migração incremental com coexistência; XIII. Documentação única e verificada no CI.
-- Seções adicionadas: Restrições de Escopo, Plataforma e Segurança; Fluxo de Desenvolvimento e
-  Portões de Qualidade; Governança.
-- Seções removidas: nenhuma.
-- Templates dependentes: nenhum alterado (plan, spec e tasks leem esta constituição em runtime;
-  o "Constitution Check" do plan-template é preenchido a partir da lista de portões desta
-  constituição).
-- TODOs adiados:
-  - TODO(PREFIXO): prefixo do projeto (`<prefixo>` nos Requisitos) ainda não definido.
+- Version: (versionless template) → 1.0.0
+- Principles: all new (I through XIII); none renamed or removed.
+  I. Three declared sources, everything else derived; II. DTCG tokens as the single source of appearance;
+  III. Agnostic core, native implementation per framework; IV. React and Vue parity verified
+  by machine; V. Verifiable accessibility (NON-NEGOTIABLE); VI. Robust components by default;
+  VII. Quality proven in a real browser, with blocking gates; VIII. AI agents
+  consume the catalog, never guess; IX. Secure supply chain and publishing;
+  X. Predictable versioning and explicit lifecycle; XI. Monorepo with enforced layer
+  boundaries; XII. Incremental migration with coexistence; XIII. Single documentation verified in CI.
+- Sections added: Scope, Platform and Security Constraints; Development Workflow and
+  Quality Gates; Governance.
+- Sections removed: none.
+- Dependent templates: none changed (plan, spec and tasks read this constitution at runtime;
+  the plan-template "Constitution Check" is filled from the list of gates in this
+  constitution).
+- Deferred TODOs:
+  - TODO(PREFIXO): project prefix (`<prefixo>` in the Requirements) not yet defined.
 -->
 
-# Constituição do PatoDS
+# PatoDS Constitution
 
-O PatoDS é um design system único que entrega a mesma aparência, a mesma API e o mesmo nível de
-acessibilidade em aplicações React e Vue, consultável por pessoas e por agentes de IA. A fonte de
-requisitos é o documento "Requisitos de Design System Multi-framework" (versão de 2026-10-20),
-doravante "Requisitos". Os IDs citados (ADR-xx, TOK-xx, CMP-xx, A11Y-xx etc.) referem-se a ele.
+PatoDS is a single design system that delivers the same appearance, the same API and the same level of
+accessibility across React and Vue applications, queryable by people and by AI agents. The source of
+requirements is the document "Multi-framework Design System Requirements" (version 2026-10-20),
+hereinafter "Requirements". The cited IDs (ADR-xx, TOK-xx, CMP-xx, A11Y-xx, etc.) refer to it.
 
-Convenção: DEVE e NÃO DEVE indicam regra obrigatória; DEVERIA indica recomendação cuja exceção
-exige justificativa registrada; PODE indica opção.
+Convention: MUST and MUST NOT indicate a mandatory rule; SHOULD indicates a recommendation whose
+exception requires a recorded justification; MAY indicates an option.
 
-TODO(PREFIXO): os Requisitos ainda não definem o prefixo do projeto. Até a definição, `<prefixo>`
-é marcador intencional do prefixo usado em tokens, classes, atributos de dados e no escopo do
-registro (TOK-04, TOK-05, CMP-05, ENG-20) e DEVE ser substituído por emenda quando o valor for
-definido.
+TODO(PREFIXO): the Requirements do not yet define the project prefix. Until it is defined, `<prefixo>`
+is an intentional marker for the prefix used in tokens, classes, data attributes and in the registry
+scope (TOK-04, TOK-05, CMP-05, ENG-20) and MUST be replaced by amendment once the value is defined.
 
-## Princípios Fundamentais
+## Core Principles
 
-### I. Três fontes declaradas, todo o resto derivado
+### I. Three declared sources, everything else derived
 
-- Existem exatamente três fontes declaradas: tokens DTCG (aparência), tipos TypeScript exportados
-  com comentários de API (contrato de API) e um arquivo de orientação de uso por componente
-  (metadados escritos à mão: quando usar, estágio, categoria e demais campos).
-- O catálogo DEVE ser compilado no build a partir dessas fontes, e site de documentação, MCP, CLI
-  e o conteúdo factual de skills e instruções de uso DEVEM obter dele os dados dos componentes;
-  extrator próprio por consumidor, serviço hospedado consultado em tempo real e site de
-  documentação como fonte NÃO DEVEM ser usados (ADR-06, DOC-03, DOC-11, IA-02, IA-08, IA-13). Nada
-  derivado é editado à mão.
-- O texto procedural das skills, em templates versionados com dono, e o arquivo de instruções da
-  raiz do repositório (IA-09) são escritos à mão e não são derivados (IA-08).
-- Contrato de DOM e grafo de dependências DEVEM ser extraídos no build do núcleo e dos pacotes.
-- Artefatos gerados que são versionados (catálogo, skills) DEVEM ser regenerados no CI, e o CI
-  DEVE falhar em qualquer divergência (IA-02, IA-08).
-- A geração do catálogo DEVE ser determinística: duas gerações sobre o mesmo commit, em máquinas
-  diferentes, produzem o mesmo hash (IA-04). Dois builds da mesma fonte de tokens DEVEM produzir
-  saída idêntica byte a byte (TOK-05).
-- Nenhum consumidor (docs, MCP, CLI, skills, apps de exemplo) PODE manter tabela de props ou valor
-  de token escrito à mão (DOC-03, DOC-11).
+- There are exactly three declared sources: DTCG tokens (appearance), exported TypeScript types
+  with API comments (API contract) and a per-component usage guidance file (hand-written metadata:
+  when to use, stage, category and the remaining fields).
+- The catalog MUST be compiled at build time from these sources, and the documentation site, MCP, CLI
+  and the factual content of skills and usage instructions MUST obtain component data from it;
+  a per-consumer custom extractor, a hosted service queried at runtime and the documentation site
+  as a source MUST NOT be used (ADR-06, DOC-03, DOC-11, IA-02, IA-08, IA-13). Nothing derived is
+  edited by hand.
+- The procedural text of skills, in versioned templates with an owner, and the instructions file of
+  the repository root (IA-09) are hand-written and are not derived (IA-08).
+- The DOM contract and the dependency graph MUST be extracted at build time from the core and the packages.
+- Generated artifacts that are versioned (catalog, skills) MUST be regenerated in CI, and CI
+  MUST fail on any divergence (IA-02, IA-08).
+- Catalog generation MUST be deterministic: two generations over the same commit, on different
+  machines, produce the same hash (IA-04). Two builds from the same token source MUST produce
+  byte-for-byte identical output (TOK-05).
+- No consumer (docs, MCP, CLI, skills, example apps) MAY maintain a hand-written props table or token
+  value (DOC-03, DOC-11).
 
-Motivo: cópias divergem. Uma fonte por fato e um catálogo único como intermediário mantêm docs,
-agentes e pacotes alinhados à mesma versão (ADR-05, ADR-06).
+Rationale: copies diverge. One source per fact and a single catalog as intermediary keep docs,
+agents and packages aligned to the same version (ADR-05, ADR-06).
 
-### II. Tokens DTCG como fonte única da aparência
+### II. DTCG tokens as the single source of appearance
 
-- Todo token DEVE estar na fonte única em formato W3C DTCG, validada por schema no CI (TOK-01).
-- Tokens DEVEM seguir três camadas: primitivos, semânticos e de componente. Só primitivos têm
-  valor literal; as demais camadas referenciam por alias (TOK-02).
-- Estilos de componente DEVEM consumir somente tokens semânticos ou de componente. Token primitivo
-  ou valor literal em estilo de componente bloqueia o merge (TOK-03).
-- Nomes DEVEM seguir a convenção documentada, com prefixo `<prefixo>` e segmentos em ordem fixa;
-  a saída DEVE incluir CSS custom properties `--<prefixo>-*` e módulos ESM tipados (TOK-04 a
-  TOK-06).
-- Marca e modo (claro/escuro) DEVEM ser eixos independentes, selecionados por atributos distintos,
-  aplicáveis a qualquer subárvore com escopos aninhados (TOK-07, TOK-08, TOK-14).
-- Toda combinação de marca e modo DEVE ter o mesmo conjunto de chaves semânticas (TOK-09).
-- Adicionar uma marca DEVE alterar apenas arquivos de tokens, nunca código de componente (TOK-07).
-- Controles interativos DEVEM usar uma escala única de alturas (TOK-13).
-- A sincronização com a ferramenta de design DEVE ocorrer automaticamente a cada versão
-  publicada, na direção definida em Premissas; vale a premissa vigente: o repositório é a fonte, a
-  ferramenta recebe as variáveis e nenhuma rotina importa variáveis para o repositório (DSN-01).
-  Edição manual no destino DEVE ser restaurada pela sincronização seguinte e registrada em log
-  (DSN-03).
-- Variáveis da ferramenta de design DEVEM ter nome e hierarquia idênticos aos tokens, com marca e
-  modo como eixos trocáveis de forma independente (DSN-04, DSN-05). Divergências entre ferramenta
-  e código em tokens, ícones, componentes, variantes, propriedades e estágio DEVEM ser detectadas
-  automaticamente, ao menos semanalmente e a cada versão publicada, cada uma com item rastreável,
-  responsável e prazo (DSN-11).
-- Componente estável ou depreciado com representação visual DEVE ter correspondente com o mesmo
-  nome e estágio na biblioteca de design (DSN-06); componente estável com representação visual
-  DEVE ter mapeamento design-código com snippet que compila no CI (DSN-09).
+- Every token MUST be in the single source in W3C DTCG format, validated by schema in CI (TOK-01).
+- Tokens MUST follow three layers: primitive, semantic and component. Only primitives have a
+  literal value; the other layers reference by alias (TOK-02).
+- Component styles MUST consume only semantic or component tokens. A primitive token or literal value
+  in a component style blocks the merge (TOK-03).
+- Names MUST follow the documented convention, with the `<prefixo>` prefix and segments in a fixed
+  order; the output MUST include CSS custom properties `--<prefixo>-*` and typed ESM modules (TOK-04
+  through TOK-06).
+- Brand and mode (light/dark) MUST be independent axes, selected by distinct attributes,
+  applicable to any subtree with nested scopes (TOK-07, TOK-08, TOK-14).
+- Every brand and mode combination MUST have the same set of semantic keys (TOK-09).
+- Adding a brand MUST change only token files, never component code (TOK-07).
+- Interactive controls MUST use a single height scale (TOK-13).
+- Sync with the design tool MUST happen automatically on every published version, in the direction
+  defined in Assumptions; the current assumption holds: the repository is the source, the tool
+  receives the variables and no routine imports variables into the repository (DSN-01).
+  A manual edit at the destination MUST be restored by the next sync and recorded in a log (DSN-03).
+- Design tool variables MUST have names and hierarchy identical to the tokens, with brand and
+  mode as independently swappable axes (DSN-04, DSN-05). Divergences between tool and code in tokens,
+  icons, components, variants, properties and stage MUST be detected automatically, at least weekly
+  and on every published version, each with a trackable item, owner and deadline (DSN-11).
+- A stable or deprecated component with a visual representation MUST have a counterpart with the same
+  name and stage in the design library (DSN-06); a stable component with a visual representation
+  MUST have a design-code mapping with a snippet that compiles in CI (DSN-09).
 
-Motivo: formato aberto, neutro de framework e legível por ferramentas e agentes (ADR-02); a
-sincronização numa só direção impede que a ferramenta de design vire fonte não declarada.
+Rationale: an open format, framework-neutral and readable by tools and agents (ADR-02); the
+one-directional sync prevents the design tool from becoming an undeclared source.
 
-### III. Núcleo agnóstico, implementação nativa por framework
+### III. Agnostic core, native implementation per framework
 
-- Estilos DEVEM viver num núcleo CSS agnóstico, com classes prefixadas e camadas `@layer`,
-  publicado pelo pacote de estilos. Pacotes React e Vue NÃO DEVEM conter regras CSS e DEVEM
-  aplicar as mesmas classes do núcleo para cada variante (ADR-03, CMP-04). CSS Modules, CSS-in-JS
-  em runtime e classes utilitárias no markup NÃO DEVEM ser usados para estilizar componentes
-  (ADR-03).
-- Cada framework DEVE ter implementação nativa e idiomática, com reatividade e SSR nativos. Web
-  Components, geração de código a partir de fonte única e wrappers de um framework para o outro
-  NÃO DEVEM ser usados (ADR-01).
-- Componentes interativos DEVEM ser construídos sobre primitivos headless de biblioteca mantida e
-  acessível em cada framework (ADR-04, CMP-02). Exceção pontual ao CMP-02 exige ADR; construir
-  primitivos headless próprios do zero, adotar biblioteca já estilizada ou reaproveitar componentes
-  legados como abordagem contraria o ADR-04 e exige pedido de mudança aprovado e novo ADR
-  (GOV-07). A escolha da biblioteca segue a prova de conceito do CMP-28 e a decisão em Premissas.
-- Cada componente DEVE ter contrato de DOM versionado (classes, atributos `data-<prefixo>-*`,
-  variáveis CSS). O núcleo NÃO DEVE estilizar seletores sobre atributos dos primitivos headless
-  (CMP-14).
-- Componentes, classes CSS e atributos públicos DEVEM usar o prefixo `<prefixo>` (CMP-05).
+- Styles MUST live in an agnostic CSS core, with prefixed classes and `@layer` layers,
+  published by the styles package. React and Vue packages MUST NOT contain CSS rules and MUST
+  apply the same core classes for each variant (ADR-03, CMP-04). CSS Modules, runtime CSS-in-JS
+  and utility classes in the markup MUST NOT be used to style components (ADR-03).
+- Each framework MUST have a native, idiomatic implementation, with native reactivity and SSR. Web
+  Components, code generation from a single source and wrappers from one framework to the other
+  MUST NOT be used (ADR-01).
+- Interactive components MUST be built on headless primitives from a maintained library that is
+  accessible in each framework (ADR-04, CMP-02). A one-off exception to CMP-02 requires an ADR;
+  building custom headless primitives from scratch, adopting an already-styled library or reusing
+  legacy components as an approach contradicts ADR-04 and requires an approved change request and a
+  new ADR (GOV-07). The library choice follows the CMP-28 proof of concept and the decision in
+  Assumptions.
+- Each component MUST have a versioned DOM contract (classes, `data-<prefixo>-*` attributes, CSS
+  variables). The core MUST NOT style selectors over the headless primitives' attributes (CMP-14).
+- Components, CSS classes and public attributes MUST use the `<prefixo>` prefix (CMP-05).
 
-Motivo: API idiomática em cada app sem degradar tipos, eventos ou SSR; o custo de escrever o
-comportamento duas vezes é contido pelos Princípios IV e VII.
+Rationale: an idiomatic API in each app without degrading types, events or SSR; the cost of writing
+the behavior twice is contained by Principles IV and VII.
 
-### IV. Paridade React e Vue verificada por máquina
+### IV. React and Vue parity verified by machine
 
-- Todo componente publicado DEVE existir nos dois frameworks com a mesma API conceitual, expressa
-  no idioma nativo: `v-model` em Vue, `value` com callback em React (CMP-03).
-- Cada componente DEVE ter tabela de equivalência de props, eventos, slots, modelos e APIs
-  imperativas, com regras de normalização versionadas (CMP-03).
-- O CI DEVE comparar automaticamente a superfície pública dos dois pacotes. Divergência sem
-  exceção aprovada bloqueia o merge (CMP-12).
-- O snapshot normalizado de DOM de cada estado DEVE ser idêntico entre React e Vue e coincidir com
-  o contrato de DOM (CMP-14).
-- Cada componente DEVE ter uma única especificação de comportamento, executada nos dois
-  frameworks; falha em qualquer um bloqueia o merge (CMP-15).
-- Componentes com estado DEVEM aceitar uso controlado e não controlado (CMP-07); componentes de
-  coleção DEVEM inferir o tipo do item, inclusive em template Vue (CMP-25).
+- Every published component MUST exist in both frameworks with the same conceptual API, expressed
+  in the native idiom: `v-model` in Vue, `value` with a callback in React (CMP-03).
+- Each component MUST have an equivalence table of props, events, slots, models and imperative
+  APIs, with versioned normalization rules (CMP-03).
+- CI MUST automatically compare the public surface of both packages. A divergence without an
+  approved exception blocks the merge (CMP-12).
+- The normalized DOM snapshot of each state MUST be identical between React and Vue and match the
+  DOM contract (CMP-14).
+- Each component MUST have a single behavior specification, run in both frameworks; a failure in
+  either one blocks the merge (CMP-15).
+- Stateful components MUST accept controlled and uncontrolled usage (CMP-07); collection components
+  MUST infer the item type, including in a Vue template (CMP-25).
 
-Motivo: sem paridade verificável, os frameworks divergem e as apps herdam inconsistências.
+Rationale: without verifiable parity, the frameworks diverge and the apps inherit inconsistencies.
 
-### V. Acessibilidade verificável (INEGOCIÁVEL)
+### V. Verifiable accessibility (NON-NEGOTIABLE)
 
-- O PatoDS DEVE declarar um único nível de conformidade alvo; vale a premissa vigente, WCAG 2.2
+- PatoDS MUST declare a single target conformance level; the current assumption holds, WCAG 2.2
   AA (A11Y-01).
-- Cada componente DEVE ter zero violações do motor de regras automatizado em toda a matriz
-  framework × tema × modo, inclusive após passos de interação (A11Y-02).
-- Lint de acessibilidade DEVE estar ativo nos dois frameworks, falhando com erro ou aviso
+- Each component MUST have zero violations from the automated rules engine across the entire
+  framework × theme × mode matrix, including after interaction steps (A11Y-02).
+- Accessibility lint MUST be active in both frameworks, failing with an error or warning
   (A11Y-03).
-- Componentes interativos DEVEM ser operáveis só por teclado conforme o padrão APG aplicável e
-  exibir foco visível (A11Y-04, A11Y-05).
-- Tokens de cor DEVEM atender às razões de contraste do nível alvo, medidas sobre manifesto
-  versionado de pares e com opacidade composta (A11Y-09).
-- Estado e significado NÃO DEVEM depender só de cor (A11Y-23).
-- Cada componente DEVE manter conteúdo e função a 320 px de largura, com zoom de texto de 200% e
-  espaçamento de texto aumentado, na matriz do QA-05, salvo a rolagem interna da Tabela
-  (A11Y-21); cada alvo de ponteiro DEVE medir ao menos 24 por 24 px, salvo a exceção de
-  espaçamento do critério 2.5.8 (A11Y-19); conteúdo do próprio sistema NÃO DEVE encobrir
-  totalmente o elemento com foco (A11Y-18).
-- Cada componente DEVE publicar, na sua página e no catálogo, declaração de conformidade com os
-  critérios atendidos, as limitações conhecidas e a data da última revisão (A11Y-12); cada
-  animação automática DEVE atender ao critério 2.2.2 ou declarar no catálogo a exceção aplicável
+- Interactive components MUST be operable by keyboard alone per the applicable APG pattern and
+  show visible focus (A11Y-04, A11Y-05).
+- Color tokens MUST meet the target level's contrast ratios, measured over a versioned manifest
+  of pairs and with composited opacity (A11Y-09).
+- State and meaning MUST NOT depend on color alone (A11Y-23).
+- Each component MUST keep content and function at 320 px width, with 200% text zoom and
+  increased text spacing, in the QA-05 matrix, except for the Table's internal scrolling
+  (A11Y-21); each pointer target MUST measure at least 24 by 24 px, except for the spacing
+  exception of criterion 2.5.8 (A11Y-19); the system's own content MUST NOT fully obscure
+  the focused element (A11Y-18).
+- Each component MUST publish, on its page and in the catalog, a conformance declaration with the
+  criteria met, the known limitations and the date of the last review (A11Y-12); each automatic
+  animation MUST meet criterion 2.2.2 or declare the applicable exception in the catalog
   (A11Y-24).
-- Promoção a estável DEVE exigir auditoria manual por pessoa diferente do autor (A11Y-16) e, para
-  os componentes listados no Inventário, teste manual com leitor de tela em React e Vue (A11Y-08).
-- Toda exceção DEVE estar em arquivo versionado com justificativa, responsável e prazo, visível na
-  documentação do componente. Exceção vencida falha o CI. Regra desativada sem exceção registrada é
-  proibida (A11Y-11).
+- Promotion to stable MUST require a manual audit by a person other than the author (A11Y-16) and,
+  for the components listed in the Inventory, manual screen-reader testing in React and Vue (A11Y-08).
+- Every exception MUST be in a versioned file with justification, owner and deadline, visible in the
+  component's documentation. An expired exception fails CI. A disabled rule without a recorded
+  exception is forbidden (A11Y-11).
 
-Motivo: conformidade exigível em contrato precisa ser comprovada por teste e auditoria, não
-declarada.
+Rationale: conformance that is contractually enforceable must be proven by test and audit, not
+declared.
 
-### VI. Componentes robustos por padrão
+### VI. Robust components by default
 
-- Renderização no servidor: nenhum componente PODE usar APIs do navegador no render ou no setup;
-  zero erros e zero avisos de hidratação; CSS presente no HTML inicial (CMP-08).
-- React Server Components: todo módulo com hooks ou manipuladores de evento DEVE ter `use client`;
-  o catálogo DEVE marcar cada componente como seguro no servidor ou só cliente (CMP-22).
-- Segurança: HTML cru (`v-html`, `dangerouslySetInnerHTML`) DEVE ser bloqueado por lint
-  (CMP-16); atributos de URL DEVEM aceitar só esquemas de allowlist versionada, igual nos dois
-  frameworks (CMP-17); componentes DEVEM funcionar sob CSP sem `unsafe-eval` nem `unsafe-inline`
-  em `script-src`, com nonce configurável (CMP-26).
-- Estado de APIs imperativas DEVE ser isolado por requisição no SSR (CMP-20); sobreposições em
-  Portal DEVEM herdar marca e modo da origem (CMP-21).
-- Internacionalização: textos internos e nomes acessíveis DEVEM vir de props ou mensagens
-  traduzíveis (CMP-09).
-- Cada componente DEVE renderizar sem provedores, com padrões documentados de tema, localidade e
-  roteamento (CMP-24).
-- Avisos de uso incorreto DEVEM sair só em desenvolvimento, com código estável e link para a
-  documentação; o bundle de produção NÃO DEVE conter seus textos (CMP-23).
-- Tipos públicos DEVEM ser exportados sem `any` (CMP-11) e publicados como declarações junto do
-  código compilado (ENG-05); pacotes DEVEM ser ESM com tree-shaking por componente, sem perder CSS
-  no build de produção (ENG-04); ícones DEVEM ser carregáveis sob demanda com nomes tipados
-  (CMP-10).
+- Server rendering: no component MAY use browser APIs in render or setup;
+  zero errors and zero hydration warnings; CSS present in the initial HTML (CMP-08).
+- React Server Components: every module with hooks or event handlers MUST have `use client`;
+  the catalog MUST mark each component as server-safe or client-only (CMP-22).
+- Security: raw HTML (`v-html`, `dangerouslySetInnerHTML`) MUST be blocked by lint
+  (CMP-16); URL attributes MUST accept only schemes from a versioned allowlist, the same in both
+  frameworks (CMP-17); components MUST work under CSP without `unsafe-eval` or `unsafe-inline`
+  in `script-src`, with a configurable nonce (CMP-26).
+- Imperative-API state MUST be isolated per request in SSR (CMP-20); Portal overlays MUST inherit
+  brand and mode from the origin (CMP-21).
+- Internationalization: internal texts and accessible names MUST come from props or translatable
+  messages (CMP-09).
+- Each component MUST render without providers, with documented defaults for theme, locale and
+  routing (CMP-24).
+- Incorrect-usage warnings MUST appear only in development, with a stable code and a link to the
+  documentation; the production bundle MUST NOT contain their texts (CMP-23).
+- Public types MUST be exported without `any` (CMP-11) and published as declarations alongside the
+  compiled code (ENG-05); packages MUST be ESM with per-component tree-shaking, without losing CSS
+  in the production build (ENG-04); icons MUST be loadable on demand with typed names (CMP-10).
 
-Motivo: o design system roda em apps SPA, SSR e RSC sob políticas de segurança variadas; cada
-garantia precisa valer sem configuração extra.
+Rationale: the design system runs in SPA, SSR and RSC apps under varied security policies; each
+guarantee must hold without extra configuration.
 
-### VII. Qualidade comprovada em navegador real, com portões bloqueantes
+### VII. Quality proven in a real browser, with blocking gates
 
-- Comportamento e acessibilidade DEVEM ser validados por stories executadas como testes de
-  interação e de acessibilidade em navegador real, nunca em DOM simulado, com navegador e fontes
-  de ambiente versionado e sem rede externa (ADR-08, QA-01).
-- Os testes de interação DEVEM rodar em todos os motores da lista de navegadores definida em
-  Premissas, à noite e antes de cada publicação; falha em qualquer motor DEVE bloquear a
-  publicação e abrir issue automaticamente, e o pull request PODE rodar em um só motor (QA-12).
-- Toda lógica fora da UI (utilitários, hooks, composables, scripts de build) DEVE ter teste
-  unitário (QA-02).
-- Regressão visual DEVE ser check obrigatório de merge sobre o subconjunto do PR e da fila de merge
-  fixado na matriz versionada de frameworks, temas, modos, larguras e estados, e a matriz completa
-  DEVE estar verde antes da promoção à tag principal; diferença só passa com aprovação de revisor
-  visual que seja dono de design e não autor do PR (QA-04, QA-05, ENG-26).
-- Tipos públicos DEVEM ter testes, com ao menos um caso negativo por componente, e relatório de API
-  versionado (QA-08).
-- Apps de exemplo DEVEM consumir o pacote empacotado (tarball) ou o registro, nunca o código-fonte
+- Behavior and accessibility MUST be validated by stories run as interaction and accessibility tests
+  in a real browser, never in a simulated DOM, with a browser and fonts from a versioned environment
+  and no external network (ADR-08, QA-01).
+- Interaction tests MUST run on all engines from the browser list defined in Assumptions, nightly
+  and before each publish; a failure on any engine MUST block the publish and open an issue
+  automatically, and the pull request MAY run on a single engine (QA-12).
+- All non-UI logic (utilities, hooks, composables, build scripts) MUST have a unit test (QA-02).
+- Visual regression MUST be a mandatory merge check over the PR and merge-queue subset pinned in the
+  versioned matrix of frameworks, themes, modes, widths and states, and the full matrix MUST be
+  green before promotion to the main tag; a difference only passes with approval from a visual
+  reviewer who is a design owner and not the PR author (QA-04, QA-05, ENG-26).
+- Public types MUST have tests, with at least one negative case per component, and a versioned API
+  report (QA-08).
+- Example apps MUST consume the packaged tarball or the registry, never the source code
   (QA-06, ENG-10).
-- Cobertura, orçamento de bundle, tolerância visual, taxa de testes instáveis e demais limiares
-  DEVEM viver num único arquivo versionado, alterável só com aprovação de pessoa indicada pelo
-  requerente (QA-14). Os valores seguem Premissas.
-- Checks obrigatórios DEVEM bloquear o merge, não apenas avisar. A taxa de testes instáveis DEVE
-  ser medida por reexecuções com resultado divergente, incluídos os testes em quarentena, e ficar
-  no limite do arquivo de limiares (QA-09); teste em quarentena NÃO DEVE contar como aprovado
-  (QA-01). Se o QA-10 (Desejável) for contratado, cada teste em quarentena DEVE ter issue
-  vinculada, dono e prazo de correção.
-- Stories, fixtures, exemplos e snapshots DEVEM usar só dados sintéticos (QA-15).
+- Coverage, bundle budget, visual tolerance, flaky-test rate and the other thresholds
+  MUST live in a single versioned file, changeable only with approval from a person designated by
+  the requester (QA-14). The values follow Assumptions.
+- Mandatory checks MUST block the merge, not merely warn. The flaky-test rate MUST
+  be measured by re-runs with a divergent result, including quarantined tests, and stay
+  within the threshold file's limit (QA-09); a quarantined test MUST NOT count as passing
+  (QA-01). If QA-10 (Desirable) is contracted, each quarantined test MUST have a linked
+  issue, owner and fix deadline.
+- Stories, fixtures, examples and snapshots MUST use only synthetic data (QA-15).
 
-Motivo: foco, layout e contraste só são confiáveis com renderização real; avisos ignorados viram
-regressões.
+Rationale: focus, layout and contrast are only reliable with real rendering; ignored warnings become
+regressions.
 
-### VIII. Agentes de IA consomem o catálogo, nunca adivinham
+### VIII. AI agents consume the catalog, never guess
 
-- O catálogo DEVE ser legível por máquina, validado por JSON Schema publicado e versionado com o
-  pacote, e conter os campos exigidos pelos Requisitos (IA-01, IA-03).
-- O catálogo DEVE ser publicado dentro dos pacotes de UI que descreve, gerado do mesmo commit
-  (IA-06), e ficar fora do código importado pela app (ADR-06, QA-07).
-- Servidor MCP e CLI DEVEM ser locais e somente leitura, sem escrita em disco, sem rede e sem
-  credenciais (salvo telemetria ativada conforme Premissas), e responder com o catálogo do pacote
-  instalado, informando sua versão (ADR-07, IA-05, IA-07, IA-13, IA-16).
-- Cada ferramenta MCP DEVE ter schemas de entrada e saída versionados (IA-17); cada comando da CLI
-  DEVE ter saída JSON validada contra JSON Schema e códigos de saída documentados (IA-07). A
-  verificação de API pública cobre os schemas do MCP e da CLI (IA-17, GOV-01).
-- Conteúdo factual de skills e instruções DEVE ser gerado do catálogo; texto procedural fica em
-  templates versionados com dono, e lint DEVE barrar nome de componente, prop ou token escrito à
-  mão neles (IA-08).
-- A suíte determinística de roteamento DEVE rodar em todo pull request contra o catálogo real, sem
-  chamar modelo de linguagem, e bloquear o merge com taxa abaixo do limiar do arquivo do QA-14
-  (IA-10); evals de qualidade de resposta DEVEM rodar à noite e antes de cada release e bloquear o
-  release abaixo do limiar, salvo release de correção de segurança, que segue com o resultado
-  registrado (IA-14). Os limiares seguem a premissa vigente: são definidos sobre linha de base
-  medida no início da Fase 3.
-- Texto livre do catálogo com Unicode invisível ou URL fora de allowlist DEVE falhar o build
+- The catalog MUST be machine-readable, validated by a published JSON Schema versioned with the
+  package, and contain the fields required by the Requirements (IA-01, IA-03).
+- The catalog MUST be published within the UI packages it describes, generated from the same commit
+  (IA-06), and stay outside the code imported by the app (ADR-06, QA-07).
+- The MCP server and CLI MUST be local and read-only, with no disk writes, no network and no
+  credentials (except telemetry enabled per Assumptions), and respond with the installed package's
+  catalog, reporting its version (ADR-07, IA-05, IA-07, IA-13, IA-16).
+- Each MCP tool MUST have versioned input and output schemas (IA-17); each CLI command MUST have
+  JSON output validated against a JSON Schema and documented exit codes (IA-07). The
+  public-API check covers the MCP and CLI schemas (IA-17, GOV-01).
+- The factual content of skills and instructions MUST be generated from the catalog; procedural text
+  stays in versioned templates with an owner, and lint MUST block hand-written component, prop or
+  token names in them (IA-08).
+- The deterministic routing suite MUST run on every pull request against the real catalog, without
+  calling a language model, and block the merge when the rate falls below the threshold in the
+  QA-14 file (IA-10); response-quality evals MUST run nightly and before each release and block the
+  release below the threshold, except for a security-fix release, which proceeds with the result
+  recorded (IA-14). The thresholds follow the current assumption: they are defined against a baseline
+  measured at the start of Phase 3.
+- Free text in the catalog with invisible Unicode or a URL outside the allowlist MUST fail the build
   (IA-18).
 
-Motivo: agentes erram quando adivinham; um catálogo verificável e casado com a versão instalada
-os mantém corretos.
+Rationale: agents err when they guess; a verifiable catalog matched to the installed version keeps
+them correct.
 
-### IX. Cadeia de suprimentos e publicação seguras
+### IX. Secure supply chain and publishing
 
-- Versões DEVEM ser publicadas somente pelo pipeline, após aprovação de duas pessoas com MFA;
-  nenhum token pessoal PODE ter permissão de publicação (ENG-15, GOV-10).
-- O escopo `@<prefixo>` DEVE estar reservado no registro público de pacotes, em conta indicada
-  pelo requerente; check diário e antes de cada publicação DEVE falhar se o escopo não pertencer a
-  essa conta (ENG-20).
-- Toda versão DEVE sair primeiro sob tag de pré-release e só depois ser promovida à tag principal
-  (ENG-26); a publicação DEVE ser idempotente, sem versão parcial após falha (ENG-27).
-- Toda versão DEVE ter atestado de proveniência assinado e SBOM (ENG-09, ENG-19).
-- Tarballs DEVEM conter só arquivos de allowlist versionada, sem scripts de instalação, e incluir
-  avisos de terceiros e o campo `license` definido em Premissas (ENG-17, ENG-22).
-- Dependências DEVEM ser instaladas do lockfile em modo congelado (ENG-16); scripts de instalação
-  de dependências DEVEM ser bloqueados salvo allowlist (ENG-24); licenças DEVEM seguir política
-  versionada (ENG-21); dependências diretas depreciadas NÃO DEVEM existir (ENG-07); dependência
-  nova DEVE ter aprovação de dono (ENG-25).
-- Ações de terceiros no CI DEVEM ser fixadas por digest SHA (ENG-18).
-- Segredos DEVEM constar de inventário com dono, escopo, tipo e prazo de rotação; segredo fixo
-  DEVE ter justificativa registrada de que o provedor não oferece credencial federada (ENG-13); PR
-  de fork NÃO DEVE receber segredo de escrita, e secret scanning DEVE bloquear o merge (ENG-14);
-  cache remoto DEVE ser gravável só pela branch protegida (ENG-03).
-- Fontes, ícones e logotipos distribuídos DEVEM constar de inventário com origem, licença e direito
-  de redistribuição (ENG-23).
-- Vulnerabilidades em dependências DEVEM ser corrigidas nos prazos por severidade: crítica 7 dias,
-  alta 30, média 90 (ENG-11). Vulnerabilidade confirmada no código do PatoDS DEVE ter advisory e
-  versão corrigida em cada versão maior suportada, com as versões afetadas depreciadas no registro
-  (GOV-15), seguindo a política de segurança publicada (GOV-14).
+- Versions MUST be published only by the pipeline, after approval from two people with MFA;
+  no personal token MAY have publish permission (ENG-15, GOV-10).
+- The `@<prefixo>` scope MUST be reserved in the public package registry, in an account designated
+  by the requester; a daily check and a check before each publish MUST fail if the scope does not
+  belong to that account (ENG-20).
+- Every version MUST be released first under a pre-release tag and only then promoted to the main tag
+  (ENG-26); publishing MUST be idempotent, with no partial version after a failure (ENG-27).
+- Every version MUST have a signed provenance attestation and an SBOM (ENG-09, ENG-19).
+- Tarballs MUST contain only files from a versioned allowlist, without install scripts, and include
+  third-party notices and the `license` field defined in Assumptions (ENG-17, ENG-22).
+- Dependencies MUST be installed from the lockfile in frozen mode (ENG-16); dependency install
+  scripts MUST be blocked except for an allowlist (ENG-24); licenses MUST follow a versioned policy
+  (ENG-21); deprecated direct dependencies MUST NOT exist (ENG-07); a new dependency MUST have owner
+  approval (ENG-25).
+- Third-party actions in CI MUST be pinned by SHA digest (ENG-18).
+- Secrets MUST appear in an inventory with owner, scope, type and rotation deadline; a static secret
+  MUST have a recorded justification that the provider does not offer a federated credential
+  (ENG-13); a fork PR MUST NOT receive a write secret, and secret scanning MUST block the merge
+  (ENG-14); the remote cache MUST be writable only by the protected branch (ENG-03).
+- Distributed fonts, icons and logos MUST appear in an inventory with origin, license and
+  redistribution right (ENG-23).
+- Dependency vulnerabilities MUST be fixed within deadlines by severity: critical 7 days,
+  high 30, medium 90 (ENG-11). A confirmed vulnerability in PatoDS code MUST have an advisory and a
+  fixed version in each supported major version, with the affected versions deprecated in the
+  registry (GOV-15), following the published security policy (GOV-14).
 
-Motivo: um design system é dependência de todas as apps; comprometê-lo compromete todas.
+Rationale: a design system is a dependency of every app; compromising it compromises them all.
 
-### X. Versionamento previsível e ciclo de vida explícito
+### X. Predictable versioning and explicit lifecycle
 
-- Todos os pacotes publicados DEVEM seguir SemVer 2.0.0, e a verificação de API pública no CI DEVE
-  bloquear quebra sem incremento de major (GOV-01). Essa verificação cobre também os schemas de
-  MCP e CLI (IA-17) e a lista de códigos de aviso (CMP-23); alteração incompatível no JSON Schema
-  do catálogo DEVE sair só em versão major (IA-03). A estratégia de versão única ou independente
-  DEVE estar registrada em ADR; vale a premissa vigente de versão única.
-- Mensagens de commit DEVEM seguir Conventional Commits, impostas por hook local e check de CI
-  (GOV-02); o changelog DEVE ser gerado a cada versão, com mudanças incompatíveis em seção própria
-  (GOV-03).
-- Cada componente DEVE declarar, no arquivo de orientação de uso, um estágio: experimental, beta,
-  estável ou depreciado; estágio ausente ou inválido falha o build (GOV-04).
-- Promoção a estável DEVE passar pela definição de pronto versionada, verificada no CI (GOV-13).
-- Depreciação DEVE respeitar o prazo mínimo de Premissas antes da remoção (salvo remoção por
-  segurança com advisory) e ter guia de migração com substituto e exemplo antes e depois
-  (GOV-05, GOV-06).
-- A major anterior DEVE ser suportada pelo prazo definido em Premissas, fixado em política
-  publicada; correção de severidade crítica sem relação com segurança DEVE sair também na major
-  anterior suportada, no prazo do ACE-04 (GOV-18).
-- Cada mudança incompatível mecânica de uma major DEVE ter codemod com fixtures (GOV-17).
+- All published packages MUST follow SemVer 2.0.0, and the public-API check in CI MUST
+  block a break without a major increment (GOV-01). This check also covers the MCP and CLI
+  schemas (IA-17) and the warning-code list (CMP-23); an incompatible change to the catalog JSON
+  Schema MUST ship only in a major version (IA-03). The single-version or independent-version
+  strategy MUST be recorded in an ADR; the current assumption of a single version holds.
+- Commit messages MUST follow Conventional Commits, enforced by a local hook and a CI check
+  (GOV-02); the changelog MUST be generated for each version, with incompatible changes in their
+  own section (GOV-03).
+- Each component MUST declare, in the usage guidance file, a stage: experimental, beta,
+  stable or deprecated; a missing or invalid stage fails the build (GOV-04).
+- Promotion to stable MUST pass the versioned definition of done, verified in CI (GOV-13).
+- Deprecation MUST respect the minimum deadline from Assumptions before removal (except a security
+  removal with an advisory) and have a migration guide with a replacement and a before-and-after
+  example (GOV-05, GOV-06).
+- The previous major MUST be supported for the deadline defined in Assumptions, fixed in a published
+  policy; a critical-severity fix unrelated to security MUST also ship in the supported previous
+  major, within the ACE-04 deadline (GOV-18).
+- Each mechanical incompatible change in a major MUST have a codemod with fixtures (GOV-17).
 
-Motivo: apps consumidoras só atualizam com confiança quando quebras são raras, anunciadas e
-assistidas.
+Rationale: consumer apps only upgrade with confidence when breaks are rare, announced and
+assisted.
 
-### XI. Monorepo com fronteiras de camada impostas
+### XI. Monorepo with enforced layer boundaries
 
-- Tokens, núcleo, bibliotecas e ferramentas DEVEM viver num único monorepo (ADR-09).
-- As camadas DEVEM seguir tokens → núcleo → frameworks. Ferramentas (gerador do catálogo, lint,
-  codemods, mapeamentos, snippets do DSN-09) DEVEM depender da UI só como devDependency (ENG-01).
-- Camadas e arestas permitidas DEVEM estar num arquivo versionado; aresta proibida falha o CI, e
-  cada camada nova DEVE entrar nele na fase em que é criada (ENG-01, ACE-08).
-- O CI DEVE executar só as tarefas dos pacotes afetados e seus dependentes, com execução completa
-  diária e quando mudam lockfile, toolchain ou workflows (ENG-02).
-- Se o ENG-12 (Desejável) for contratado, cada ativo compartilhado (ícones, fontes, CSS de tokens)
-  DEVE ter um único pacote de origem, sem arquivo idêntico publicado em mais de um pacote (ENG-12).
+- Tokens, core, libraries and tools MUST live in a single monorepo (ADR-09).
+- The layers MUST follow tokens → core → frameworks. Tools (catalog generator, lint,
+  codemods, mappings, DSN-09 snippets) MUST depend on the UI only as a devDependency (ENG-01).
+- Layers and allowed edges MUST be in a versioned file; a forbidden edge fails CI, and
+  each new layer MUST be added to it in the phase it is created (ENG-01, ACE-08).
+- CI MUST run only the tasks of the affected packages and their dependents, with a full run
+  daily and when the lockfile, toolchain or workflows change (ENG-02).
+- If ENG-12 (Desirable) is contracted, each shared asset (icons, fonts, token CSS)
+  MUST have a single source package, with no identical file published in more than one package
+  (ENG-12).
 
-Motivo: mudanças entre camadas saem num só PR e a paridade fica verificável, sem acoplamento
-acidental entre pacotes.
+Rationale: cross-layer changes ship in a single PR and parity stays verifiable, without accidental
+coupling between packages.
 
-### XII. Migração incremental com coexistência
+### XII. Incremental migration with coexistence
 
-- O PatoDS DEVE coexistir com os design systems legados na mesma página sem conflito de estilos:
-  classes e variáveis só com `<prefixo>`, nomes e ordem das camadas `@layer` publicados, com guia
-  para envolver o CSS legado em camada inferior (MIG-07, MIG-14).
-- Codemods de migração dos legados DEVEM cobrir todas as trocas classificadas como exatas nas
-  tabelas do MIG-02 e do MIG-03, e somente elas, ser idempotentes e produzir código que passa em
-  typecheck, lint e testes sem edição manual (MIG-05, ADR-10).
-- Trocas similares ou sem equivalente DEVEM usar skills de agente que abrem PR sem merge
-  automático, sempre com aprovação humana registrada (MIG-06).
-- A migração DEVE ser possível em lotes independentes, com deploy e rollback por lote (MIG-09).
-- O fornecedor NÃO DEVE alterar arquivos das apps consumidoras: codemods rodam nelas só em modo de
-  simulação, e o kit é validado em apps de teste próprias (MIG-13, Escopo).
-- O progresso DEVE ser medido pelo inventário automatizado de uso (MIG-01, MIG-11).
+- PatoDS MUST coexist with the legacy design systems on the same page without style conflicts:
+  classes and variables only with `<prefixo>`, published `@layer` names and order, with a guide
+  to wrap the legacy CSS in a lower layer (MIG-07, MIG-14).
+- Legacy migration codemods MUST cover all the swaps classified as exact in the MIG-02 and MIG-03
+  tables, and only those, be idempotent and produce code that passes typecheck, lint and tests
+  without manual editing (MIG-05, ADR-10).
+- Similar swaps or those without an equivalent MUST use agent skills that open a PR without automatic
+  merge, always with recorded human approval (MIG-06).
+- Migration MUST be possible in independent batches, with per-batch deploy and rollback (MIG-09).
+- The vendor MUST NOT change the consumer apps' files: codemods run on them only in simulation mode,
+  and the kit is validated in its own test apps (MIG-13, Scope).
+- Progress MUST be measured by the automated usage inventory (MIG-01, MIG-11).
 
-Motivo: troca de uma vez concentra risco e trava os times; migração por lote entrega valor sem
-parar o produto (ADR-10).
+Rationale: a one-shot swap concentrates risk and stalls the teams; batch migration delivers value
+without stopping the product (ADR-10).
 
-### XIII. Documentação única e verificada no CI
+### XIII. Single documentation verified in CI
 
-- O PatoDS DEVE ter um único site de documentação; cada página de componente DEVE exibir exemplos
-  e API de React e Vue, e o CI DEVE falhar se faltar a versão de algum framework suportado
-  (DOC-01).
-- Cada componente DEVE ter exemplos executáveis para todas as variantes e estados documentados;
-  exemplo que não compila contra os tipos atuais, não renderiza ou usa API depreciada DEVE falhar o
+- PatoDS MUST have a single documentation site; each component page MUST show React and Vue examples
+  and API, and CI MUST fail if a supported framework's version is missing (DOC-01).
+- Each component MUST have runnable examples for all documented variants and states; an example that
+  does not compile against the current types, does not render or uses a deprecated API MUST fail the
   build (DOC-04).
-- Fundamentos de tokens, cores, tipografia e ícones DEVEM ser gerados dos pacotes publicados
-  (DOC-05); link ou âncora interna quebrada DEVE bloquear o merge (DOC-12).
-- Cada pacote publicável DEVE ter README com propósito, instalação, uso mínimo e link para a
-  documentação completa (DOC-08); o guia de início rápido de cada framework DEVE ser executado no
-  CI em projeto vazio (DOC-07).
-- O changelog de cada versão publicada DEVE estar no site em até 24 horas (DOC-09), e cada major
-  suportada DEVE manter documentação navegável gerada do catálogo do commit daquela versão
+- Fundamentals of tokens, colors, typography and icons MUST be generated from the published packages
+  (DOC-05); a broken internal link or anchor MUST block the merge (DOC-12).
+- Each publishable package MUST have a README with purpose, installation, minimal usage and a link to
+  the full documentation (DOC-08); each framework's quick-start guide MUST be run in CI in an empty
+  project (DOC-07).
+- Each published version's changelog MUST be on the site within 24 hours (DOC-09), and each major
+  supported MUST keep browsable documentation generated from the catalog of that version's commit
   (DOC-15).
 
-Motivo: documentação escrita à mão envelhece mais rápido que os componentes; gerada e verificada
-no CI, ela acompanha a versão instalada.
+Rationale: hand-written documentation ages faster than the components; generated and verified in CI,
+it tracks the installed version.
 
-## Restrições de Escopo, Plataforma e Segurança
+## Scope, Platform and Security Constraints
 
-**Escopo**
+**Scope**
 
-- Frameworks suportados: React e Vue. Angular e Web Components estão fora deste contrato.
-- Fora do escopo, salvo pedido de mudança: componentes de gráficos e visualização de dados,
-  paletas de dados, biblioteca de ilustrações, componentes específicos de um único produto,
-  hospedagem de serviços de IA e migração do código das apps consumidoras.
-- O Inventário de componentes dos Requisitos fecha a lista e as nove categorias (CMP-01).
-  Componente fora do Inventário exige RFC (GOV-08) e pedido de mudança aprovado (GOV-16).
-- Prioridade: ID ou item do Inventário Obrigatório bloqueia o aceite da fase a que pertence;
-  Desejável só entra se contratado e, então, é aceito pelos mesmos critérios na fase indicada;
-  Opcional só entra por pedido de mudança aprovado. Specs e planos NÃO DEVEM incluir item
-  Desejável não contratado nem item Opcional sem pedido de mudança aprovado.
+- Supported frameworks: React and Vue. Angular and Web Components are outside this contract.
+- Out of scope, except by change request: chart and data-visualization components,
+  data palettes, an illustration library, components specific to a single product,
+  hosting of AI services and migration of the consumer apps' code.
+- The component Inventory in the Requirements closes the list and the nine categories (CMP-01).
+  A component outside the Inventory requires an RFC (GOV-08) and an approved change request (GOV-16).
+- Priority: a Mandatory ID or Inventory item blocks acceptance of the phase it belongs to;
+  a Desirable one only enters if contracted and is then accepted by the same criteria in the
+  indicated phase; an Optional one only enters by an approved change request. Specs and plans
+  MUST NOT include an uncontracted Desirable item or an Optional item without an approved change
+  request.
 
-**Plataforma**
+**Platform**
 
-- O CI DEVE testar em matriz o piso e a versão mais recente de React, Vue, Node e TypeScript;
-  `peerDependencies` e `engines` DEVEM coincidir com o piso testado; CSS DEVE ser validado contra
-  lista de navegadores versionada (ENG-08).
-- O CSS de cada marca, com os dois modos, DEVE ser importável sem as demais marcas (ENG-06).
+- CI MUST test in a matrix the floor and the latest version of React, Vue, Node and TypeScript;
+  `peerDependencies` and `engines` MUST match the tested floor; CSS MUST be validated against a
+  versioned browser list (ENG-08).
+- Each brand's CSS, with both modes, MUST be importable without the other brands (ENG-06).
 
-**Privacidade e dados**
+**Privacy and data**
 
-- Stories, fixtures, exemplos e snapshots NÃO DEVEM conter dados pessoais reais; documentos
-  pessoais (ex.: CPF, CNPJ) e e-mails fora de domínio reservado DEVEM ser bloqueados por varredura
-  no CI, e fotos DEVEM vir de banco sintético ou licenciado, com origem e licença em registro
-  versionado (QA-15).
-- Telemetria das ferramentas para agentes, se existir, DEVE ser desligada por padrão, sem dados
-  pessoais, texto livre ou código-fonte (IA-12, premissa vigente).
-- Exemplos editáveis do site DEVEM rodar em iframe com sandbox em origem separada; o site NÃO DEVE
-  carregar rastreadores de terceiros sem aprovação registrada do requerente (DOC-16).
+- Stories, fixtures, examples and snapshots MUST NOT contain real personal data; personal
+  documents (e.g., CPF, CNPJ) and emails outside a reserved domain MUST be blocked by a CI scan,
+  and photos MUST come from a synthetic or licensed bank, with origin and license in a versioned
+  record (QA-15).
+- Telemetry of the agent tools, if any, MUST be off by default, with no personal data, free text or
+  source code (IA-12, current assumption).
+- The site's editable examples MUST run in an iframe with a sandbox on a separate origin; the site
+  MUST NOT load third-party trackers without recorded approval from the requester (DOC-16).
 
-**Decisões em aberto**
+**Open decisions**
 
-Esta constituição não decide os itens da seção "Premissas e decisões em aberto" dos Requisitos.
-Enquanto não houver decisão, vale a premissa vigente de cada linha. Specs e planos DEVEM citar a
-premissa que assumem e NÃO DEVEM fixar valor diferente dela sem pedido de mudança.
+This constitution does not decide the items in the "Assumptions and open decisions" section of the
+Requirements. Until a decision is made, each line's current assumption holds. Specs and plans MUST
+cite the assumption they adopt and MUST NOT fix a value different from it without a change request.
 
-## Fluxo de Desenvolvimento e Portões de Qualidade
+## Development Workflow and Quality Gates
 
-**Fluxo Spec Kit**
+**Spec Kit Workflow**
 
-- Toda feature DEVE seguir o fluxo Spec Kit (specify → plan → tasks → implement) e citar os IDs
-  dos Requisitos que atende; requisito sem ID de origem exige justificativa no spec.
-- O "Constitution Check" de cada plano DEVE responder com "sim" ou "não", no mínimo, às perguntas
-  abaixo; toda resposta "não" é violação e segue a regra de exceção desta seção:
-  1. Todo dado de componente ou de token (API, aparência, metadados de uso) vem das três fontes
-     declaradas e todo consumidor o obtém do catálogo gerado, sem cópia mantida à mão? (I)
-  2. Todo estilo de componente consome só tokens semânticos ou de componente, sem token primitivo
-     nem valor literal, e a sincronização com a ferramenta de design segue a direção vigente, com
-     divergências detectadas? (II)
-  3. Os pacotes de framework seguem sem regras CSS, o núcleo sem seletor sobre atributo de
-     primitivo headless, e todo componente interativo usa primitivo da biblioteca headless? (III)
-  4. A mudança mantém paridade de API, DOM e comportamento entre React e Vue? (IV)
-  5. Cada componente afetado tem testes do motor de regras, de teclado, de foco visível, de reflow
-     e de tamanho de alvo, os tokens de cor passam no contraste, há declaração de conformidade e
-     toda exceção de acessibilidade está registrada conforme o A11Y-11? (V)
-  6. SSR, RSC, CSP, i18n e uso sem provedor continuam válidos? (VI)
-  7. Os testes rodam em navegador real, na matriz de motores exigida, e os limiares vêm do arquivo
-     do QA-14? (VII)
-  8. Dados para agentes vêm do catálogo e as ferramentas seguem somente leitura, sem rede nem
-     credenciais? (VIII)
-  9. Dependências, segredos, publicação e ativos seguem as regras de cadeia de suprimentos? (IX)
-  10. A mudança respeita SemVer, estágio de ciclo de vida e política de depreciação? (X)
-  11. As fronteiras de camada continuam válidas? (XI)
-  12. A coexistência com legados continua sem conflito? (XII)
-  13. A documentação cobre React e Vue, é gerada do catálogo, tem exemplos que compilam contra os
-      tipos atuais, README por pacote e links válidos? (XIII)
-  14. A feature está dentro do escopo e do Inventário de componentes, respeita a prioridade
-      contratada e cita a premissa vigente de cada decisão em aberto que assume? (Restrições de
-      Escopo, Plataforma e Segurança)
-- Violação NÃO DEVE avançar sem exceção formal prevista nos Requisitos (ex.: registro do A11Y-11,
-  exceção aprovada do CMP-12, ADR de exceção pontual do CMP-02, motivo aprovado pelo requerente do
-  GOV-17), registrada em "Complexity Tracking" do plano. Contrariar ADR-01 a ADR-10 não é exceção
-  de plano: exige pedido de mudança aprovado pelo requerente e novo ADR (GOV-07).
+- Every feature MUST follow the Spec Kit workflow (specify → plan → tasks → implement) and cite the
+  IDs of the Requirements it meets; a requirement without a source ID requires justification in the
+  spec.
+- Each plan's "Constitution Check" MUST answer, at minimum, "yes" or "no" to the questions
+  below; every "no" answer is a violation and follows the exception rule of this section:
+  1. Does all component or token data (API, appearance, usage metadata) come from the three declared
+     sources and does every consumer obtain it from the generated catalog, with no hand-maintained
+     copy? (I)
+  2. Does every component style consume only semantic or component tokens, with no primitive token
+     nor literal value, and does sync with the design tool follow the current direction, with
+     divergences detected? (II)
+  3. Do the framework packages remain without CSS rules, the core without a selector over a headless
+     primitive's attribute, and does every interactive component use a primitive from the headless
+     library? (III)
+  4. Does the change keep API, DOM and behavior parity between React and Vue? (IV)
+  5. Does each affected component have rules-engine, keyboard, visible-focus, reflow and target-size
+     tests, do the color tokens pass contrast, is there a conformance declaration and is every
+     accessibility exception recorded per A11Y-11? (V)
+  6. Do SSR, RSC, CSP, i18n and provider-less usage remain valid? (VI)
+  7. Do the tests run in a real browser, on the required engine matrix, and do the thresholds come
+     from the QA-14 file? (VII)
+  8. Does agent data come from the catalog and do the tools remain read-only, with no network nor
+     credentials? (VIII)
+  9. Do dependencies, secrets, publishing and assets follow the supply-chain rules? (IX)
+  10. Does the change respect SemVer, lifecycle stage and deprecation policy? (X)
+  11. Do the layer boundaries remain valid? (XI)
+  12. Does coexistence with legacy remain conflict-free? (XII)
+  13. Does the documentation cover React and Vue, is it generated from the catalog, does it have
+      examples that compile against the current types, a README per package and valid links? (XIII)
+  14. Is the feature within scope and the component Inventory, does it respect the contracted
+      priority and cite the current assumption of each open decision it adopts? (Scope,
+      Platform and Security Constraints)
+- A violation MUST NOT proceed without a formal exception provided for in the Requirements (e.g., an
+  A11Y-11 record, an approved CMP-12 exception, a CMP-02 one-off exception ADR, a requester-approved
+  GOV-17 reason), recorded in the plan's "Complexity Tracking". Contradicting ADR-01 through ADR-10
+  is not a plan exception: it requires a change request approved by the requester and a new ADR
+  (GOV-07).
 
-**Decisões e revisão**
+**Decisions and review**
 
-- Toda decisão de arquitetura DEVE ser registrada em ADR numerado, com status e data, antes de ser
-  implementada; PR com rótulo de arquitetura DEVE vincular ADR aceito. ADR que altere ADR-01 a
-  ADR-10 DEVE citar pedido de mudança aprovado pelo requerente, e o check de CI DEVE rejeitar PR
-  sem essa aprovação (GOV-07).
-- Todo componente novo ou mudança incompatível de API DEVE ter RFC aprovada, com funcionalidades,
-  estados, padrão APG aplicável e mapa de teclado (GOV-08).
-- Arquivo de donos DEVE cobrir 100% dos diretórios; merge exige aprovação de dono da área; snapshots
-  visuais têm ao menos um dono de design (GOV-09).
+- Every architecture decision MUST be recorded in a numbered ADR, with status and date, before it is
+  implemented; a PR with an architecture label MUST link an accepted ADR. An ADR that changes ADR-01
+  through ADR-10 MUST cite a change request approved by the requester, and the CI check MUST reject a
+  PR without that approval (GOV-07).
+- Every new component or incompatible API change MUST have an approved RFC, with features, states,
+  the applicable APG pattern and a keyboard map (GOV-08).
+- The owners file MUST cover 100% of directories; a merge requires approval from the area's owner;
+  visual snapshots have at least one design owner (GOV-09).
 
-**Rastreabilidade e aceite**
+**Traceability and acceptance**
 
-- Cada ID contratado DEVE constar de uma matriz de rastreabilidade versionada que o liga a check de
-  CI ou evidência retida, com IDs de fases futuras marcados como planejados; ID de fase em curso ou
-  já aceita sem check ou evidência, ou com check inexistente, falha o CI (ACE-02).
-- Cada fase DEVE terminar num pacote de aceite com a evidência de cada ID (ACE-01).
-- Todo check que promete bloqueio DEVE ser comprovado por violação proposital registrada, quando os
-  Requisitos assim exigirem.
-- A Fase 1 só começa após aprovação do relatório da prova de conceito headless (CMP-28) e do plano
-  de entrega (ACE-09); cada fase só começa com as saídas das fases de que depende aceitas.
+- Each contracted ID MUST appear in a versioned traceability matrix that links it to a CI check or
+  retained evidence, with IDs from future phases marked as planned; an ID from an in-progress or
+  already-accepted phase without a check or evidence, or with a nonexistent check, fails CI (ACE-02).
+- Each phase MUST end in an acceptance package with the evidence for each ID (ACE-01).
+- Every check that promises blocking MUST be proven by a recorded deliberate violation, when the
+  Requirements so require.
+- Phase 1 only begins after approval of the headless proof-of-concept report (CMP-28) and the
+  delivery plan (ACE-09); each phase only begins once the outputs of the phases it depends on are
+  accepted.
 
-## Governança
+## Governance
 
-- Precedência: Requisitos e pedidos de mudança aprovados > esta constituição > specs, planos e
-  tarefas > demais práticas. Conflito entre esta constituição e os Requisitos se resolve emendando
-  a constituição.
-- Emendas DEVEM ser feitas por PR que altere `.specify/memory/constitution.md`, com o Sync Impact
-  Report na descrição do PR e aprovação do dono desse arquivo no arquivo de donos (GOV-09).
-- Emenda que reflita mudança em ADR-01 a ADR-10, em premissa vigente, em limiar, em requisito
-  Obrigatório ou inclusão de requisito Opcional DEVE citar o pedido de mudança aprovado pelo
-  requerente e, quando arquitetural, o novo ADR (GOV-07).
-- Versionamento desta constituição segue SemVer: MAJOR para remoção ou redefinição incompatível de
-  princípio ou regra de governança; MINOR para princípio ou seção nova ou orientação ampliada de
-  forma material; PATCH para esclarecimento e redação sem mudança de sentido.
-- Conformidade: `/speckit-plan` aplica os portões do "Constitution Check"; `/speckit-analyze`
-  trata conflito com esta constituição como CRÍTICO; revisores de PR DEVEM verificar os princípios
-  afetados; cada pacote de aceite de fase DEVE incluir revisão de conformidade com esta
-  constituição.
-- Orientação de runtime para agentes de código fica no arquivo de instruções da raiz do
-  repositório (ex.: `AGENTS.md`, IA-09), que NÃO PODE contradizer esta constituição.
+- Precedence: Requirements and approved change requests > this constitution > specs, plans and
+  tasks > other practices. A conflict between this constitution and the Requirements is resolved by
+  amending the constitution.
+- Amendments MUST be made by a PR that changes `.specify/memory/constitution.md`, with the Sync
+  Impact Report in the PR description and approval from that file's owner in the owners file (GOV-09).
+- An amendment that reflects a change to ADR-01 through ADR-10, to a current assumption, to a
+  threshold, to a Mandatory requirement or the inclusion of an Optional requirement MUST cite the
+  change request approved by the requester and, when architectural, the new ADR (GOV-07).
+- Versioning of this constitution follows SemVer: MAJOR for the removal or incompatible redefinition
+  of a principle or governance rule; MINOR for a new principle or section or materially expanded
+  guidance; PATCH for clarification and wording without a change of meaning.
+- Conformance: `/speckit-plan` applies the "Constitution Check" gates; `/speckit-analyze`
+  treats a conflict with this constitution as CRITICAL; PR reviewers MUST verify the affected
+  principles; each phase acceptance package MUST include a conformance review against this
+  constitution.
+- Runtime guidance for code agents lives in the instructions file at the repository root (e.g.,
+  `AGENTS.md`, IA-09), which MUST NOT contradict this constitution.
 
 **Version**: 1.0.0 | **Ratified**: 2026-10-21 | **Last Amended**: 2026-10-21
