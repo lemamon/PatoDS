@@ -1,447 +1,447 @@
 ---
-description: "Lista de tarefas da feature 001 — Design tokens e temas"
+description: "Task list for feature 001 — Design tokens and themes"
 ---
 
-# Tasks: Design tokens e temas
+# Tasks: Design tokens and themes
 
 **Input**: [spec.md](spec.md), [plan.md](plan.md), [research.md](research.md),
 [data-model.md](data-model.md), [contracts/](contracts/), [quickstart.md](quickstart.md)
 
-**Testes**: obrigatórios nesta feature. O Princípio VII da constituição e os requisitos QA-01,
-QA-02, QA-08 e FR-024 exigem testes de unidade, de tipos, em navegador real e fixtures de lint com
-violação proposital. As tarefas de teste de cada história estão no corpo da história.
+**Tests**: mandatory in this feature. Constitution Principle VII and requirements QA-01,
+QA-02, QA-08, and FR-024 require unit tests, type tests, real-browser tests, and lint fixtures with
+intentional violations. Each story's test tasks are in the story body.
 
-**Marcador `<prefixo>`**: marcador da constituição (TODO(PREFIXO)). **Marcas** `a` (padrão) e `b`
-são sintéticas até a entrega das marcas reais (QA-15). Caminhos e nomes seguem [plan.md](plan.md) e
-os contratos.
+**`<prefixo>` marker**: constitution marker (TODO(PREFIXO)). **Brands** `a` (default) and `b`
+are synthetic until the real brands are delivered (QA-15). Paths and names follow [plan.md](plan.md) and
+the contracts.
 
-## Format: `[ID] [P?] [Story] Descrição com caminho`
+## Format: `[ID] [P?] [Story] Description with path`
 
-- **[P]**: pode rodar em paralelo (arquivos diferentes, sem dependência pendente).
-- **[Story]**: US1 a US6; Setup, Foundational e Polish não levam rótulo.
+- **[P]**: can run in parallel (different files, no pending dependency).
+- **[Story]**: US1 to US6; Setup, Foundational, and Polish carry no label.
 
 ---
 
-## Phase 1: Setup (esqueleto do monorepo)
+## Phase 1: Setup (monorepo skeleton)
 
-**Objetivo**: inicializar o monorepo e a configuração compartilhada (ADR-09, ADR-12).
+**Objective**: initialize the monorepo and the shared configuration (ADR-09, ADR-12).
 
-- [x] T001 Rodar `git init`, criar `.gitignore` (ignorar `node_modules/`, `**/dist/`, `.turbo/`,
-  `*.tsbuildinfo`) e definir `main` como branch na raiz `/`
-- [x] T002 Criar `package.json` na raiz com `"packageManager": "pnpm@11.28.x"` (versão exata),
-  `devEngines.packageManager` com `pmOnFail: "error"`, `private: true`, e scripts que delegam ao
+- [x] T001 Run `git init`, create `.gitignore` (ignore `node_modules/`, `**/dist/`, `.turbo/`,
+  `*.tsbuildinfo`) and set `main` as the branch at the root `/`
+- [x] T002 Create `package.json` at the root with `"packageManager": "pnpm@11.28.x"` (exact version),
+  `devEngines.packageManager` with `pmOnFail: "error"`, `private: true`, and scripts that delegate to
   turbo (`tokens:validate`, `tokens:build`, `contrast:check`, `lint:styles`, `test`, `test:types`,
   `test:e2e`, `check:determinism`, `check:drift`, `check:scan`, `check:layers`, `design-sync`)
-- [x] T003 [P] Criar `pnpm-workspace.yaml` com `packages`, `tools`, `apps`, `tests`; `catalog` com
-  versões exatas (terrazzo 2.9.0, ajv, colorjs.io 0.7.1, stylelint 17.16.x, vitest 5.0.x,
-  @playwright/test 1.64.x, typescript 6.0.x e catálogo nomeado `typescript7` para 7.0.x);
-  `catalogMode: strict`; `allowBuilds` (allowlist do ENG-24, só `fsevents`); `minimumReleaseAge:
+- [x] T003 [P] Create `pnpm-workspace.yaml` with `packages`, `tools`, `apps`, `tests`; `catalog` with
+  exact versions (terrazzo 2.9.0, ajv, colorjs.io 0.7.1, stylelint 17.16.x, vitest 5.0.x,
+  @playwright/test 1.64.x, typescript 6.0.x and the named catalog `typescript7` for 7.0.x);
+  `catalogMode: strict`; `allowBuilds` (ENG-24 allowlist, only `fsevents`); `minimumReleaseAge:
   1440`; `blockExoticSubdeps: true`; `trustPolicy: no-downgrade`
-- [x] T004 [P] Criar `.node-version` (24.x) e `.gitattributes` forçando `* text=auto eol=lf`
-- [x] T005 [P] Criar `tsconfig.base.json` estrito (`strict`, `moduleResolution: "bundler"`,
-  `verbatimModuleSyntax`, `noEmit` por padrão), alvo compatível com TS 6.0
-- [x] T006 Criar `turbo.json` com as tarefas do T002, `envMode: "strict"`, `globalDependencies`
+- [x] T004 [P] Create `.node-version` (24.x) and `.gitattributes` forcing `* text=auto eol=lf`
+- [x] T005 [P] Create a strict `tsconfig.base.json` (`strict`, `moduleResolution: "bundler"`,
+  `verbatimModuleSyntax`, `noEmit` by default), with a target compatible with TS 6.0
+- [x] T006 Create `turbo.json` with the T002 tasks, `envMode: "strict"`, `globalDependencies`
   (`.node-version`, `pnpm-workspace.yaml`, `pnpm-lock.yaml`, `turbo.json`, `tsconfig.base.json`,
-  `.github/**`), telemetria desligada, e o esqueleto de `boundaries.tags` (preenchido no T022)
-- [x] T007 [P] Criar `quality/thresholds.json` (QA-14) com a seção de contraste
-  `{ "level": "WCAG22-AA", "text": 4.5, "nonText": 3 }` e espaço para orçamento de bundle do QA-07
-  (valor pendente com o requerente)
-- [x] T008 [P] Criar `quality/license-policy.json` (ENG-21) com as licenças permitidas (MIT, ISC,
-  Apache-2.0, BSD-2-Clause, BSD-3-Clause, MIT-0, CC0-1.0, Python-2.0), MPL-2.0 só como dependência de
-  desenvolvimento não modificada, W3C para a cópia dos schemas DTCG, e override revisado de
-  `svg-tags` (MIT pelo campo legado)
-- [x] T009 [P] Criar `quality/scan-allowlist.json` (varredura do FR-001) com a fonte de tokens e as
-  fixtures dos scanners, cada entrada com justificativa
-- [x] T010 [P] Criar `.github/CODEOWNERS` com donos por área, incluindo o papel dono da
-  sincronização (DSN-02) e o dono de acessibilidade do manifesto de contraste (GOV-09)
-- [x] T011 [P] Criar `stylelint.config.mjs` na raiz (esqueleto do gate: `ignoreDisables: true`,
-  caminho do plugin, preenchido no T0 da US5)
-- [x] T012 [P] Criar `.github/workflows/tokens-ci.yml` (esqueleto): `pnpm install --frozen-lockfile`,
-  todas as actions fixadas por digest SHA (ENG-18), matriz de Node piso (22 LTS) e mais recente,
-  `TURBO_TELEMETRY_DISABLED=1`, separação PR (Chromium) e noturno (todos os motores)
+  `.github/**`), telemetry off, and the `boundaries.tags` skeleton (filled in T022)
+- [x] T007 [P] Create `quality/thresholds.json` (QA-14) with the contrast section
+  `{ "level": "WCAG22-AA", "text": 4.5, "nonText": 3 }` and room for the QA-07 bundle budget
+  (value pending with the requester)
+- [x] T008 [P] Create `quality/license-policy.json` (ENG-21) with the allowed licenses (MIT, ISC,
+  Apache-2.0, BSD-2-Clause, BSD-3-Clause, MIT-0, CC0-1.0, Python-2.0), MPL-2.0 only as an unmodified
+  development dependency, W3C for the DTCG schema copy, and a reviewed override of
+  `svg-tags` (MIT via the legacy field)
+- [x] T009 [P] Create `quality/scan-allowlist.json` (FR-001 scan) with the token source and the
+  scanner fixtures, each entry with a justification
+- [x] T010 [P] Create `.github/CODEOWNERS` with owners by area, including the sync
+  owner role (DSN-02) and the accessibility owner of the contrast manifest (GOV-09)
+- [x] T011 [P] Create `stylelint.config.mjs` at the root (gate skeleton: `ignoreDisables: true`,
+  plugin path, filled in the US5 T0)
+- [x] T012 [P] Create `.github/workflows/tokens-ci.yml` (skeleton): `pnpm install --frozen-lockfile`,
+  all actions pinned by SHA digest (ENG-18), matrix of floor Node (22 LTS) and latest,
+  `TURBO_TELEMETRY_DISABLED=1`, separation of PR (Chromium) and nightly (all engines)
 
-**Checkpoint**: monorepo instala com lockfile congelado e `turbo run` resolve as tarefas vazias.
+**Checkpoint**: the monorepo installs with a frozen lockfile and `turbo run` resolves the empty tasks.
 
 ---
 
-## Phase 2: Foundational (pré-requisitos bloqueantes)
+## Phase 2: Foundational (blocking prerequisites)
 
-**Objetivo**: pacote de tokens, schemas, modelo interno do build, motor de cor, checks de repo e
-fronteiras de camada. **Nenhuma história começa antes disto.**
+**Objective**: token package, schemas, internal build model, color engine, repo checks, and
+layer boundaries. **No story starts before this.**
 
-- [x] T013 Criar `packages/tokens/package.json` (`@<prefixo>/tokens`): `exports` `"."` →
+- [x] T013 Create `packages/tokens/package.json` (`@<prefixo>/tokens`): `exports` `"."` →
   `dist/esm/index.js` (types `index.d.ts`), `"./values"` → `dist/esm/values.js`, `"./css/base.css"`,
   `"./css/brand-*.css"`, `"./meta/*"`; `sideEffects: ["**/*.css"]`; `files` allowlist (ENG-17);
-  **zero dependências de runtime**; `license` `UNLICENSED` (marcador, ENG-22)
-- [ ] T014 [P] Copiar `format.json` e `resolver.json` do DTCG 2025.10 para
-  `packages/tokens/schemas/dtcg-2025.10/`, com `SHA256SUMS` e `LICENSE-W3C.md`; registrar origem e
-  licença W3C em `quality/license-policy.json` e nos avisos de terceiros
-- [x] T015 [P] Criar `packages/tokens/src/layers.json` na forma `{ "order": ["<prefixo>.tokens"] }`
-  (fonte única da ordem das camadas, css-output L-03)
-- [x] T016 Criar scaffold de `tools/tokens-build` (`@<prefixo>/tokens-build`, `private: true`):
-  `package.json` com devDependency `@terrazzo/parser` e `@terrazzo/token-tools` 2.9.0 (alinhadas por
-  `overrides` do pnpm), `ajv` exato e `@<prefixo>/color`; `bin` `tokens-build` com subcomandos
-  `validate` e `build`; códigos de saída 0 ok, 1 violação, 2 uso/config, 3 interno; flag `--json`
+  **zero runtime dependencies**; `license` `UNLICENSED` (marker, ENG-22)
+- [ ] T014 [P] Copy `format.json` and `resolver.json` from DTCG 2025.10 to
+  `packages/tokens/schemas/dtcg-2025.10/`, with `SHA256SUMS` and `LICENSE-W3C.md`; record the origin and
+  W3C license in `quality/license-policy.json` and in the third-party notices
+- [x] T015 [P] Create `packages/tokens/src/layers.json` in the form `{ "order": ["<prefixo>.tokens"] }`
+  (single source of the @layer order, css-output L-03)
+- [x] T016 Create the scaffold of `tools/tokens-build` (`@<prefixo>/tokens-build`, `private: true`):
+  `package.json` with devDependency `@terrazzo/parser` and `@terrazzo/token-tools` 2.9.0 (aligned by
+  pnpm `overrides`), exact `ajv`, and `@<prefixo>/color`; `bin` `tokens-build` with subcommands
+  `validate` and `build`; exit codes 0 ok, 1 violation, 2 usage/config, 3 internal; flag `--json`
   (tools-cli.md §1)
-- [x] T017 Implementar em `tools/tokens-build/src/model.ts` o modelo interno de token (data-model,
-  "Token": `path`, `cssName`, `layer`, `category`, `type`, `axis`, `role`, `values`, `source`) e o
-  leitor com Ajv que valida contra os schemas DTCG versionados (V-01) e monta o índice
-  `id → arquivo:linha:coluna` usado em toda mensagem de erro
-- [x] T018 Implementar em `tools/tokens-build/src/resolver.ts` o carregamento via `@terrazzo/parser`
-  com `req` próprio que rejeita `$ref` não `file:` (sem rede); expor `listPermutations()` e
-  `apply()`; falhar (código 1) se a lista de permutações vier indefinida ou incompleta
-- [x] T019 [P] Criar `tools/color` (`@<prefixo>/color`, folha, sem dependências do workspace) com
-  `toEmittedSrgb()` (mapeamento CSS Color 4 método `css`, sRGB de 8 bits; alfa `rgb(r g b / a)` com
-  três casas), módulo WCAG 2.2 (limiar 0,04045; coeficientes 0,2126/0,7152/0,0722; sem
-  arredondamento; aprova com ≥) e composição source-over em sRGB gama, variante float e variante que
-  arredonda 8 bits a cada dobra; testes unitários com vetores de ouro (#767676/#fff = 4,54 passa,
-  #777777/#fff = 4,48 falha, preto/branco = 21) — ADR-15, FR-020, QA-02
-- [x] T020 [P] Criar scaffold de `tools/repo-checks` (`@<prefixo>/repo-checks`, sem dependências do
-  workspace): `bin` `repo-checks` com `determinism`, `drift`, `scan-tokens`, `layers`; códigos de
-  saída 0–3; `--json`
-- [x] T021 Implementar `tools/repo-checks` subcomando `layers`: check de manifesto pnpm
-  (`pnpm ls -r --prod --json`) que falha com pacote de UI no fechamento `--prod` de pacote `tools`,
-  com pacote sem exatamente uma tag de camada e com `@boundaries-ignore` fora de registro versionado;
-  mais fixture de violação proposital em `.ts` por aresta proibida (ENG-01, ADR-12 check c)
-- [x] T022 Preencher `turbo.json` `boundaries.tags`: tags `tokens`, `tools`, `apps` e as arestas
-  permitidas do plan (`tokens -(dev)-> tools/tokens-build, tools/color`; `tools/tokens-build ->
-  tools/color`; `apps -> tokens só via tarball`); `tools/color` e `tools/repo-checks` sem dependência
-  do workspace (ADR-12 check a)
-- [ ] T023 Ligar no `.github/workflows/tokens-ci.yml` os jobs `install --frozen-lockfile` e
-  `check:layers` (turbo boundaries + `repo-checks layers`), com a fixture de violação do T021 provando
-  o bloqueio
+- [x] T017 Implement in `tools/tokens-build/src/model.ts` the internal token model (data-model,
+  "Token": `path`, `cssName`, `layer`, `category`, `type`, `axis`, `role`, `values`, `source`) and the
+  reader with Ajv that validates against the versioned DTCG schemas (V-01) and builds the index
+  `id → file:line:column` used in every error message
+- [x] T018 Implement in `tools/tokens-build/src/resolver.ts` the loading via `@terrazzo/parser`
+  with a custom `req` that rejects non-`file:` `$ref` (no network); expose `listPermutations()` and
+  `apply()`; fail (code 1) if the permutation list comes back undefined or incomplete
+- [x] T019 [P] Create `tools/color` (`@<prefixo>/color`, a leaf, with no workspace dependencies) with
+  `toEmittedSrgb()` (CSS Color 4 `css` method mapping, 8-bit sRGB; alpha `rgb(r g b / a)` with
+  three places), WCAG 2.2 module (threshold 0.04045; coefficients 0.2126/0.7152/0.0722; no
+  rounding; passes with ≥) and source-over compositing in gamma sRGB, a float variant and a variant that
+  rounds to 8 bits at each blend; unit tests with golden vectors (#767676/#fff = 4.54 passes,
+  #777777/#fff = 4.48 fails, black/white = 21) — ADR-15, FR-020, QA-02
+- [x] T020 [P] Create the scaffold of `tools/repo-checks` (`@<prefixo>/repo-checks`, with no workspace
+  dependencies): `bin` `repo-checks` with `determinism`, `drift`, `scan-tokens`, `layers`; exit
+  codes 0–3; `--json`
+- [x] T021 Implement the `tools/repo-checks` `layers` subcommand: pnpm manifest check
+  (`pnpm ls -r --prod --json`) that fails with a UI package in a `tools` package's `--prod` closure,
+  with a package without exactly one layer tag, and with `@boundaries-ignore` outside a versioned registry;
+  plus an intentional-violation fixture in `.ts` for a forbidden edge (ENG-01, ADR-12 check c)
+- [x] T022 Fill `turbo.json` `boundaries.tags`: tags `tokens`, `tools`, `apps` and the allowed
+  edges from the plan (`tokens -(dev)-> tools/tokens-build, tools/color`; `tools/tokens-build ->
+  tools/color`; `apps -> tokens only via tarball`); `tools/color` and `tools/repo-checks` with no workspace
+  dependency (ADR-12 check a)
+- [ ] T023 Wire into `.github/workflows/tokens-ci.yml` the `install --frozen-lockfile` and
+  `check:layers` jobs (turbo boundaries + `repo-checks layers`), with the T021 violation fixture proving
+  the block
 
-**Checkpoint**: fundação pronta — as histórias podem começar; US4 e US6 podem correr em paralelo a
-US2/US3 depois daqui.
+**Checkpoint**: the foundation is ready — stories can start; US4 and US6 can run in parallel to
+US2/US3 after this.
 
 ---
 
-## Phase 3: User Story 1 — Definir tokens numa fonte única validada (Priority: P1) 🎯 MVP
+## Phase 3: User Story 1 — Define tokens in a single validated source (Priority: P1) 🎯 MVP
 
-**Goal**: fonte única DTCG em três camadas, com nomes padronizados, validada no CI; token mal
-formado, mal nomeado, com literal fora da camada primitiva ou referência inválida é barrado.
+**Goal**: a single DTCG source in three layers, with standardized names, validated in CI; a malformed,
+misnamed token, one with a literal outside the primitive layer, or one with an invalid reference is blocked.
 
-**Independent Test**: propor mudanças válidas e inválidas (nome fora do padrão, literal na camada
-semântica, alias para token inexistente, ciclo, categoria sem token semântico) e confirmar que só as
-válidas passam, com relatório por categoria (spec US1).
+**Independent Test**: propose valid and invalid changes (name off the standard, literal in the semantic
+layer, alias to a nonexistent token, cycle, category without a semantic token) and confirm that only the
+valid ones pass, with a report by category (spec US1).
 
-### Fixtures e testes (US1)
+### Fixtures and tests (US1)
 
-- [ ] T024 [P] [US1] Criar fixtures inválidas em `tools/tokens-build/fixtures/invalid/` com `expect`
-  de código por caso: literal fora de primitivo (V-02), alias inexistente e ciclo (V-03), referência
-  de camada acima (V-04: `primitive → primitive`, `semantic → primitive|semantic`, `component →
-  semantic|component|primitive`), `$ref` fora de primitivo, `$root` e `$extends` fora da forma com
-  chaves (V-05), nome fora da gramática (V-06), categoria sem token semântico (V-11), variação nos
-  dois eixos fora da forma do `brand.` (V-08), valor semântico em set compartilhado (V-09), `hex`
-  divergente dos componentes (V-10), altura de controle fora da escala (V-12), chave semântica
-  ausente/excedente numa permutação (V-13)
-- [ ] T025 [P] [US1] Criar fixtures válidas em `tools/tokens-build/fixtures/valid/` que passam com
-  zero violações, cobrindo todas as 11 categorias e a escala de alturas
-- [x] T026 [P] [US1] Testes unitários dos validadores em `tools/tokens-build/test/validate.test.ts`
-  (Vitest), comparando o multiconjunto de `{arquivo, linha, coluna, código}` esperado e obtido (100%
-  dos erros esperados, zero falsos positivos; FR-024, SC-009, QA-02)
+- [ ] T024 [P] [US1] Create invalid fixtures in `tools/tokens-build/fixtures/invalid/` with an `expect`
+  of code per case: literal outside a primitive (V-02), nonexistent alias and cycle (V-03), reference
+  to a layer above (V-04: `primitive → primitive`, `semantic → primitive|semantic`, `component →
+  semantic|component|primitive`), `$ref` outside a primitive, `$root` and `$extends` off the keyed
+  form (V-05), name off the grammar (V-06), category without a semantic token (V-11), variation on
+  both axes off the `brand.` form (V-08), semantic value in a shared set (V-09), `hex`
+  diverging from the components (V-10), control height outside the scale (V-12), semantic key
+  missing/excess in a permutation (V-13)
+- [ ] T025 [P] [US1] Create valid fixtures in `tools/tokens-build/fixtures/valid/` that pass with
+  zero violations, covering all 11 categories and the height scale
+- [x] T026 [P] [US1] Validator unit tests in `tools/tokens-build/test/validate.test.ts`
+  (Vitest), comparing the expected and obtained multiset of `{file, line, column, code}` (100%
+  of the expected errors, zero false positives; FR-024, SC-009, QA-02)
 
-### Implementação (US1)
+### Implementation (US1)
 
-- [x] T027 [US1] Implementar os validadores de camada e alias em
-  `tools/tokens-build/src/rules/layer.ts`: literal só em `primitive` (V-02, FR-003); alias resolve e
-  sem ciclo em todas as permutações (V-03, FR-004); direção de referência (V-04); `$ref` só em
-  primitivo, `$root` proibido, `$extends` só com chaves (V-05) — códigos `TKN-*` da token-source.md
-- [x] T028 [US1] Implementar o validador de nomenclatura em `tools/tokens-build/src/rules/naming.ts`:
-  gramática de segmentos por categoria em ordem fixa, kebab ASCII, prefixo, colisão de nome CSS
+- [x] T027 [US1] Implement the layer and alias validators in
+  `tools/tokens-build/src/rules/layer.ts`: literal only in `primitive` (V-02, FR-003); alias resolves and
+  is cycle-free in all permutations (V-03, FR-004); reference direction (V-04); `$ref` only in
+  a primitive, `$root` forbidden, `$extends` only with keys (V-05) — `TKN-*` codes from token-source.md
+- [x] T028 [US1] Implement the naming validator in `tools/tokens-build/src/rules/naming.ts`:
+  segment grammar by category in a fixed order, ASCII kebab, prefix, CSS name collision
   (V-06, FR-005, `TKN-NAME-*`)
-- [x] T029 [US1] Implementar os validadores de eixo em `tools/tokens-build/src/rules/axis.ts`: eixo
-  coerente com os contextos (V-07); forma do grupo `brand.` para variação marca × modo, com as mesmas
-  chaves em toda marca (V-08, FR-033); sets compartilhados sem valor de eixo (V-09, `TKN-AXIS-*`,
+- [x] T029 [US1] Implement the axis validators in `tools/tokens-build/src/rules/axis.ts`: axis
+  consistent with the contexts (V-07); `brand.` group form for brand × mode variation, with the same
+  keys across every brand (V-08, FR-033); shared sets without an axis value (V-09, `TKN-AXIS-*`,
   `TKN-BRAND-SOURCE-*`)
-- [x] T030 [US1] Implementar cobertura e escala em `tools/tokens-build/src/rules/coverage.ts`: ao
-  menos um token semântico por categoria (V-11, FR-006); escala única de alturas fechada (V-12,
+- [x] T030 [US1] Implement coverage and scale in `tools/tokens-build/src/rules/coverage.ts`: at
+  least one semantic token per category (V-11, FR-006); single closed height scale (V-12,
   FR-007, `TKN-CATEGORY-COVERAGE`, `TKN-CONTROL-SCALE`)
-- [x] T031 [US1] Implementar a paridade de chaves em `tools/tokens-build/src/rules/parity.ts`:
-  comparar o conjunto de chaves semânticas de todas as permutações e por contexto, apontando chave
-  ausente ou excedente (V-13, FR-011, `TKN-PARITY-*`)
-- [x] T032 [US1] Ligar as regras ao `tokens-build validate`, emitindo um resumo de validação JSON com
-  contagem por categoria e a escala de alturas por permutação (atende o cenário 4 da US1; relatório
-  completo fica no build, FR-008)
-- [x] T033 [P] [US1] Criar a fonte inicial em `packages/tokens/src/`: `tokens.resolver.json`
-  (modificadores `brand` com contextos `a`/`b` e `mode` com `light`/`dark`, `default` `a` e `light`,
+- [x] T031 [US1] Implement key parity in `tools/tokens-build/src/rules/parity.ts`:
+  compare the set of semantic keys of all permutations and per context, pointing to a missing
+  or excess key (V-13, FR-011, `TKN-PARITY-*`)
+- [x] T032 [US1] Wire the rules to `tokens-build validate`, emitting a JSON validation summary with
+  a count by category and the height scale per permutation (meets US1 scenario 4; the full report
+  stays in the build, FR-008)
+- [x] T033 [P] [US1] Create the initial source in `packages/tokens/src/`: `tokens.resolver.json`
+  (modifiers `brand` with contexts `a`/`b` and `mode` with `light`/`dark`, `default` `a` and `light`,
   `resolutionOrder`), `primitive/*.tokens.json`, `semantic/invariant.tokens.json`,
-  `semantic/brand/{a,b}.tokens.json` (grupo `brand.`), `semantic/mode/{light,dark}.tokens.json`,
-  `component/*.tokens.json`, cobrindo as 11 categorias e `size.control.*` com valores sintéticos
-- [x] T034 [US1] Implementar `tools/repo-checks` subcomando `scan-tokens` (FR-001): varrer
-  `git ls-files` por declaração de custom property com valor literal e qualquer nome em CSS, `<style>`
-  de SFC e HTML fora da fonte, chaves `--<prefixo>-` e `setProperty` em TS/JS/JSON e documentos DTCG
-  fora da fonte; respeitar `quality/scan-allowlist.json`; fixtures de autoteste em CSS, SFC, TSX e
-  JSON detectadas 100% (SC-001, SC-009)
-- [ ] T035 [US1] Adicionar o check de "módulo de lógica sem teste irmão" em `tools/repo-checks` e
-  rodá-lo em `pnpm test` (QA-02)
-- [ ] T036 [US1] Ligar `tokens:validate` e `check:scan` no `tokens-ci.yml` como checks obrigatórios
-  de PR; rodar sobre a fonte real (100% dos tokens passam)
+  `semantic/brand/{a,b}.tokens.json` (`brand.` group), `semantic/mode/{light,dark}.tokens.json`,
+  `component/*.tokens.json`, covering the 11 categories and `size.control.*` with synthetic values
+- [x] T034 [US1] Implement the `tools/repo-checks` `scan-tokens` subcommand (FR-001): scan
+  `git ls-files` for a custom property declaration with a literal value and any name in CSS, SFC `<style>`,
+  and HTML outside the source, `--<prefixo>-` keys and `setProperty` in TS/JS/JSON and DTCG documents
+  outside the source; honor `quality/scan-allowlist.json`; self-test fixtures in CSS, SFC, TSX, and
+  JSON detected 100% (SC-001, SC-009)
+- [ ] T035 [US1] Add the "logic module without a sibling test" check to `tools/repo-checks` and
+  run it in `pnpm test` (QA-02)
+- [ ] T036 [US1] Wire `tokens:validate` and `check:scan` into `tokens-ci.yml` as required PR
+  checks; run over the real source (100% of the tokens pass)
 
-**Checkpoint**: US1 testável sozinha — `pnpm tokens:validate` aprova a fonte e barra cada violação.
+**Checkpoint**: US1 testable on its own — `pnpm tokens:validate` passes the source and blocks each violation.
 
 ---
 
-## Phase 4: User Story 2 — Consumir tokens gerados com marca e modo por subárvore (Priority: P2)
+## Phase 4: User Story 2 — Consume generated tokens with brand and mode per subtree (Priority: P2)
 
-**Goal**: CSS por marca e módulos tipados gerados de forma determinística; marca e modo por atributo,
-com escopos aninhados; erro de tipos para token inexistente.
+**Goal**: CSS per brand and typed modules generated deterministically; brand and mode by attribute,
+with nested scopes; a type error for a nonexistent token.
 
-**Independent Test**: app de exemplo que importa `base.css` + a marca A, alterna modo e aninha
-escopos, sem variável exclusiva de B nem variável sem valor; projeto tipado recebe erro em token
-inexistente; dois builds byte a byte idênticos (spec US2).
+**Independent Test**: an example app that imports `base.css` + brand A, toggles mode and nests
+scopes, with no B-exclusive variable and no variable without a value; a typed project gets an error on a nonexistent
+token; two byte-for-byte identical builds (spec US2).
 
-### Testes (US2)
+### Tests (US2)
 
-- [x] T037 [P] [US2] Testes unitários dos formatadores em
-  `tools/tokens-build/test/format-css.test.ts` e `format-esm.test.ts`: seletores, forma sem espaço
-  entre toggles, `initial` literal, colocação por `placement`, saída ordenada (QA-02)
-- [ ] T038 [P] [US2] Criar `apps/tokens-example` (Vite 8 sem framework, `@<prefixo>/tokens-example`)
-  que instala o **tarball empacotado** do pacote de tokens (nunca o código-fonte; QA-06, Princípio
-  VII), importa `./css/base.css` e `./css/brand-a.css`, e lê o mapa `./values`
-- [ ] T039 [P] [US2] Testes em navegador real em `apps/tokens-example/tests/scopes.spec.ts`
-  (@playwright/test, imagem `mcr.microsoft.com/playwright:v1.64.x-noble` fixada por digest, sem rede)
-  cobrindo os 21 casos da css-output.md §16: sem atributo (marca padrão + claro), modo só na raiz,
-  escopo só de modo aninhado, escopo só de marca herdando modo, A→B→A, alternância de modo, cadeia
-  intercalada, dois atributos num elemento, valores inválidos herdam o ancestral, marca não
-  importada, troca em runtime, comparação exata de strings; e importação só de A sem variável de B
-  nem variável pública sem valor (ENG-06, FR-012 a FR-014, FR-017, SC-006, SC-007)
-- [ ] T040 [P] [US2] Criar `tests/types-consumer` (`@<prefixo>/types-consumer`) que instala o tarball
-  e roda `tsc --noEmit` estrito em `moduleResolution` `bundler` e `nodenext`, nas versões TS 6.0.x e
-  7.0.x (catálogo `typescript7`), com `expect-type` nos casos positivos e `@ts-expect-error` nos
-  negativos (token, marca e modo inexistentes); `publint` no tarball (FR-016, QA-08, ENG-05)
+- [x] T037 [P] [US2] Formatter unit tests in
+  `tools/tokens-build/test/format-css.test.ts` and `format-esm.test.ts`: selectors, no-space form
+  between toggles, literal `initial`, placement by `placement`, ordered output (QA-02)
+- [ ] T038 [P] [US2] Create `apps/tokens-example` (Vite 8 without a framework, `@<prefixo>/tokens-example`)
+  that installs the **packaged tarball** of the token package (never the source code; QA-06, Principle
+  VII), imports `./css/base.css` and `./css/brand-a.css`, and reads the `./values` map
+- [ ] T039 [P] [US2] Real-browser tests in `apps/tokens-example/tests/scopes.spec.ts`
+  (@playwright/test, image `mcr.microsoft.com/playwright:v1.64.x-noble` pinned by digest, no network)
+  covering the 21 cases of css-output.md §16: no attribute (default brand + light), mode only at the root,
+  mode-only nested scope, brand-only scope inheriting mode, A→B→A, mode toggle, interleaved
+  chain, two attributes on one element, invalid values inherit the ancestor, brand not
+  imported, runtime switch, exact string comparison; and importing only A with no B variable
+  or public variable without a value (ENG-06, FR-012 to FR-014, FR-017, SC-006, SC-007)
+- [ ] T040 [P] [US2] Create `tests/types-consumer` (`@<prefixo>/types-consumer`) that installs the tarball
+  and runs strict `tsc --noEmit` in `moduleResolution` `bundler` and `nodenext`, in TS versions 6.0.x and
+  7.0.x (catalog `typescript7`), with `expect-type` in the positive cases and `@ts-expect-error` in the
+  negatives (nonexistent token, brand, and mode); `publint` on the tarball (FR-016, QA-08, ENG-05)
 
-### Implementação (US2)
+### Implementation (US2)
 
-- [x] T041 [US2] Implementar o formatador CSS em `tools/tokens-build/src/format/css.ts`: emitir
-  `base.css` (declaração de camadas do `layers.json`, primitivos compartilhados em `:where(:root)`,
-  toggles privados `--<prefixo>-_on-light`/`_on-dark` com `initial` literal, modo padrão, resolvedor
-  `:where(:root, [data-<prefixo>-brand], [data-<prefixo>-mode])` com os tokens de eixo modo,
-  invariantes e de componente, na forma sem espaço) e `brand-<id>.css` (tokens de eixo marca públicos
-  e primitivos exclusivos da marca; `:where(:root)` só na marca padrão) — css-output.md §4 a §8,
+- [x] T041 [US2] Implement the CSS formatter in `tools/tokens-build/src/format/css.ts`: emit
+  `base.css` (layer declaration from `layers.json`, shared primitives in `:where(:root)`,
+  private toggles `--<prefixo>-_on-light`/`_on-dark` with literal `initial`, default mode, resolver
+  `:where(:root, [data-<prefixo>-brand], [data-<prefixo>-mode])` with the mode-axis tokens,
+  invariants and components, in the no-space form) and `brand-<id>.css` (public brand-axis tokens
+  and brand-exclusive primitives; `:where(:root)` only in the default brand) — css-output.md §4 to §8,
   FR-015, FR-017
-- [ ] T042 [US2] Implementar o lint do CSS gerado em `tools/tokens-build/src/format/css-lint.ts`:
-  forma sem espaço, `initial` literal (bug WebKit 243247), todo alvo de `var()` declarado, token
-  público só no resolvedor ou no escopo de marca, `css-layer` vs `layers.json`, `dist-parity`
-  (css-output.md §13) — falha no build
-- [x] T043 [P] [US2] Implementar o formatador ESM em `tools/tokens-build/src/format/esm.ts`: `index.js`
-  com objeto congelado `tokens` por caminho + `.d.ts` com união `TokenName` e literais
-  `var(--<prefixo>-…)`; `values.js` com `Readonly<Record<Brand, Record<Mode, Record<TokenName,
-  string>>>>` + `.d.ts`; excluir o segmento privado `_` (esm-output.md, FR-016)
-- [x] T044 [US2] Implementar o emissor de `dist/meta/tokens.manifest.json` em
-  `tools/tokens-build/src/format/manifest.ts` conforme [contracts/build-manifests.md](contracts/build-manifests.md)
-  §2 (por token: `cssName`, `layer`, `category`, `type`, `axis`, `role`, `placement`,
-  `exclusiveBrand`, `aliasOf`, `aliasChains` por permutação, `scale`, `color.emitted`/`subRefs`,
-  `source`), com garantias M-06 a M-08
-- [x] T045 [P] [US2] Implementar o emissor de `dist/meta/sync-manifest.json` em
-  `tools/tokens-build/src/format/sync-manifest.ts` (build-manifests.md §3, formato em
-  [contracts/design-sync.md](contracts/design-sync.md)), do mesmo modelo resolvido
-- [x] T046 [P] [US2] Implementar o emissor de `dist/meta/report.json` e `report.md` em
-  `tools/tokens-build/src/format/report.ts`: contagem por categoria e camada, escala de alturas por
-  permutação, cores fora do gamut mapeadas, tamanho bruto e gzip de cada arquivo (build-manifests.md
+- [ ] T042 [US2] Implement the generated-CSS lint in `tools/tokens-build/src/format/css-lint.ts`:
+  no-space form, literal `initial` (WebKit bug 243247), every `var()` target declared, public
+  token only in the resolver or in the brand scope, `css-layer` vs `layers.json`, `dist-parity`
+  (css-output.md §13) — fails in the build
+- [x] T043 [P] [US2] Implement the ESM formatter in `tools/tokens-build/src/format/esm.ts`: `index.js`
+  with a frozen `tokens` object by path + `.d.ts` with a `TokenName` union and literals
+  `var(--<prefixo>-…)`; `values.js` with `Readonly<Record<Brand, Record<Mode, Record<TokenName,
+  string>>>>` + `.d.ts`; exclude the private `_` segment (esm-output.md, FR-016)
+- [x] T044 [US2] Implement the `dist/meta/tokens.manifest.json` emitter in
+  `tools/tokens-build/src/format/manifest.ts` per [contracts/build-manifests.md](contracts/build-manifests.md)
+  §2 (per token: `cssName`, `layer`, `category`, `type`, `axis`, `role`, `placement`,
+  `exclusiveBrand`, `aliasOf`, `aliasChains` per permutation, `scale`, `color.emitted`/`subRefs`,
+  `source`), with guarantees M-06 to M-08
+- [x] T045 [P] [US2] Implement the `dist/meta/sync-manifest.json` emitter in
+  `tools/tokens-build/src/format/sync-manifest.ts` (build-manifests.md §3, format in
+  [contracts/design-sync.md](contracts/design-sync.md)), from the same resolved model
+- [x] T046 [P] [US2] Implement the `dist/meta/report.json` and `report.md` emitter in
+  `tools/tokens-build/src/format/report.ts`: count by category and layer, height scale per
+  permutation, out-of-gamut colors mapped, raw and gzip size of each file (build-manifests.md
   §4, FR-006, FR-008, QA-07)
-- [x] T047 [P] [US2] Implementar o emissor do relatório de API em
-  `tools/tokens-build/src/format/api-report.ts` → `packages/tokens/api/tokens.api.json` (versionado),
-  conforme esm-output.md §11 (superfície pública, classificação major/minor/patch do GOV-01)
-- [x] T048 [US2] Implementar o writer determinístico em `tools/tokens-build/src/write.ts` (ordenação
-  por code point, LF, sem timestamp nem caminho absoluto; JSON canônico M-02) e ligar o pipeline
-  `tokens-build build` que roda os formatadores T041 a T047
-- [x] T049 [US2] Implementar `tools/repo-checks` subcomando `determinism`: dois builds a partir de
-  dois `git worktree` limpos, em caminhos, `TZ` e `LC_ALL` diferentes, com cache de tarefas
-  desligado, empacotando com `pnpm pack`; comparar sha256 por arquivo e dos tarballs; variante entre
-  Node piso e mais recente (FR-015, SC-002, ENG-08)
-- [x] T050 [US2] Implementar `tools/repo-checks` subcomando `drift`: `dist/` no `.gitignore`; falhar
-  se `git ls-files` listar arquivo gerado; regenerar `api/tokens.api.json` e exigir
+- [x] T047 [P] [US2] Implement the API-report emitter in
+  `tools/tokens-build/src/format/api-report.ts` → `packages/tokens/api/tokens.api.json` (versioned),
+  per esm-output.md §11 (public surface, GOV-01 major/minor/patch classification)
+- [x] T048 [US2] Implement the deterministic writer in `tools/tokens-build/src/write.ts` (code-point
+  ordering, LF, no timestamp or absolute path; canonical JSON M-02) and wire the
+  `tokens-build build` pipeline that runs formatters T041 to T047
+- [x] T049 [US2] Implement the `tools/repo-checks` `determinism` subcommand: two builds from
+  two clean `git worktree`s, in different paths, `TZ`, and `LC_ALL`, with task cache
+  off, packing with `pnpm pack`; compare sha256 per file and of the tarballs; variant between
+  floor and latest Node (FR-015, SC-002, ENG-08)
+- [x] T050 [US2] Implement the `tools/repo-checks` `drift` subcommand: `dist/` in `.gitignore`; fail
+  if `git ls-files` lists a generated file; regenerate `api/tokens.api.json` and require
   `git diff --exit-code` (QA-08)
-- [ ] T051 [US2] Ligar `tokens:build`, `test:types`, `test:e2e` (Chromium no PR; todos os motores no
-  noturno), `check:determinism` e `check:drift` no `tokens-ci.yml`; gerar o tarball e instalar nas
-  apps (QA-06)
+- [ ] T051 [US2] Wire `tokens:build`, `test:types`, `test:e2e` (Chromium on the PR; all engines in the
+  nightly), `check:determinism`, and `check:drift` into `tokens-ci.yml`; generate the tarball and install it in
+  the apps (QA-06)
 
-**Checkpoint**: US2 testável — app de exemplo troca marca e modo, tipos barram token inexistente,
-build byte a byte idêntico.
-
----
-
-## Phase 5: User Story 3 — Adicionar uma marca sem tocar em componentes (Priority: P3)
-
-**Goal**: adicionar uma marca altera apenas arquivos de tokens (a fonte e o relatório de API
-regenerado), com as mesmas chaves semânticas e troca em runtime.
-
-**Independent Test**: adicionar a marca sintética `c` e conferir no diff que só mudaram arquivos de
-tokens; a checagem de chaves passa; a app alterna para `c` em runtime (spec US3).
-
-- [x] T052 [P] [US3] Teste de integração em `tools/tokens-build/test/add-brand.test.ts`: copiar a
-  fonte para worktree temporária, acrescentar o contexto `c` e `semantic/brand/c.tokens.json`,
-  rodar `tokens-build build`, e afirmar que `git diff --name-only` toca só `packages/tokens/src/**` e
-  `packages/tokens/api/tokens.api.json` (FR-009, SC-005)
-- [ ] T053 [P] [US3] Teste em navegador real em `apps/tokens-example/tests/add-brand.spec.ts`: com a
-  marca `c` na worktree, a app alterna para `c` em runtime; valores mudam sem recarregar e sem
-  alteração de código de componente (US3 cenário 3)
-- [x] T054 [US3] Confirmar que a paridade de chaves (T031) e o diff aceitam a marca `c`: fixture em
-  que `c` tem chave ausente ou excedente é bloqueada (US3 cenário 2); documentar os passos de
-  "adicionar uma marca" em [quickstart.md](quickstart.md) se ainda não cobertos
-
-**Checkpoint**: US3 testável — marca nova entra só por arquivos de tokens.
+**Checkpoint**: US2 testable — the example app switches brand and mode, types block a nonexistent token,
+byte-for-byte identical build.
 
 ---
 
-## Phase 6: User Story 4 — Garantir contraste em todas as combinações (Priority: P4)
+## Phase 5: User Story 3 — Add a brand without touching components (Priority: P3)
 
-**Goal**: manifesto de pares de contraste medido em todas as combinações de marca e modo, com
-opacidade composta; par reprovado falha o build; estado inativo é medido e reportado sem falhar.
+**Goal**: adding a brand changes only token files (the source and the regenerated API
+report), with the same semantic keys and runtime switching.
 
-**Independent Test**: incluir um par reprovado e um translúcido e confirmar que o build falha no
-primeiro e compõe o segundo sobre o fundo (spec US4).
+**Independent Test**: add the synthetic brand `c` and check in the diff that only token files
+changed; the key check passes; the app switches to `c` at runtime (spec US3).
 
-### Testes (US4)
+- [x] T052 [P] [US3] Integration test in `tools/tokens-build/test/add-brand.test.ts`: copy the
+  source to a temporary worktree, add the `c` context and `semantic/brand/c.tokens.json`,
+  run `tokens-build build`, and assert that `git diff --name-only` touches only `packages/tokens/src/**`
+  and `packages/tokens/api/tokens.api.json` (FR-009, SC-005)
+- [ ] T053 [P] [US3] Real-browser test in `apps/tokens-example/tests/add-brand.spec.ts`: with the
+  `c` brand in the worktree, the app switches to `c` at runtime; values change without reloading and without a
+  change to component code (US3 scenario 3)
+- [x] T054 [US3] Confirm that the key parity (T031) and the diff accept brand `c`: a fixture where
+  `c` has a missing or excess key is blocked (US3 scenario 2); document the "add a brand" steps
+  in [quickstart.md](quickstart.md) if not yet covered
 
-- [x] T055 [P] [US4] Fixtures de manifesto em `tools/tokens-contrast/fixtures/`: par reprovado, par
-  translúcido composto, pilha sem base opaca (V-16), conjunto de superfícies vazio num modo, token
-  ausente numa permutação (V-14), par isento `wcag-inactive` abaixo do mínimo (reportado, não falha),
-  grupo "any-of" com um lado aprovado e outro sem lado aprovado, limiares incoerentes (código 2),
+**Checkpoint**: US3 testable — a new brand enters through token files only.
+
+---
+
+## Phase 6: User Story 4 — Guarantee contrast across all combinations (Priority: P4)
+
+**Goal**: contrast-pair manifest measured across all brand and mode combinations, with
+composited opacity; a failing pair fails the build; an inactive state is measured and reported without failing.
+
+**Independent Test**: include a failing pair and a translucent one and confirm that the build fails on the
+first and composites the second over the background (spec US4).
+
+### Tests (US4)
+
+- [x] T055 [P] [US4] Manifest fixtures in `tools/tokens-contrast/fixtures/`: failing pair, translucent
+  composited pair, stack without an opaque base (V-16), empty surface set in a mode, a token
+  missing in a permutation (V-14), exempt `wcag-inactive` pair below the minimum (reported, does not fail),
+  "any-of" group with one passing side and another with no passing side, incoherent thresholds (code 2),
   `emitted-mismatch`
-- [x] T056 [P] [US4] Testes unitários em `tools/tokens-contrast/test/check.test.ts` da composição
-  (float e 8 bits por dobra, menor dos dois), isenção, grupo any-of e truncamento/ordem do relatório
-  (FR-020, SC-002, QA-02)
+- [x] T056 [P] [US4] Unit tests in `tools/tokens-contrast/test/check.test.ts` of the compositing
+  (float and 8-bit per blend, the smaller of the two), exemption, any-of group, and report
+  truncation/order (FR-020, SC-002, QA-02)
 
-### Implementação (US4)
+### Implementation (US4)
 
-- [ ] T057 [P] [US4] Criar `packages/tokens/contrast/manifest.json`, `surfaces.json` e seus schemas
-  (`manifest.schema.json`, `surfaces.schema.json`) conforme contrast-manifest.md: `pairs[]` com `id`,
-  `fg`, `bg` (pilha ou `@conjunto`), `state` do vocabulário versionado, `kind`, `group`, `exempt`;
-  referências só a tokens semânticos públicos ou de componente (FR-019); dono de a11y no CODEOWNERS
-- [x] T058 [US4] Criar `tools/tokens-contrast` (`@<prefixo>/tokens-contrast`, devDependency de
-  `@<prefixo>/color` e dos manifestos de `@<prefixo>/tokens`): `bin` `tokens-contrast check`, códigos
-  de saída 0–3
-- [x] T059 [US4] Implementar o checker em `tools/tokens-contrast/src/check.ts`: para cada par e
-  permutação, resolver via `tokens.manifest.json` (`color.emitted`), compor alfa sobre pilha opaca ou
-  `@conjunto` expandido, aplicar o módulo WCAG de `@<prefixo>/color`, mínimos de
-  `quality/thresholds.json`, isenção `wcag-inactive`, grupo any-of, `emitted-mismatch`; par reprovado
-  falha o build (FR-020, FR-021 parte de dados, A11Y-09, SC-008)
-- [x] T060 [US4] Emitir o relatório de contraste JSON e Markdown (ordenado por id, marca e modo, sem
-  timestamp, razões truncadas a 2 casas na tabela) e retê-lo como evidência (ACE-02)
-- [ ] T061 [P] [US4] Amostras em navegador real em `apps/tokens-example/tests/contrast.spec.ts`:
-  renderizar um swatch por par e permutação do tarball, pintar a pilha opaca em ancestrais reais,
-  afirmar `getComputedStyle` igual ao sRGB emitido e rodar axe (Princípio VII, QA-01; axe/@axe-core
-  no `license-policy.json` como MPL-2.0 dev)
-- [ ] T062 [US4] Ligar `contrast:check` no `tokens-ci.yml` sobre o manifesto real em todo PR e incluir
-  o relatório na variante de determinismo entre Node piso e mais recente
+- [ ] T057 [P] [US4] Create `packages/tokens/contrast/manifest.json`, `surfaces.json`, and their schemas
+  (`manifest.schema.json`, `surfaces.schema.json`) per contrast-manifest.md: `pairs[]` with `id`,
+  `fg`, `bg` (stack or `@set`), `state` from the versioned vocabulary, `kind`, `group`, `exempt`;
+  references only to public semantic or component tokens (FR-019); the a11y owner in CODEOWNERS
+- [x] T058 [US4] Create `tools/tokens-contrast` (`@<prefixo>/tokens-contrast`, devDependency of
+  `@<prefixo>/color` and the manifests of `@<prefixo>/tokens`): `bin` `tokens-contrast check`, exit
+  codes 0–3
+- [x] T059 [US4] Implement the checker in `tools/tokens-contrast/src/check.ts`: for each pair and
+  permutation, resolve via `tokens.manifest.json` (`color.emitted`), composite alpha over an opaque stack or
+  an expanded `@set`, apply the WCAG module of `@<prefixo>/color`, minimums from
+  `quality/thresholds.json`, `wcag-inactive` exemption, any-of group, `emitted-mismatch`; a failing pair
+  fails the build (FR-020, FR-021 data part, A11Y-09, SC-008)
+- [x] T060 [US4] Emit the JSON and Markdown contrast report (ordered by id, brand, and mode, with no
+  timestamp, ratios truncated to 2 places in the table) and retain it as evidence (ACE-02)
+- [ ] T061 [P] [US4] Real-browser samples in `apps/tokens-example/tests/contrast.spec.ts`:
+  render one swatch per pair and permutation from the tarball, paint the opaque stack on real ancestors,
+  assert `getComputedStyle` equals the emitted sRGB and run axe (Principle VII, QA-01; axe/@axe-core
+  in `license-policy.json` as MPL-2.0 dev)
+- [ ] T062 [US4] Wire `contrast:check` into `tokens-ci.yml` over the real manifest on every PR and include
+  the report in the determinism variant between floor and latest Node
 
-**Checkpoint**: US4 testável — contraste de todos os pares em todas as combinações, com isenções.
+**Checkpoint**: US4 testable — contrast of all pairs in all combinations, with exemptions.
 
 ---
 
-## Phase 7: User Story 5 — Barrar estilos fora dos tokens (Priority: P5)
+## Phase 7: User Story 5 — Block styles outside the tokens (Priority: P5)
 
-**Goal**: lint de estilos que barra token primitivo, valor literal e altura de controle fora da
-escala, entregue com fixtures e provado.
+**Goal**: a style lint that blocks a primitive token, literal value, and control height outside the
+scale, delivered with fixtures and proven.
 
-**Independent Test**: rodar o lint sobre exemplos válidos e inválidos e confirmar 100% dos erros
-esperados e zero falsos positivos (spec US5).
+**Independent Test**: run the lint over valid and invalid examples and confirm 100% of the expected
+errors and zero false positives (spec US5).
 
-### Testes (US5)
+### Tests (US5)
 
-- [x] T063 [P] [US5] Fixtures em `tools/stylelint-plugin/fixtures/valid/` (zero avisos) e
-  `invalid/` (um `/* expect: <código>@<coluna> */` por caso) cobrindo os 9 subcódigos:
-  `primitive-token`, `brand-mode-source-token`, `unknown-token` (com e sem prefixo), `literal-value`,
+- [x] T063 [P] [US5] Fixtures in `tools/stylelint-plugin/fixtures/valid/` (zero warnings) and
+  `invalid/` (one `/* expect: <code>@<column> */` per case) covering the 9 subcodes:
+  `primitive-token`, `brand-mode-source-token`, `unknown-token` (with and without prefix), `literal-value`,
   `var-fallback-literal`, `token-definition`, `control-height`, `control-height-missing`,
   `unclassified-component` (lint-rules.md §3)
-- [x] T064 [P] [US5] Harness de fixtures em `tools/stylelint-plugin/test/rule.test.ts` comparando
-  multiconjunto de `{arquivo, linha, coluna, código}`, exigindo que todo código tenha fixture inválida
+- [x] T064 [P] [US5] Fixture harness in `tools/stylelint-plugin/test/rule.test.ts` comparing the
+  multiset of `{file, line, column, code}`, requiring every code to have an invalid fixture
   (FR-024, SC-009)
 
-### Implementação (US5)
+### Implementation (US5)
 
-- [x] T065 [US5] Criar `tools/stylelint-plugin` (`@<prefixo>/stylelint-plugin`, devDependency de
-  stylelint 17.16.x, `@csstools/*` 4.x, `postcss-selector-parser` 7.x; consome
+- [x] T065 [US5] Create `tools/stylelint-plugin` (`@<prefixo>/stylelint-plugin`, devDependency of
+  stylelint 17.16.x, `@csstools/*` 4.x, `postcss-selector-parser` 7.x; consumes
   `@<prefixo>/tokens/meta/tokens.manifest.json`)
-- [x] T066 [US5] Implementar a regra `<prefixo>/design-tokens` em
-  `tools/stylelint-plugin/src/design-tokens.ts`: mapa de propriedades governadas, allowlist de
-  palavras-chave (`transparent`, `currentcolor`, `0`, `auto`, `none`, globais), os 9 subcódigos,
-  registro de controles só de fixture, regra para `@media`/`@container` (lint-rules.md §3; FR-022,
+- [x] T066 [US5] Implement the `<prefixo>/design-tokens` rule in
+  `tools/stylelint-plugin/src/design-tokens.ts`: a map of governed properties, a keyword allowlist
+  (`transparent`, `currentcolor`, `0`, `auto`, `none`, globals), the 9 subcodes,
+  a fixture-only control registry, a rule for `@media`/`@container` (lint-rules.md §3; FR-022,
   FR-023)
-- [ ] T067 [P] [US5] Implementar a regra `<prefixo>/contrast-pairs` em
-  `tools/stylelint-plugin/src/contrast-pairs.ts`: agrupar por sujeito e estado, exigir anotação de
-  fundo `/* <prefixo>-contrast: on <token> | @<conjunto> */` quando não estiver no mesmo sujeito,
-  erro em expressão não resolvível, pular `@media (forced-colors)` (FR-021)
-- [ ] T068 [US5] Preencher `stylelint.config.mjs` e ligar `lint:styles` no `tokens-ci.yml` com
-  `ignoreDisables`, `--max-warnings 0` e relatório JSON como prova de zero violações (aplicado às
-  fixtures nesta feature; ao núcleo quando existir)
+- [ ] T067 [P] [US5] Implement the `<prefixo>/contrast-pairs` rule in
+  `tools/stylelint-plugin/src/contrast-pairs.ts`: group by subject and state, require a
+  background annotation `/* <prefixo>-contrast: on <token> | @<set> */` when it is not on the same subject,
+  error on a non-resolvable expression, skip `@media (forced-colors)` (FR-021)
+- [ ] T068 [US5] Fill `stylelint.config.mjs` and wire `lint:styles` into `tokens-ci.yml` with
+  `ignoreDisables`, `--max-warnings 0`, and a JSON report as proof of zero violations (applied to
+  the fixtures in this feature; to the core once it exists)
 
-**Checkpoint**: US5 testável — o lint barra cada violação e não gera falso positivo.
+**Checkpoint**: US5 testable — the lint blocks each violation and produces no false positive.
 
 ---
 
-## Phase 8: User Story 6 — Manter a ferramenta de design sincronizada (Priority: P6)
+## Phase 8: User Story 6 — Keep the design tool synced (Priority: P6)
 
-**Goal**: motor de sincronização repositório → ferramenta em portas e adaptadores, com fake em
-memória, detecção de divergência e itens rastreáveis; sem operação que leia da ferramenta para o
-repositório.
+**Goal**: a repository → tool sync engine in ports and adapters, with an in-memory
+fake, divergence detection, and trackable items; with no operation that reads from the tool into the
+repository.
 
-**Independent Test**: suíte de contrato contra o fake (edição manual restaurada, renomeação, divergência);
-nenhuma rotina importa variáveis para o repositório (spec US6).
+**Independent Test**: a contract suite against the fake (manual edit restored, rename, divergence);
+no routine imports variables into the repository (spec US6).
 
-### Testes (US6)
+### Tests (US6)
 
-- [x] T069 [P] [US6] Implementar `InMemoryDesignTool` em `tools/design-sync/src/adapters/memory.ts`
-  com capacidades configuráveis e injeção de falhas (falhar após N operações, 429 com Retry-After,
-  403, credencial expirada) e os auxiliares `simulateManualEdit`, `simulateRename`,
+- [x] T069 [P] [US6] Implement `InMemoryDesignTool` in `tools/design-sync/src/adapters/memory.ts`
+  with configurable capabilities and fault injection (fail after N operations, 429 with Retry-After,
+  403, expired credential) and the helpers `simulateManualEdit`, `simulateRename`,
   `simulateExtraVariable`, `faults.failAfterOperations` (design-sync.md)
-- [x] T070 [P] [US6] Implementar `describeDesignToolPortContract` em
-  `tools/design-sync/test/port-contract.test.ts` (casos C-01 a C-18) e rodá-la contra o fake em todo
-  PR (QA-02); `InMemoryTracker`, `InMemoryAlert` e `FakeClock`; marcas sintéticas A/B (QA-15)
+- [x] T070 [P] [US6] Implement `describeDesignToolPortContract` in
+  `tools/design-sync/test/port-contract.test.ts` (cases C-01 to C-18) and run it against the fake on every
+  PR (QA-02); `InMemoryTracker`, `InMemoryAlert`, and `FakeClock`; synthetic brands A/B (QA-15)
 
-### Implementação (US6)
+### Implementation (US6)
 
-- [x] T071 [US6] Criar `tools/design-sync` (`@<prefixo>/design-sync`, `private: true`, **sem
-  dependências de runtime**; só `fetch`, `crypto`, `fs`, `util.parseArgs`) com `bin` `design-sync`
-  (`plan`, `apply`, `detect`, `check-access`, `--adapter memory|<tool>`); códigos 0–5 (4 acesso, 5
+- [x] T071 [US6] Create `tools/design-sync` (`@<prefixo>/design-sync`, `private: true`, **with no
+  runtime dependencies**; only `fetch`, `crypto`, `fs`, `util.parseArgs`) with `bin` `design-sync`
+  (`plan`, `apply`, `detect`, `check-access`, `--adapter memory|<tool>`); codes 0–5 (4 access, 5
   verify)
-- [x] T072 [US6] Definir as portas em `tools/design-sync/src/ports.ts`: `DesignToolPort`
+- [x] T072 [US6] Define the ports in `tools/design-sync/src/ports.ts`: `DesignToolPort`
   (`capabilities`, `checkAccess`, `readSnapshot`, `apply(plan,{dryRun})`, `requestPublish`),
-  `TrackerPort`, `AlertPort`, **sem operação ferramenta → repositório** (garante FR-025 e US6 cenário
+  `TrackerPort`, `AlertPort`, **with no tool → repository operation** (guarantees FR-025 and US6 scenario
   6)
-- [x] T073 [US6] Implementar o núcleo puro em `tools/design-sync/src/core/`: estado desejado do
-  `sync-manifest.json`, topologia por eixo, diff e plano (renomeação por chave, recriar na troca de
-  tipo, deletes por último só em coleções gerenciadas), classificação de divergência contra versão
-  anterior e atual, log JSON canônico com envelope separado, impressão digital da divergência
-  (DSN-01 a DSN-05, DSN-11, FR-025 a FR-030); estados `planned|dry-run|verified|failed`
-- [ ] T074 [P] [US6] Implementar os adaptadores GitHub de tracker e alerta em
-  `tools/design-sync/src/adapters/github/`: token de GitHub App de curta duração (Issues:write, org
-  Members:read), item com dono (papel do CODEOWNERS) e prazo (detecção + SLA de
-  `design-sync.config.json`), alerta ao dono em falha (DSN-02, FR-026); testes contra snapshots
-  gravados
-- [ ] T075 [US6] Criar `.github/workflows/design-sync.yml`: gatilhos pós-promoção à tag principal,
-  cron semanal e `workflow_dispatch`, num grupo de concorrência; environments `design-sync-read` e
-  `design-sync-write`; actions fixadas por SHA; sem segredo em PR de fork (ENG-14)
-- [ ] T076 [US6] Adicionar teste de arquitetura (`tools/design-sync/test/no-repo-write.test.ts`) e
-  aresta no arquivo de camadas que proíbem o `design-sync` escrever na fonte de tokens (ENG-01,
+- [x] T073 [US6] Implement the pure core in `tools/design-sync/src/core/`: desired state from the
+  `sync-manifest.json`, topology per axis, diff and plan (rename by key, recreate on a type
+  change, deletes last only in managed collections), divergence classification against the previous
+  and current version, canonical JSON log with a separate envelope, divergence fingerprint
+  (DSN-01 to DSN-05, DSN-11, FR-025 to FR-030); states `planned|dry-run|verified|failed`
+- [ ] T074 [P] [US6] Implement the GitHub tracker and alert adapters in
+  `tools/design-sync/src/adapters/github/`: a short-lived GitHub App token (Issues:write, org
+  Members:read), an item with an owner (CODEOWNERS role) and due date (detection + SLA from
+  `design-sync.config.json`), an alert to the owner on failure (DSN-02, FR-026); tests against recorded
+  snapshots
+- [ ] T075 [US6] Create `.github/workflows/design-sync.yml`: triggers post-promotion to the main tag,
+  weekly cron, and `workflow_dispatch`, in a concurrency group; environments `design-sync-read` and
+  `design-sync-write`; actions pinned by SHA; no secret in a fork PR (ENG-14)
+- [ ] T076 [US6] Add an architecture test (`tools/design-sync/test/no-repo-write.test.ts`) and an
+  edge in the layer file that forbid `design-sync` from writing to the token source (ENG-01,
   FR-025)
 
-**Checkpoint**: US6 testável — sincronização validada contra o fake; adaptador real fica para depois
-da decisão do requerente.
+**Checkpoint**: US6 testable — sync validated against the fake; the real adapter is left for after
+the requester's decision.
 
 ---
 
 ## Phase 9: Polish & Cross-Cutting
 
-**Purpose**: fechamento, rastreabilidade e requisitos transversais.
+**Purpose**: closing, traceability, and cross-cutting requirements.
 
-- [x] T077 [P] Escrever `packages/tokens/README.md` com propósito, instalação, uso mínimo e link para
-  a documentação completa (DOC-08)
-- [ ] T078 [P] Gerar/escrever `docs/tokens/convencao-de-nomes.md` a partir do contrato
-  [token-source.md](contracts/token-source.md) e ligar o check que compara os vocabulários do
-  documento com os do validador (TOK-04)
-- [ ] T079 Criar a matriz de rastreabilidade versionada (`specs/001-design-tokens-themes/traceability.md`
-  ou `quality/traceability.json`) ligando cada FR/ID desta feature a um check de CI ou evidência, e um
-  check que falha com ID sem check (FR-031, ACE-02)
-- [ ] T080 [P] Ligar `pnpm sbom` (ENG-19) e `pnpm licenses list --json` contra
-  `quality/license-policy.json` (ENG-21) no `tokens-ci.yml`, incluindo os pacotes `tools/*`
-- [ ] T081 [P] Ligar a medição do orçamento de bundle (QA-07) a partir de `report.json` (`files`)
-  contra `quality/thresholds.json` (valor do orçamento pendente com o requerente)
-- [ ] T082 Rodar a validação ponta a ponta do [quickstart.md](quickstart.md) e registrar o resultado
-- [ ] T083 Revisão de conformidade com a constituição (as 14 perguntas do Constitution Check do
-  plano) e anexar ao pacote de aceite da fase (ACE-01); obter aprovação de dono dos ADR-11 a ADR-16
+- [x] T077 [P] Write `packages/tokens/README.md` with purpose, installation, minimal usage, and a link to
+  the full documentation (DOC-08)
+- [ ] T078 [P] Generate/write `docs/tokens/convencao-de-nomes.md` from the
+  [token-source.md](contracts/token-source.md) contract and wire the check that compares the document's
+  vocabularies with the validator's (TOK-04)
+- [ ] T079 Create the versioned traceability matrix (`specs/001-design-tokens-themes/traceability.md`
+  or `quality/traceability.json`) linking each FR/ID of this feature to a CI check or evidence, and a
+  check that fails with an ID without a check (FR-031, ACE-02)
+- [ ] T080 [P] Wire `pnpm sbom` (ENG-19) and `pnpm licenses list --json` against
+  `quality/license-policy.json` (ENG-21) into `tokens-ci.yml`, including the `tools/*` packages
+- [ ] T081 [P] Wire the bundle-budget measurement (QA-07) from `report.json` (`files`)
+  against `quality/thresholds.json` (budget value pending with the requester)
+- [ ] T082 Run the end-to-end validation of [quickstart.md](quickstart.md) and record the result
+- [ ] T083 Constitution conformance review (the 14 questions of the plan's Constitution Check)
+  and attach it to the phase acceptance package (ACE-01); obtain owner approval of ADR-11 to ADR-16
   (GOV-07, GOV-09)
 
 ---
@@ -450,33 +450,33 @@ da decisão do requerente.
 
 ### Phase Dependencies
 
-- **Setup (Phase 1)**: sem dependência; começa já.
-- **Foundational (Phase 2)**: depende do Setup; **bloqueia todas as histórias**.
-- **US1 (Phase 3)**: depende da Foundational. É o MVP.
-- **US2 (Phase 4)**: depende da Foundational e da fonte válida da US1 (T033).
-- **US3 (Phase 5)**: depende da US1 (paridade) e da US2 (build e app de exemplo).
-- **US4 (Phase 6)**: depende da Foundational (`tools/color`, T019) e dos valores emitidos no
-  `tokens.manifest.json` (T044); pode correr em paralelo à US2 depois do T044.
-- **US5 (Phase 7)**: depende do `tokens.manifest.json` (T044).
-- **US6 (Phase 8)**: depende do `sync-manifest.json` (T045); o núcleo e o fake não dependem de US3,
-  US4 nem US5.
-- **Polish (Phase 9)**: depende das histórias contratadas concluídas.
+- **Setup (Phase 1)**: no dependency; starts right away.
+- **Foundational (Phase 2)**: depends on Setup; **blocks all stories**.
+- **US1 (Phase 3)**: depends on Foundational. It is the MVP.
+- **US2 (Phase 4)**: depends on Foundational and the valid US1 source (T033).
+- **US3 (Phase 5)**: depends on US1 (parity) and US2 (build and example app).
+- **US4 (Phase 6)**: depends on Foundational (`tools/color`, T019) and the values emitted in
+  `tokens.manifest.json` (T044); it can run in parallel to US2 after T044.
+- **US5 (Phase 7)**: depends on `tokens.manifest.json` (T044).
+- **US6 (Phase 8)**: depends on `sync-manifest.json` (T045); the core and the fake do not depend on US3,
+  US4, or US5.
+- **Polish (Phase 9)**: depends on the contracted stories being complete.
 
 ### Within Each User Story
 
-- Fixtures e testes antes ou junto da implementação; comparar por multiconjunto.
-- Validadores e formatadores são funções puras com teste unitário.
-- História completa e testável antes da próxima prioridade.
+- Fixtures and tests before or together with the implementation; compare by multiset.
+- Validators and formatters are pure functions with unit tests.
+- A story complete and testable before the next priority.
 
 ### Parallel Opportunities
 
-- Setup: T003, T004, T005, T007, T008, T009, T010, T011, T012 em paralelo.
-- Foundational: T014, T015, T019, T020 em paralelo; T016→T017→T018 em sequência.
-- US1: T024, T025, T026, T033 em paralelo antes das regras; as regras T027 a T031 tocam arquivos
-  diferentes e podem correr em paralelo.
-- US2: T037, T038, T039, T040 em paralelo; formatadores T043, T045, T046, T047 em paralelo após T044.
-- Depois da Foundational, com `tokens.manifest.json` pronto (T044), **US4, US5 e o núcleo de US6**
-  podem correr em paralelo a US3, por tocarem pacotes diferentes (`tools/tokens-contrast`,
+- Setup: T003, T004, T005, T007, T008, T009, T010, T011, T012 in parallel.
+- Foundational: T014, T015, T019, T020 in parallel; T016→T017→T018 in sequence.
+- US1: T024, T025, T026, T033 in parallel before the rules; the rules T027 to T031 touch different
+  files and can run in parallel.
+- US2: T037, T038, T039, T040 in parallel; formatters T043, T045, T046, T047 in parallel after T044.
+- After Foundational, with `tokens.manifest.json` ready (T044), **US4, US5, and the US6 core**
+  can run in parallel to US3, since they touch different packages (`tools/tokens-contrast`,
   `tools/stylelint-plugin`, `tools/design-sync`).
 
 ---
@@ -484,48 +484,48 @@ da decisão do requerente.
 ## Parallel Example: User Story 1
 
 ```bash
-# Fixtures e testes juntos:
-Task: "Fixtures inválidas em tools/tokens-build/fixtures/invalid/ (T024)"
-Task: "Fixtures válidas em tools/tokens-build/fixtures/valid/ (T025)"
-Task: "Fonte inicial em packages/tokens/src/ (T033)"
+# Fixtures and tests together:
+Task: "Invalid fixtures in tools/tokens-build/fixtures/invalid/ (T024)"
+Task: "Valid fixtures in tools/tokens-build/fixtures/valid/ (T025)"
+Task: "Initial source in packages/tokens/src/ (T033)"
 
-# Regras de validação (arquivos diferentes):
-Task: "Regras de camada e alias em tools/tokens-build/src/rules/layer.ts (T027)"
-Task: "Nomenclatura em tools/tokens-build/src/rules/naming.ts (T028)"
-Task: "Eixo e brand.* em tools/tokens-build/src/rules/axis.ts (T029)"
-Task: "Cobertura e escala em tools/tokens-build/src/rules/coverage.ts (T030)"
-Task: "Paridade em tools/tokens-build/src/rules/parity.ts (T031)"
+# Validation rules (different files):
+Task: "Layer and alias rules in tools/tokens-build/src/rules/layer.ts (T027)"
+Task: "Naming in tools/tokens-build/src/rules/naming.ts (T028)"
+Task: "Axis and brand.* in tools/tokens-build/src/rules/axis.ts (T029)"
+Task: "Coverage and scale in tools/tokens-build/src/rules/coverage.ts (T030)"
+Task: "Parity in tools/tokens-build/src/rules/parity.ts (T031)"
 ```
 
 ---
 
 ## Implementation Strategy
 
-### MVP (só US1)
+### MVP (US1 only)
 
-1. Phase 1 Setup → 2. Phase 2 Foundational → 3. Phase 3 US1 → validar `pnpm tokens:validate` e
-`check:scan` sozinhos. Entrega a fonte única validada.
+1. Phase 1 Setup → 2. Phase 2 Foundational → 3. Phase 3 US1 → validate `pnpm tokens:validate` and
+`check:scan` on their own. Delivers the single validated source.
 
-### Entrega incremental
+### Incremental delivery
 
-Setup + Foundational → US1 (fonte validada) → US2 (CSS/ESM/manifestos, app de exemplo) → US3 (marca
-nova) → US4 (contraste) → US5 (lint) → US6 (sincronização). Cada história agrega valor sem quebrar as
-anteriores.
+Setup + Foundational → US1 (validated source) → US2 (CSS/ESM/manifests, example app) → US3 (new
+brand) → US4 (contrast) → US5 (lint) → US6 (sync). Each story adds value without breaking the
+previous ones.
 
-### Estratégia de time paralelo
+### Parallel-team strategy
 
-Depois do T044 (`tokens.manifest.json`), US4, US5 e o núcleo de US6 vão para pessoas diferentes, em
-pacotes `tools/*` distintos; US2 e US3 continuam na trilha principal.
+After T044 (`tokens.manifest.json`), US4, US5, and the US6 core go to different people, in
+distinct `tools/*` packages; US2 and US3 continue on the main track.
 
 ---
 
 ## Notes
 
-- `[P]` = arquivos diferentes, sem dependência pendente.
-- Marcas `a`/`b` sintéticas; marca padrão real, prefixo, ferramenta de design, lista de navegadores,
-  pisos de Node/TS e contratação do TOK-12 pendentes com o requerente (plan.md, research.md). As
-  tarefas usam as premissas vigentes.
-- Os checks de `.vue` do ENG-01 e o cache remoto do ENG-03 (ADR-12) ficam para a feature de CI e
-  governança; esta feature entrega os checks de camada em `.ts`.
-- FR-032 (TOK-12, Desejável) não tem tarefa até a contratação.
-- Commit após cada tarefa ou grupo lógico; parar em cada checkpoint para validar a história.
+- `[P]` = different files, no pending dependency.
+- Brands `a`/`b` synthetic; the real default brand, prefix, design tool, browser list,
+  Node/TS floors, and the contracting of TOK-12 pending with the requester (plan.md, research.md). The
+  tasks use the current premises.
+- The ENG-01 `.vue` checks and the ENG-03 remote cache (ADR-12) are left for the CI and
+  governance feature; this feature delivers the layer checks in `.ts`.
+- FR-032 (TOK-12, Desirable) has no task until it is contracted.
+- Commit after each task or logical group; stop at each checkpoint to validate the story.
