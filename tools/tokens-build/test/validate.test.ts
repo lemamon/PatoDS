@@ -46,54 +46,54 @@ function validBase(): ModelToken[] {
 }
 
 describe('validateModel', () => {
-  it('modelo válido não gera findings', () => {
+  it('valid model generates no findings', () => {
     expect(validateModel(model(validBase()))).toEqual([])
   })
 
-  it('V-02: literal fora da camada primitiva', () => {
+  it('V-02: literal outside the primitive layer', () => {
     const m = model([...validBase(), tok({ id: 'color.bad', layer: 'semantic', hasAlias: false })])
     expect(codes(validateModel(m))).toContain('TKN-LITERAL-OUTSIDE-PRIMITIVE')
   })
 
-  it('V-04: direção de referência proibida (primitivo → semântico)', () => {
+  it('V-04: forbidden reference direction (primitive → semantic)', () => {
     const prim = tok({ id: 'color.p', layer: 'primitive', axis: 'invariant', hasAlias: false, raw: { dependencies: ['color.ok'] } })
     const m = model([...validBase(), prim])
     expect(codes(validateModel(m))).toContain('TKN-LAYER-DIRECTION')
   })
 
-  it('V-06: categoria desconhecida e segmento fora do padrão', () => {
+  it('V-06: unknown category and nonstandard segment', () => {
     const m = model([...validBase(), tok({ id: 'Foo.Bar', category: 'Foo' })])
     const c = codes(validateModel(m))
     expect(c).toContain('TKN-NAME-CATEGORY')
     expect(c).toContain('TKN-NAME-SEGMENT')
   })
 
-  it('V-06: colisão de nome CSS', () => {
+  it('V-06: CSS name collision', () => {
     const m = model([...validBase(), tok({ id: 'color.ok', category: 'color' })]) // duplicates color.ok
     expect(codes(validateModel(m))).toContain('TKN-NAME-COLLISION')
   })
 
-  it('V-08: brand-mode-source fora da forma', () => {
+  it('V-08: brand-mode-source outside the expected form', () => {
     const m = model([...validBase(), tok({ id: 'brand.color.bg.surface.sepia', category: 'color', role: 'brand-mode-source', axis: 'brand' })])
     expect(codes(validateModel(m))).toContain('TKN-BRAND-SOURCE-MODE')
   })
 
-  it('V-10: hex diverge dos componentes', () => {
+  it('V-10: hex diverges from the components', () => {
     const bad = tok({ id: 'color.white', layer: 'primitive', type: 'color', hasAlias: false, raw: { $value: { colorSpace: 'srgb', components: [1, 1, 1], hex: '#000000' } } })
     expect(codes(validateModel(model([...validBase(), bad])))).toContain('TKN-COLOR-HEX-MISMATCH')
   })
 
-  it('V-11: categoria sem semântico público', () => {
+  it('V-11: category without public semantic', () => {
     const missing = validBase().filter((t) => t.category !== 'opacity')
     expect(codes(validateModel(model(missing)))).toContain('TKN-CATEGORY-COVERAGE')
   })
 
-  it('V-12: altura de controle fora da escala', () => {
+  it('V-12: control height outside the scale', () => {
     const m = model([...validBase(), tok({ id: 'size.control.xl', category: 'size', scale: undefined })])
     expect(codes(validateModel(m))).toContain('TKN-CONTROL-SCALE')
   })
 
-  it('V-13: chave semântica ausente numa permutação', () => {
+  it('V-13: semantic key missing in a permutation', () => {
     const base = validBase()
     const m = model(base)
     m.load.permutations[0]!.set = {} // remove all keys from the permutation
