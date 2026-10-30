@@ -84,7 +84,7 @@ export async function loadTokens(srcDir: string): Promise<LoadResult> {
 
   const req = async (url: URL): Promise<string> => {
     if (url.protocol !== 'file:') {
-      throw new Error(`Rede bloqueada no build de tokens: ${url.href} (FR-025, determinismo)`)
+      throw new Error(`Network blocked during token build: ${url.href} (FR-025, determinism)`)
     }
     return await readFile(fileURLToPath(url), 'utf8')
   }
@@ -96,11 +96,11 @@ export async function loadTokens(srcDir: string): Promise<LoadResult> {
     req,
   })
 
-  if (!resolver) throw new Error('Nenhum resolvedor encontrado na fonte de tokens.')
+  if (!resolver) throw new Error('No resolver found in the token source.')
   const inputs = resolver.listPermutations?.()
   if (!inputs) {
     throw new Error(
-      'resolver.listPermutations() indefinido: resolvedor complexo demais ou permutationLimit excedido.',
+      'resolver.listPermutations() undefined: resolver too complex or permutationLimit exceeded.',
     )
   }
 
