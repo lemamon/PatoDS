@@ -1,7 +1,6 @@
 {
   "name": "@patods/tokens",
   "version": "0.0.0",
-  "private": true,
   "type": "module",
   "license": "MIT",
   "sideEffects": ["**/*.css"],
