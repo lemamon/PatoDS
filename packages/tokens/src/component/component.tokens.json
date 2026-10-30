@@ -1,5 +1,5 @@
 {
-  "$description": "Tokens de componente (camada component): aliam tokens semânticos; resolvem por escopo no CSS.",
+  "$description": "Component tokens (component layer): alias semantic tokens; resolve by scope in CSS.",
   "color": {
     "$type": "color",
     "button": {
