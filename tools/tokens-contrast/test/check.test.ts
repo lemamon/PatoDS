@@ -23,7 +23,7 @@ function fixture(pairs: Pair[], colors: Record<string, Record<string, string>>):
 }
 
 describe('runContrastCheck (US4)', () => {
-  it('reprova par abaixo do mínimo e aprova par bom', () => {
+  it('fails a pair below the minimum and passes a good pair', () => {
     const dir = fixture(
       [
         { id: 'ok', fg: 'fg', bg: ['bgLight'], state: 'default', kind: 'text' },
@@ -41,7 +41,7 @@ describe('runContrastCheck (US4)', () => {
     expect(failed).not.toContain('ok')
   })
 
-  it('par isento é medido e reportado, mas não reprova', () => {
+  it('an exempt pair is measured and reported, but does not fail', () => {
     const dir = fixture(
       [{ id: 'dis', fg: 'mid', bg: ['bgLight'], state: 'disabled', kind: 'text', exempt: 'wcag-inactive' }],
       { mid: { 'a/light': '#999999' }, bgLight: { 'a/light': '#ffffff' } },
@@ -52,7 +52,7 @@ describe('runContrastCheck (US4)', () => {
     expect(r.report.rows[0]!.pass).toBe(false)
   })
 
-  it('fundo translúcido é composto sobre a base opaca (não assume fundo opaco)', () => {
+  it('translucent background is composited over the opaque base (does not assume an opaque background)', () => {
     const dir = fixture(
       [{ id: 'scrim', fg: 'black', bg: ['bgLight', 'scrim'], state: 'default', kind: 'text' }],
       {
@@ -69,7 +69,7 @@ describe('runContrastCheck (US4)', () => {
     expect(row.ratio).toBeLessThan(5)
   })
 
-  it('base não opaca é erro', () => {
+  it('non-opaque base is an error', () => {
     const dir = fixture(
       [{ id: 'x', fg: 'white', bg: ['scrim'], state: 'default', kind: 'text' }],
       { white: { 'a/light': '#ffffff' }, scrim: { 'a/light': 'rgb(0 0 0 / 0.6)' } },
