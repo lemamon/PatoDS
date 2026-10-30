@@ -10,8 +10,8 @@ import { runBuild } from '../src/build.ts'
 const SRC = join(import.meta.dirname, '../../../packages/tokens/src')
 
 // US3: adding a brand only touches token files (source + API report).
-describe('adicionar marca (US3)', () => {
-  it('a marca C entra só com arquivos de tokens, mantém paridade e gera brand-c.css', async () => {
+describe('add brand (US3)', () => {
+  it('brand C enters with only token files, keeps parity and generates brand-c.css', async () => {
     const dir = mkdtempSync(join(tmpdir(), 'patods-src-'))
     cpSync(SRC, join(dir, 'src'), { recursive: true })
     const srcDir = join(dir, 'src')
@@ -24,7 +24,7 @@ describe('adicionar marca (US3)', () => {
 
     // 2) brand C token file (reuses brand B's structure)
     const bFile = readFileSync(join(srcDir, 'semantic/brand/b.tokens.json'), 'utf8')
-    writeFileSync(join(srcDir, 'semantic/brand/c.tokens.json'), bFile.replace('Marca sintética B', 'Marca sintética C'))
+    writeFileSync(join(srcDir, 'semantic/brand/c.tokens.json'), bFile.replace('Synthetic brand B', 'Synthetic brand C'))
 
     const model = buildModel(await loadTokens(srcDir))
     // acceptance scenario 2: key parity still holds
