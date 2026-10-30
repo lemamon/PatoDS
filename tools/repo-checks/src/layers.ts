@@ -59,12 +59,12 @@ export async function checkLayers(root: string): Promise<LayerFinding[]> {
     const prod: Record<string, string> = p.json.dependencies ?? {}
     for (const dep of Object.keys(prod)) {
       const target = byName.get(dep)
-      if (!target) continue // dependência externa, coberta por licença/allowlist
+      if (!target) continue // external dependency, covered by license/allowlist
       if (!ALLOWED_PROD[p.layer].has(target.layer)) {
         out.push({
           code: 'ENG01-FORBIDDEN-EDGE',
           pkg: p.name,
-          message: `Camada "${p.layer}" (${p.dir}) depende em produção de "${target.layer}" (${dep}); aresta proibida (ENG-01).`,
+          message: `Layer "${p.layer}" (${p.dir}) depends in production on "${target.layer}" (${dep}); forbidden edge (ENG-01).`,
         })
       }
     }
@@ -76,7 +76,7 @@ export async function checkLayers(root: string): Promise<LayerFinding[]> {
           out.push({
             code: 'ENG01-TOOL-PROD-UI',
             pkg: p.name,
-            message: `Ferramenta "${p.name}" depende da UI "${dep}" em produção; só devDependency é permitido (ENG-01).`,
+            message: `Tool "${p.name}" depends on the UI "${dep}" in production; only devDependency is allowed (ENG-01).`,
           })
         }
       }
