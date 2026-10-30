@@ -1,114 +1,112 @@
-# Contrato: módulos ESM e tipos dos tokens
+# Contract: ESM modules and token types
 
-**Feature**: [spec.md](../spec.md) | **Pesquisa**: [research.md](../research.md) (D1, D6, D7) |
-**Modelo**: [data-model.md](../data-model.md) | **Data**: 2026-10-21
+**Feature**: [spec.md](../spec.md) | **Research**: [research.md](../research.md) (D1, D6, D7) |
+**Model**: [data-model.md](../data-model.md) | **Date**: 2026-10-21
 
-Decisões de origem: [ADR-11](../../../docs/adr/ADR-11-pipeline-build-tokens.md) (pipeline de build)
-e [ADR-16](../../../docs/adr/ADR-16-lint-tokens-e-testes.md) (lint de tokens e pilha de testes),
-ambas com status Proposto. Detalhes: [research/token-build.md](../research/token-build.md) e
-[research/lint-test.md](../research/lint-test.md); onde divergem do [research.md](../research.md),
-vale o research.md.
+Source decisions: [ADR-11](../../../docs/adr/ADR-11-pipeline-build-tokens.md) (build pipeline)
+and [ADR-16](../../../docs/adr/ADR-16-lint-tokens-e-testes.md) (token lint and test stack),
+both with status Proposed. Details: [research/token-build.md](../research/token-build.md) and
+[research/lint-test.md](../research/lint-test.md); where they diverge from [research.md](../research.md),
+research.md prevails.
 
-`<prefixo>` é o marcador do prefixo do projeto (TODO(PREFIXO) da constituição v1.0.0), usado
-literalmente nos trechos abaixo. Marcas `a` e `b` são as marcas sintéticas das fixtures (QA-15).
-O CSS, a serialização de valores e o mecanismo de escopo estão em [css-output.md](css-output.md).
+`<prefixo>` is the project prefix marker (TODO(PREFIXO) of constitution v1.0.0), used literally in the
+snippets below. Brands `a` and `b` are the synthetic fixture brands (QA-15). The CSS, the value
+serialization and the scope mechanism are in [css-output.md](css-output.md).
 
-## 1. Escopo e rastreabilidade
+## 1. Scope and traceability
 
-Este contrato fixa as entradas JavaScript do pacote `@<prefixo>/tokens`, a forma das exportações,
-as declarações de tipo, o que fica de fora, os campos do `package.json`, o conteúdo do tarball, os
-testes de tipos e o relatório de API.
+This contract fixes the JavaScript entries of the `@<prefixo>/tokens` package, the shape of the
+exports, the type declarations, what is left out, the `package.json` fields, the tarball content, the
+type tests and the API report.
 
-| Requisito | Onde é atendido |
+| Requirement | Where it is met |
 | --- | --- |
-| FR-016, TOK-06 | §2 a §5: referências `var(--<prefixo>-*)` de todos os tokens e, em entrada separada, mapas por marca e modo, com `.d.ts`; §10: nome inexistente gera erro de tipos |
-| ENG-04 | §8: ESM sem efeito colateral; `sideEffects` lista só CSS |
-| ENG-05 | §8 e §10: tipos publicados junto do código, `publint` e consumidor estrito compilando cada entrada |
-| ENG-17, ENG-22 | §8 e §9: allowlist do tarball, nenhum script de instalação, campo `license` e avisos de terceiros |
-| QA-08 | §10: testes de tipos com casos negativos; §11: relatório de API versionado e conferido por drift |
-| GOV-01 | §11: insumo da verificação de API pública |
-| Princípio I | §4: marcas, modos e nomes de atributo exportados como constantes geradas, sem cópia à mão nos consumidores |
+| FR-016, TOK-06 | §2 to §5: `var(--<prefixo>-*)` references of all tokens and, in a separate entry, maps per brand and mode, with `.d.ts`; §10: a nonexistent name produces a type error |
+| ENG-04 | §8: ESM with no side effects; `sideEffects` lists only CSS |
+| ENG-05 | §8 and §10: types published with the code, `publint` and a strict consumer compiling each entry |
+| ENG-17, ENG-22 | §8 and §9: tarball allowlist, no install script, `license` field and third-party notices |
+| QA-08 | §10: type tests with negative cases; §11: versioned API report checked by drift |
+| GOV-01 | §11: input to the public API check |
+| Principle I | §4: brands, modes and attribute names exported as generated constants, without a hand copy in the consumers |
 
-## 2. Entradas
+## 2. Entries
 
-| Subcaminho | Arquivo | Tipos | Conteúdo |
+| Subpath | File | Types | Content |
 | --- | --- | --- | --- |
-| `.` | `dist/esm/index.js` | `dist/esm/index.d.ts` | Objeto de referências `tokens`, constantes de tema e tipos `TokenName`, `Brand`, `Mode`, `TokenRef`, `TokenRefs` |
-| `./values` | `dist/esm/values.js` | `dist/esm/values.d.ts` | Mapa `values` por marca × modo × token e tipo `TokenValues` |
+| `.` | `dist/esm/index.js` | `dist/esm/index.d.ts` | `tokens` references object, theme constants and types `TokenName`, `Brand`, `Mode`, `TokenRef`, `TokenRefs` |
+| `./values` | `dist/esm/values.js` | `dist/esm/values.d.ts` | `values` map per brand × mode × token and type `TokenValues` |
 
-- O pacote é só ESM (`"type": "module"`). Não há condição `require` nem build CommonJS.
-- As duas entradas são independentes em runtime: `values.js` não importa `index.js`, e nenhuma
-  delas importa CSS. O `.d.ts` de `./values` importa tipos de `./index.js` só em nível de tipo.
-- Não há exportação padrão (`default`); só exportações nomeadas.
-- `index.js` é pequeno e serve a apps; `values.js` cresce com marcas × modos × tokens e se destina a
-  testes, SSR sem DOM, ferramentas e contextos fora do CSS (por exemplo, canvas). Para estilizar o
-  DOM, use CSS ou as referências (css-output.md, O-06).
+- The package is ESM only (`"type": "module"`). There is no `require` condition nor a CommonJS build.
+- The two entries are independent at runtime: `values.js` does not import `index.js`, and neither
+  imports CSS. The `.d.ts` of `./values` imports types from `./index.js` at the type level only.
+- There is no default export (`default`); only named exports.
+- `index.js` is small and serves apps; `values.js` grows with brands × modes × tokens and is intended
+  for tests, SSR without a DOM, tools and contexts outside the CSS (for example, canvas). To style the
+  DOM, use CSS or the references (css-output.md, O-06).
 
-## 3. Forma das exportações: decisão
+## 3. Export shape: decision
 
-**Decisão**: a entrada `.` exporta um objeto congelado `tokens`, indexado pelo caminho do token,
-com o valor literal `var(--<prefixo>-…)`, mais a união `TokenName` das chaves. Não há uma
-exportação nomeada por token.
+**Decision**: the `.` entry exports a frozen `tokens` object, indexed by the token path, with the
+literal value `var(--<prefixo>-…)`, plus the `TokenName` union of the keys. There is no one named
+export per token.
 
-Motivos:
+Reasons:
 
-1. **Identidade com a fonte e com a ferramenta de design.** A chave é o caminho DTCG exato
-   (`color.bg.surface`), o mesmo da convenção (TOK-04), do manifesto, do relatório de API e, com
-   outro separador, da ferramenta de design (DSN-04). Exportações nomeadas exigiriam converter
-   caminhos com `.`, `-` e segmentos iniciados por dígito em identificadores JavaScript, o que cria
-   uma segunda convenção de nomes e colisões: com camelCase, `space.1-5` e `space.15` virariam ambos
-   `space15`.
-2. **Um tipo só para nomes de token.** `TokenName` é exatamente `keyof TokenRefs`; tipa props e
-   funções da app que recebem nomes de token, e `Object.keys(tokens)` permite iterar em docs e
-   testes.
-3. **Superfície de API pequena e estável.** Uma exportação e uma união, em vez de centenas de
-   exportações no relatório do GOV-01.
-4. **Imutabilidade coerente com os tipos.** `Object.freeze` em runtime e propriedades `readonly` no
-   `.d.ts`.
+1. **Identity with the source and with the design tool.** The key is the exact DTCG path
+   (`color.bg.surface`), the same as the convention (TOK-04), the manifest, the API report and, with
+   another separator, the design tool (DSN-04). Named exports would require converting paths with `.`,
+   `-` and segments starting with a digit into JavaScript identifiers, which creates a second naming
+   convention and collisions: with camelCase, `space.1-5` and `space.15` would both become `space15`.
+2. **A single type for token names.** `TokenName` is exactly `keyof TokenRefs`; it types app props and
+   functions that receive token names, and `Object.keys(tokens)` allows iterating in docs and tests.
+3. **Small, stable API surface.** One export and one union, instead of hundreds of exports in the
+   GOV-01 report.
+4. **Immutability consistent with the types.** `Object.freeze` at runtime and `readonly` properties in
+   the `.d.ts`.
 
-Custo aceito: não há tree-shaking por token. Quem importa `tokens` recebe todas as referências
-(cerca de 45 bytes por token antes de compressão; a medir contra o orçamento do QA-07, cujo valor
-está pendente na premissa de limiares). Mitigações: a anotação `/*#__PURE__*/` permite ao bundler
-remover o objeto inteiro quando ele não é usado; apps que não precisam de JavaScript usam só o CSS; o
-tree-shaking por componente do ENG-04 se aplica aos pacotes de UI, e o módulo de referências é uma
-unidade.
+Accepted cost: there is no per-token tree-shaking. Whoever imports `tokens` receives all the references
+(about 45 bytes per token before compression; to be measured against the QA-07 budget, whose value is
+pending in the thresholds assumption). Mitigations: the `/*#__PURE__*/` annotation lets the bundler
+remove the whole object when it is unused; apps that do not need JavaScript use only the CSS; the
+per-component tree-shaking of ENG-04 applies to the UI packages, and the references module is a single
+unit.
 
-Alternativas rejeitadas:
+Rejected alternatives:
 
-- **Uma exportação nomeada por token**: colisões e segunda convenção de nomes (motivo 1), centenas
-  de entradas no relatório de API.
-- **Módulos por categoria** (`./color`, `./space` etc.): mais entradas no mapa de exports e no
-  relatório, sem ganho de tipos; categoria nova viraria entrada nova.
-- **Função `token(name)` ou `Proxy`**: código de runtime sem vantagem de tipo sobre o literal; o
-  `Proxy` ainda impede análise estática.
-- **`enum` do TypeScript**: gera runtime próprio do TypeScript, não é ESM idiomático e, na forma
-  `const enum`, conflita com `isolatedModules` e `verbatimModuleSyntax`.
-- **Tipos literais nos valores de `values`**: cada ajuste de cor alteraria o `.d.ts` e o relatório
-  de API, transformando mudança visual em mudança de API; `string` basta.
+- **One named export per token**: collisions and a second naming convention (reason 1), hundreds of
+  entries in the API report.
+- **Modules per category** (`./color`, `./space`, etc.): more entries in the exports map and the
+  report, with no type gain; a new category would become a new entry.
+- **`token(name)` function or `Proxy`**: runtime code with no type advantage over the literal; the
+  `Proxy` further prevents static analysis.
+- **TypeScript `enum`**: generates TypeScript's own runtime, is not idiomatic ESM and, in the
+  `const enum` form, conflicts with `isolatedModules` and `verbatimModuleSyntax`.
+- **Literal types in the `values` values**: each color adjustment would change the `.d.ts` and the API
+  report, turning a visual change into an API change; `string` is enough.
 
-## 4. Entrada `.`
+## 4. Entry `.`
 
-| Exportação | Tipo | Conteúdo |
+| Export | Type | Content |
 | --- | --- | --- |
-| `tokens` | `TokenRefs` | Objeto congelado: caminho do token → `"var(--<prefixo>-<segmentos unidos por ->)"` |
-| `TokenName` | tipo | União literal de todos os caminhos de token publicados |
-| `TokenRefs` | tipo | Objeto com uma propriedade `readonly` por token, de tipo literal `"var(--<prefixo>-…)"` |
-| `TokenRef` | tipo | `TokenRefs[TokenName]`: união de todas as referências |
-| `Brand` | tipo | União dos ids de marca (contextos do modificador `brand`) |
-| `Mode` | tipo | `"light" \| "dark"` (contextos do modificador `mode`) |
-| `brands` | `readonly [ … ]` | Tupla congelada dos ids de marca, por code point |
-| `modes` | `readonly [ … ]` | Tupla congelada dos modos, na ordem canônica (modo padrão primeiro) |
-| `defaultBrand` | literal de `Brand` | Marca padrão (premissa: indicada pelo requerente, CMP-24; `a` nas fixtures) |
-| `defaultMode` | literal de `Mode` | Modo padrão (premissa do spec: `light`) |
-| `attributes` | objeto congelado | `{ brand: "data-<prefixo>-brand", mode: "data-<prefixo>-mode" }` |
+| `tokens` | `TokenRefs` | Frozen object: token path → `"var(--<prefixo>-<segments joined by ->)"` |
+| `TokenName` | type | Literal union of all published token paths |
+| `TokenRefs` | type | Object with one `readonly` property per token, of literal type `"var(--<prefixo>-…)"` |
+| `TokenRef` | type | `TokenRefs[TokenName]`: union of all references |
+| `Brand` | type | Union of the brand ids (contexts of the `brand` modifier) |
+| `Mode` | type | `"light" \| "dark"` (contexts of the `mode` modifier) |
+| `brands` | `readonly [ … ]` | Frozen tuple of the brand ids, by code point |
+| `modes` | `readonly [ … ]` | Frozen tuple of the modes, in canonical order (default mode first) |
+| `defaultBrand` | literal of `Brand` | Default brand (assumption: designated by the requester, CMP-24; `a` in the fixtures) |
+| `defaultMode` | literal of `Mode` | Default mode (spec assumption: `light`) |
+| `attributes` | frozen object | `{ brand: "data-<prefixo>-brand", mode: "data-<prefixo>-mode" }` |
 
-`TokenName` inclui todos os tokens publicados: primitivos, semânticos públicos, fontes marca-modo
-(`brand.…`) e de componente. As regras de consumo (estilo de componente só com semânticos públicos e
-de componente, TOK-03) são impostas pelo lint de estilos, não pelos tipos; uma referência a fonte
-marca-modo ignora o modo, e uma referência a primitivo exclusivo de marca só resolve no escopo
-daquela marca (css-output.md, §15).
+`TokenName` includes all published tokens: primitives, public semantics, brand-mode sources
+(`brand.…`) and component. The consumption rules (component style only with public semantics and
+component tokens, TOK-03) are enforced by the style lint, not by the types; a reference to a brand-mode
+source ignores the mode, and a reference to a brand-exclusive primitive only resolves in that brand's
+scope (css-output.md, §15).
 
-Esboço de `dist/esm/index.js` (forma, não conteúdo completo):
+Sketch of `dist/esm/index.js` (shape, not full content):
 
 ```js
 /* @<prefixo>/tokens: generated file, do not edit. */
@@ -127,7 +125,7 @@ export const tokens = /*#__PURE__*/ Object.freeze({
 });
 ```
 
-Esboço de `dist/esm/index.d.ts`:
+Sketch of `dist/esm/index.d.ts`:
 
 ```ts
 /* @<prefixo>/tokens: generated file, do not edit. */
@@ -139,7 +137,7 @@ export type TokenName =
   | "z-index.layer.modal";
 export type TokenRefs = {
   readonly "brand.color.bg.surface.dark": "var(--<prefixo>-brand-color-bg-surface-dark)";
-  /** Superfície principal de conteúdo. */
+  /** Main content surface. */
   readonly "color.bg.surface": "var(--<prefixo>-color-bg-surface)";
   readonly "z-index.layer.modal": "var(--<prefixo>-z-index-layer-modal)";
 };
@@ -155,19 +153,19 @@ export declare const modes: readonly ["light", "dark"];
 export declare const tokens: TokenRefs;
 ```
 
-## 5. Entrada `./values`
+## 5. Entry `./values`
 
-`values[marca][modo][token]` é o valor final do token naquela permutação, resolvido até o literal e
-serializado como no CSS (css-output.md, §11), sem `var()`. É igual ao valor computado da custom
-property no navegador para aquela marca e modo efetivos (css-output.md, BR-18).
+`values[brand][mode][token]` is the final value of the token in that permutation, resolved down to the
+literal and serialized as in the CSS (css-output.md, §11), without `var()`. It equals the computed
+value of the custom property in the browser for that effective brand and mode (css-output.md, BR-18).
 
-- Todo `(marca, modo)` contém todos os tokens de `TokenName`, de modo que o tipo
-  `Record<TokenName, string>` é exato. Isso inclui os primitivos exclusivos de outra marca, que são
-  invariantes e têm o mesmo valor em toda permutação (D7); em que arquivo CSS cada um é declarado
-  está no campo `placement` do manifesto.
-- Fontes marca-modo trazem o valor da marca, igual nos dois modos.
+- Every `(brand, mode)` contains all tokens of `TokenName`, so the type `Record<TokenName, string>` is
+  exact. This includes the primitives exclusive to another brand, which are invariant and have the same
+  value in every permutation (D7); which CSS file each one is declared in is in the manifest's
+  `placement` field.
+- Brand-mode sources carry the brand's value, identical in the two modes.
 
-Esboço de `dist/esm/values.js`:
+Sketch of `dist/esm/values.js`:
 
 ```js
 /* @<prefixo>/tokens: generated file, do not edit. */
@@ -183,7 +181,7 @@ export const values = /*#__PURE__*/ Object.freeze({
 });
 ```
 
-Esboço de `dist/esm/values.d.ts`:
+Sketch of `dist/esm/values.d.ts`:
 
 ```ts
 /* @<prefixo>/tokens: generated file, do not edit. */
@@ -193,51 +191,50 @@ export type TokenValues = Readonly<Record<Brand, Readonly<Record<Mode, Readonly<
 export declare const values: TokenValues;
 ```
 
-`TokenValues` é o tipo `Record<Brand, Record<Mode, Record<TokenName, string>>>` com `Readonly` em
-cada nível; propriedades `readonly` continuam atribuíveis ao tipo sem `Readonly` para leitura.
+`TokenValues` is the type `Record<Brand, Record<Mode, Record<TokenName, string>>>` with `Readonly` at
+each level; `readonly` properties remain assignable to the type without `Readonly` for reading.
 
-## 6. O que fica de fora
+## 6. What is left out
 
-- Toggles privados `--<prefixo>-_on-*` e qualquer nome com o segmento `_` (css-output.md, T-05).
-- `$extensions`, local de origem na fonte, cadeia de alias, camada, eixo e papel: ficam no manifesto
-  (`./meta/tokens.manifest.json`), para ferramentas.
-- `$description` aparece só como comentário JSDoc no `.d.ts`, sem efeito de tipo.
-- Runtime de resolução (por exemplo, `resolver.apply()`), funções, classes e `Proxy`.
-- Importação de CSS a partir do ESM; o CSS é importado pela app (css-output.md, U-01).
-- Valores com tipo literal no mapa `values` (§3).
+- Private toggles `--<prefixo>-_on-*` and any name with the segment `_` (css-output.md, T-05).
+- `$extensions`, the source location in the source, the alias chain, layer, axis and role: they stay in
+  the manifest (`./meta/tokens.manifest.json`), for tools.
+- `$description` appears only as a JSDoc comment in the `.d.ts`, with no type effect.
+- Resolution runtime (for example, `resolver.apply()`), functions, classes and `Proxy`.
+- Importing CSS from the ESM; the CSS is imported by the app (css-output.md, U-01).
+- Literal-typed values in the `values` map (§3).
 
-## 7. Regras de geração e determinismo
+## 7. Generation and determinism rules
 
-- **E-01** Os módulos são gerados por `tokens-build build` a partir do mesmo modelo resolvido que gera
-  o CSS, e nunca editados à mão (FR-015, FR-016).
-- **E-02** Sintaxe de módulo ES2015, sem recursos posteriores: só `export const`, literais e
-  `Object.freeze`. Nenhum `import` em runtime.
-- **E-03** Chaves de tokens e de marcas ordenadas por code point; modos na ordem canônica
-  (css-output.md, RS-03). Todo caminho de token contém `.`, então nenhuma chave é índice numérico e a
-  ordem de enumeração é a de inserção.
-- **E-04** Strings escritas com `JSON.stringify` (escapes determinísticos), chaves sempre entre aspas
-  duplas, indentação de dois espaços, fim de linha LF, quebra de linha final, cabeçalho fixo sem
-  data nem versão, sem source map.
-- **E-05** Toda chamada a `Object.freeze` leva `/*#__PURE__*/`; `values` é congelado em todos os
-  níveis.
-- **E-06** `tokens[N]` é `"var(" + cssName(N) + ")"`, com `cssName` conforme css-output.md, DEP-04.
-- **E-07** No `.d.ts`, cada propriedade de `TokenRefs` leva JSDoc com o `$description` do token,
-  quando houver (com `*/` escapado), e `@deprecated` com a mensagem de `$deprecated`, quando o token
-  estiver depreciado.
-- **E-08** A verificação `dist-parity` do build confirma que as chaves de `tokens`, a união
-  `TokenName`, as chaves de cada mapa em `values`, os nomes declarados no CSS, o manifesto e o
-  relatório de API listam o mesmo conjunto de tokens; a verificação `private-segment-leak`
-  ([tools-cli.md](tools-cli.md), §2.2) confirma que nenhum nome com o segmento `_` aparece no ESM,
-  no `.d.ts` nem no relatório de API. Divergência sai com código 1.
-- **E-09** O determinismo byte a byte dos quatro arquivos é coberto por `pnpm check:determinism`
+- **E-01** The modules are generated by `tokens-build build` from the same resolved model that generates
+  the CSS, and never hand-edited (FR-015, FR-016).
+- **E-02** ES2015 module syntax, with no later features: only `export const`, literals and
+  `Object.freeze`. No `import` at runtime.
+- **E-03** Token and brand keys ordered by code point; modes in canonical order (css-output.md, RS-03).
+  Every token path contains `.`, so no key is a numeric index and the enumeration order is the insertion
+  order.
+- **E-04** Strings written with `JSON.stringify` (deterministic escapes), keys always in double quotes,
+  two-space indentation, LF line endings, a final line break, a fixed header with no date or version, no
+  source map.
+- **E-05** Every call to `Object.freeze` carries `/*#__PURE__*/`; `values` is frozen at every level.
+- **E-06** `tokens[N]` is `"var(" + cssName(N) + ")"`, with `cssName` per css-output.md, DEP-04.
+- **E-07** In the `.d.ts`, each property of `TokenRefs` carries JSDoc with the token's `$description`,
+  when present (with `*/` escaped), and `@deprecated` with the message of `$deprecated`, when the token
+  is deprecated.
+- **E-08** The build's `dist-parity` check confirms that the keys of `tokens`, the `TokenName` union,
+  the keys of each map in `values`, the names declared in the CSS, the manifest and the API report list
+  the same set of tokens; the `private-segment-leak` check
+  ([tools-cli.md](tools-cli.md), §2.2) confirms that no name with the segment `_` appears in the ESM,
+  the `.d.ts` or the API report. A divergence exits with code 1.
+- **E-09** The byte-for-byte determinism of the four files is covered by `pnpm check:determinism`
   (css-output.md, D-09).
 
-## 8. `package.json` do pacote publicado
+## 8. `package.json` of the published package
 
 ```json
 {
   "name": "@<prefixo>/tokens",
-  "version": "<versão única dos pacotes publicados>",
+  "version": "<single version of the published packages>",
   "type": "module",
   "license": "UNLICENSED",
   "sideEffects": ["**/*.css"],
@@ -267,65 +264,65 @@ cada nível; propriedades `readonly` continuam atribuíveis ao tipo sem `Readonl
 }
 ```
 
-- **PK-01** `exports` é o único mapa de resolução: sem `main`, `module` nem `types` no topo. Em cada
-  entrada JavaScript, `types` vem antes de `default`. A resolução `node10`, que ignora `exports`, não
-  é suportada (removida no TypeScript 7).
-- **PK-02** `./css/brand-*.css` usa padrão de subcaminho para que uma marca nova não altere o
-  `package.json` (FR-009, SC-005). `./meta/*` expõe os manifestos e o relatório de build para
-  ferramentas; apps não os importam.
-- **PK-03** `sideEffects` é exatamente `["**/*.css"]` (ENG-04): os módulos ESM não têm efeito
-  colateral, e o CSS não é descartado no build de produção.
-- **PK-04** Sem `dependencies`, `peerDependencies`, `optionalDependencies` nem
-  `bundledDependencies`. As `devDependencies` seguem as arestas permitidas do arquivo de camadas
-  (tokens →(dev) `tools/tokens-build`, `tools/color`), e os protocolos `workspace:` são reescritos
-  pelo `pnpm pack`.
-- **PK-05** Nenhum script de ciclo de vida de instalação (`preinstall`, `install`, `postinstall`,
-  `prepare`) (ENG-17). Os scripts `tokens:build` e `tokens:validate` são as tarefas do Turborepo
-  acionadas pela raiz (`pnpm tokens:build`, `pnpm tokens:validate`) e referenciadas no grafo como
-  `@<prefixo>/tokens#tokens:build` ([tools-cli.md](tools-cli.md), seção 7). O nome `build` fica
-  reservado à compilação dos pacotes de ferramenta, de que essas tarefas dependem (`^build`).
-- **PK-06** `license` segue a premissa vigente do ENG-22: licença proprietária do requerente, sem
-  redistribuição externa (`UNLICENSED` como marcador).
-- **PK-07** `engines.node` acompanha o piso da premissa vigente "Node em LTS" (Node 22 LTS, D2); mudar
-  o piso segue o ENG-08. O valor de `version` segue a premissa de versão única (GOV-01).
+- **PK-01** `exports` is the only resolution map: no `main`, `module` nor top-level `types`. In each
+  JavaScript entry, `types` comes before `default`. The `node10` resolution, which ignores `exports`, is
+  not supported (removed in TypeScript 7).
+- **PK-02** `./css/brand-*.css` uses a subpath pattern so that a new brand does not change the
+  `package.json` (FR-009, SC-005). `./meta/*` exposes the manifests and the build report to tools; apps
+  do not import them.
+- **PK-03** `sideEffects` is exactly `["**/*.css"]` (ENG-04): the ESM modules have no side effect, and
+  the CSS is not dropped in the production build.
+- **PK-04** No `dependencies`, `peerDependencies`, `optionalDependencies` nor `bundledDependencies`. The
+  `devDependencies` follow the allowed edges of the layers file (tokens →(dev) `tools/tokens-build`,
+  `tools/color`), and the `workspace:` protocols are rewritten by `pnpm pack`.
+- **PK-05** No install lifecycle script (`preinstall`, `install`, `postinstall`, `prepare`) (ENG-17).
+  The `tokens:build` and `tokens:validate` scripts are the Turborepo tasks triggered from the root
+  (`pnpm tokens:build`, `pnpm tokens:validate`) and referenced in the graph as
+  `@<prefixo>/tokens#tokens:build` ([tools-cli.md](tools-cli.md), section 7). The name `build` is
+  reserved for compiling the tool packages, which those tasks depend on (`^build`).
+- **PK-06** `license` follows the current assumption of ENG-22: the requester's proprietary license,
+  with no external redistribution (`UNLICENSED` as a marker).
+- **PK-07** `engines.node` tracks the floor of the current assumption "Node on LTS" (Node 22 LTS, D2);
+  changing the floor follows ENG-08. The value of `version` follows the single-version assumption
+  (GOV-01).
 
-## 9. Conteúdo do tarball (allowlist do ENG-17)
+## 9. Tarball content (ENG-17 allowlist)
 
-O tarball produzido por `pnpm pack` contém exatamente:
+The tarball produced by `pnpm pack` contains exactly:
 
-| Caminho no tarball | Origem |
+| Path in the tarball | Source |
 | --- | --- |
-| `package/package.json` | Manifesto, com `workspace:` reescrito |
-| `package/README.md` | Propósito, instalação, uso mínimo e link para a documentação (DOC-08) |
-| `package/THIRD-PARTY-NOTICES.md` | Avisos de terceiros (ENG-22; nome provisório). O conteúdo gerado não inclui código nem ativo de terceiros; os schemas DTCG ficam fora do tarball |
+| `package/package.json` | Manifest, with `workspace:` rewritten |
+| `package/README.md` | Purpose, installation, minimal usage and a link to the documentation (DOC-08) |
+| `package/THIRD-PARTY-NOTICES.md` | Third-party notices (ENG-22; provisional name). The generated content includes no third-party code or asset; the DTCG schemas are outside the tarball |
 | `package/dist/css/base.css` | css-output.md |
-| `package/dist/css/brand-<id>.css` | Exatamente um por marca do resolver |
+| `package/dist/css/brand-<id>.css` | Exactly one per brand of the resolver |
 | `package/dist/esm/index.js`, `index.d.ts` | §4 |
 | `package/dist/esm/values.js`, `values.d.ts` | §5 |
-| `package/dist/meta/tokens.manifest.json`, `sync-manifest.json`, `report.json`, `report.md` | Manifestos e relatório de build |
+| `package/dist/meta/tokens.manifest.json`, `sync-manifest.json`, `report.json`, `report.md` | Build manifests and report |
 
-Nada mais: sem `src/`, `contrast/`, `schemas/`, `api/`, testes, configurações, source maps ou
-arquivos `.tsbuildinfo`. O check do ENG-17 é da feature de CI e publicação; até ele existir, o
-projeto `@<prefixo>/types-consumer` confere no tarball a presença dos quatro arquivos ESM e `.d.ts`
-(FR-016), a ausência de arquivo fora desta tabela e a ausência de scripts de instalação.
+Nothing else: no `src/`, `contrast/`, `schemas/`, `api/`, tests, configurations, source maps or
+`.tsbuildinfo` files. The ENG-17 check is part of the CI and publishing feature; until it exists, the
+`@<prefixo>/types-consumer` project checks in the tarball the presence of the four ESM and `.d.ts`
+files (FR-016), the absence of any file outside this table and the absence of install scripts.
 
-## 10. Testes de tipos
+## 10. Type tests
 
-### 10.1 Projeto consumidor
+### 10.1 Consumer project
 
-`@<prefixo>/types-consumer` (`tests/types-consumer`, privado, camada `apps`) instala o tarball
-empacotado, nunca o código-fonte (QA-06, Princípio VII): dependências de terceiros pelo lockfile
-congelado, o tarball com scripts desativados e conferência de que os arquivos instalados batem com o
-tarball. Arquivos de teste: `src/refs.ts` e `src/values.ts` (positivos) e `src/negative.ts`
-(negativos). Executado por `pnpm test:types`.
+`@<prefixo>/types-consumer` (`tests/types-consumer`, private, layer `apps`) installs the packaged
+tarball, never the source code (QA-06, Principle VII): third-party dependencies via the frozen
+lockfile, the tarball with scripts disabled and a check that the installed files match the tarball. Test
+files: `src/refs.ts` and `src/values.ts` (positive) and `src/negative.ts` (negative). Run by
+`pnpm test:types`.
 
-Matriz: TypeScript 6.0.x e 7.0.x × resolução `bundler` e `nodenext`, quatro execuções de
-`tsc --noEmit`, todas obrigatórias. TS 7.0.x pelo pacote `typescript` (binário `tsc`) e TS 6.0.x
-pelo `@typescript/typescript6` (binário `tsc6`), em versões exatas do catálogo. TS 6.0 é o valor
-provisório do `<versão>` da premissa de versões mínimas (ENG-08, D2). O teste usa só diagnósticos
-do `tsc`, porque o TS 7.0 não tem API programática.
+Matrix: TypeScript 6.0.x and 7.0.x × resolution `bundler` and `nodenext`, four runs of `tsc --noEmit`,
+all required. TS 7.0.x via the `typescript` package (binary `tsc`) and TS 6.0.x via
+`@typescript/typescript6` (binary `tsc6`), at exact catalog versions. TS 6.0 is the provisional value of
+`<version>` of the minimum-versions assumption (ENG-08, D2). The test uses only `tsc` diagnostics,
+because TS 7.0 has no programmatic API.
 
-### 10.2 Configuração do `tsc`
+### 10.2 `tsc` configuration
 
 `tsconfig.bundler.json`:
 
@@ -352,14 +349,14 @@ do `tsc`, porque o TS 7.0 não tem API programática.
 }
 ```
 
-`tsconfig.nodenext.json` é igual, com `"module": "nodenext"` e `"moduleResolution": "nodenext"`; o
-`package.json` do projeto declara `"type": "module"`. `skipLibCheck: false` é obrigatório, para que
-os `.d.ts` do pacote sejam verificados em modo estrito.
+`tsconfig.nodenext.json` is the same, with `"module": "nodenext"` and `"moduleResolution": "nodenext"`;
+the project's `package.json` declares `"type": "module"`. `skipLibCheck: false` is required, so that the
+package's `.d.ts` are checked in strict mode.
 
-### 10.3 Casos positivos
+### 10.3 Positive cases
 
-Escritos com `expect-type`, sem depender de nomes de marca ou de token específicos, de modo que
-valem para as marcas sintéticas e para as marcas reais quando chegarem.
+Written with `expect-type`, without depending on specific brand or token names, so that they hold for
+the synthetic brands and for the real brands when they arrive.
 
 ```ts
 import { expectTypeOf } from "expect-type";
@@ -373,92 +370,92 @@ type DotToDash<S extends string> = S extends `${infer H}.${infer T}` ? `${H}-${D
 declare const n: TokenName;
 ```
 
-| Caso | Asserção |
+| Case | Assertion |
 | --- | --- |
-| P-01 | `expectTypeOf<TokenName>().not.toBeAny()` e `.not.toEqualTypeOf<string>()`: união de literais |
-| P-02 | `expectTypeOf<TokenName>().toEqualTypeOf<keyof TokenRefs>()` e `expectTypeOf(tokens).toEqualTypeOf<TokenRefs>()` |
-| P-03 | ``expectTypeOf<TokenRefs>().toEqualTypeOf<{ readonly [N in TokenName]: `var(--<prefixo>-${DotToDash<N>})` }>()``: cada referência é o literal derivado do caminho |
-| P-04 | `Brand` igual a `(typeof brands)[number]`; `Mode` igual a `"light" \| "dark"` e a `(typeof modes)[number]`; `defaultBrand` estende `Brand`; `defaultMode` igual a `"light"` |
-| P-05 | `expectTypeOf(values).toEqualTypeOf<TokenValues>()`; `TokenValues` igual a `Readonly<Record<Brand, Readonly<Record<Mode, Readonly<Record<TokenName, string>>>>>>`; `values[defaultBrand][defaultMode][n]` é `string`, sem `undefined`, mesmo com `noUncheckedIndexedAccess` |
-| P-06 | `tokens[n]` é `TokenRef`; `TokenRef` estende `` `var(--<prefixo>-${string})` `` |
-| P-07 | `attributes` igual a `{ readonly brand: "data-<prefixo>-brand"; readonly mode: "data-<prefixo>-mode" }` |
-| P-08 | Nenhuma exportação é `any` (`.not.toBeAny()` em cada uma), e uma busca textual nos `.d.ts` do tarball não encontra `any` (Princípio VI) |
-| P-09 | As duas entradas, inclusive a importação só de tipos de `@<prefixo>/tokens/values`, compilam nas quatro execuções |
+| P-01 | `expectTypeOf<TokenName>().not.toBeAny()` and `.not.toEqualTypeOf<string>()`: union of literals |
+| P-02 | `expectTypeOf<TokenName>().toEqualTypeOf<keyof TokenRefs>()` and `expectTypeOf(tokens).toEqualTypeOf<TokenRefs>()` |
+| P-03 | ``expectTypeOf<TokenRefs>().toEqualTypeOf<{ readonly [N in TokenName]: `var(--<prefixo>-${DotToDash<N>})` }>()``: each reference is the literal derived from the path |
+| P-04 | `Brand` equal to `(typeof brands)[number]`; `Mode` equal to `"light" \| "dark"` and to `(typeof modes)[number]`; `defaultBrand` extends `Brand`; `defaultMode` equal to `"light"` |
+| P-05 | `expectTypeOf(values).toEqualTypeOf<TokenValues>()`; `TokenValues` equal to `Readonly<Record<Brand, Readonly<Record<Mode, Readonly<Record<TokenName, string>>>>>>`; `values[defaultBrand][defaultMode][n]` is `string`, without `undefined`, even with `noUncheckedIndexedAccess` |
+| P-06 | `tokens[n]` is `TokenRef`; `TokenRef` extends `` `var(--<prefixo>-${string})` `` |
+| P-07 | `attributes` equal to `{ readonly brand: "data-<prefixo>-brand"; readonly mode: "data-<prefixo>-mode" }` |
+| P-08 | No export is `any` (`.not.toBeAny()` on each one), and a text search in the tarball's `.d.ts` finds no `any` (Principle VI) |
+| P-09 | The two entries, including the type-only import of `@<prefixo>/tokens/values`, compile in the four runs |
 
-### 10.4 Casos negativos
+### 10.4 Negative cases
 
-Cada caso usa `@ts-expect-error`. Se um caso deixar de falhar, a diretiva sem uso gera o erro
-TS2578 e quebra o teste, como exige o QA-08. Os nomes usados nunca podem ser válidos: o primeiro
-segmento `zzz` não é categoria, e `__invalida__` não é id kebab.
+Each case uses `@ts-expect-error`. If a case stops failing, the unused directive produces the error
+TS2578 and breaks the test, as QA-08 requires. The names used can never be valid: the first segment
+`zzz` is not a category, and `__invalid__` is not a kebab id.
 
 ```ts
-// N-01: token inexistente nas referências
+// N-01: nonexistent token in the references
 // @ts-expect-error
-void tokens["zzz.nao-existe"];
+void tokens["zzz.does-not-exist"];
 
-// N-02: string arbitrária não é TokenName
+// N-02: an arbitrary string is not TokenName
 // @ts-expect-error
-const nome: TokenName = "qualquer-coisa";
+const name: TokenName = "anything";
 
-// N-03: marca inexistente
+// N-03: nonexistent brand
 // @ts-expect-error
-void values["__invalida__"];
+void values["__invalid__"];
 
-// N-04: modo inexistente
+// N-04: nonexistent mode
 // @ts-expect-error
 void values[defaultBrand]["sepia"];
 
-// N-05: token inexistente no mapa de valores
+// N-05: nonexistent token in the values map
 // @ts-expect-error
-void values[defaultBrand][defaultMode]["zzz.nao-existe"];
+void values[defaultBrand][defaultMode]["zzz.does-not-exist"];
 
-// N-06: referências são somente leitura
+// N-06: references are read-only
 // @ts-expect-error
 tokens[n] = tokens[n];
 
-// N-07: mapa de valores é somente leitura
+// N-07: the values map is read-only
 // @ts-expect-error
 values[defaultBrand][defaultMode][n] = "#000000";
 
-// N-08: toggle privado não é token público
+// N-08: a private toggle is not a public token
 // @ts-expect-error
-const privado: TokenName = "_on-light";
+const priv: TokenName = "_on-light";
 ```
 
-Em arquivo próprio, porque são declarações de importação:
+In a separate file, because they are import declarations:
 
 ```ts
-// N-09: `values` não é exportado pela entrada "." (entradas separadas)
+// N-09: `values` is not exported by the "." entry (separate entries)
 // @ts-expect-error
 import { values as v } from "@<prefixo>/tokens";
 
-// N-10: caminho interno fora do mapa de exports
+// N-10: internal path outside the exports map
 // @ts-expect-error
 import { tokens as t } from "@<prefixo>/tokens/dist/esm/index.js";
 ```
 
-### 10.5 Verificações do pacote
+### 10.5 Package checks
 
-- `publint` sobre o tarball, sem erros nem avisos (ENG-05).
-- Conferência do conteúdo do tarball (§9).
-- A importação dos arquivos CSS não faz parte do teste de tipos: a app os importa pelo bundler, e o
-  mapa de exports deles é conferido pelo `publint` e pela app de exemplo (css-output.md, §16).
+- `publint` over the tarball, with no errors or warnings (ENG-05).
+- Check of the tarball content (§9).
+- Importing the CSS files is not part of the type test: the app imports them via the bundler, and their
+  exports map is checked by `publint` and by the example app (css-output.md, §16).
 
-## 11. Relatório de API (`api/tokens.api.json`)
+## 11. API report (`api/tokens.api.json`)
 
-Arquivo versionado em `packages/tokens/api/tokens.api.json`, gerado por `pnpm tokens:build` a
-partir do mesmo modelo dos módulos (não da análise do `.d.ts`: o TS 7.0 não tem API e o API
-Extractor embute uma versão antiga do TypeScript). `pnpm check:drift` o regenera e exige
-`git diff --exit-code`; PR que altera a superfície sem atualizar o relatório falha (QA-08). A
-verificação de API pública do GOV-01, da feature de CI e publicação, compara o relatório com o da
-última versão publicada e bloqueia quebra sem incremento de major.
+File versioned at `packages/tokens/api/tokens.api.json`, generated by `pnpm tokens:build` from the same
+model as the modules (not from analysis of the `.d.ts`: TS 7.0 has no API and the API Extractor embeds
+an old version of TypeScript). `pnpm check:drift` regenerates it and requires `git diff --exit-code`; a
+PR that changes the surface without updating the report fails (QA-08). The GOV-01 public API check, of
+the CI and publishing feature, compares the report with that of the last published version and blocks a
+break without a major bump.
 
-### 11.1 Forma
+### 11.1 Shape
 
-JSON canônico de [tools-cli.md](tools-cli.md), §1.4 (chaves por code point em todos os níveis,
-indentação de dois espaços, LF, quebra de linha final), identificado pelos campos `format` e
-`version`. `entries` segue a ordem do mapa `exports` do `package.json`; exportações e tokens são
-ordenados por `name` (code point); `brands` por code point; `modes` na ordem canônica.
+Canonical JSON of [tools-cli.md](tools-cli.md), §1.4 (keys by code point at every level, two-space
+indentation, LF, final line break), identified by the `format` and `version` fields. `entries` follows
+the order of the `exports` map of the `package.json`; exports and tokens are ordered by `name` (code
+point); `brands` by code point; `modes` in canonical order.
 
 ```json
 {
@@ -546,53 +543,53 @@ ordenados por `name` (code point); `brands` por code point; `modes` na ordem can
 }
 ```
 
-Campos de token: `name` (caminho), `cssName`, `type` (`$type` DTCG), `category`, `layer`
-(`primitive`, `semantic`, `component`), `axis` (`invariant`, `brand`, `mode`; primitivos e
-componentes são `invariant`), `role` (`public` ou `brand-mode-source`), `placement` (`base`, `brand`
-ou `brand-exclusive`, com `exclusiveBrand`) e `deprecated` (`false`, `true` ou a mensagem). Valores
-de token e descrições ficam fora: mudança de valor não é mudança de API e segue a regressão visual
-(QA-04). Os toggles privados ficam fora.
+Token fields: `name` (path), `cssName`, `type` (DTCG `$type`), `category`, `layer`
+(`primitive`, `semantic`, `component`), `axis` (`invariant`, `brand`, `mode`; primitives and components
+are `invariant`), `role` (`public` or `brand-mode-source`), `placement` (`base`, `brand` or
+`brand-exclusive`, with `exclusiveBrand`) and `deprecated` (`false`, `true` or the message). Token
+values and descriptions are left out: a value change is not an API change and follows the visual
+regression (QA-04). The private toggles are left out.
 
-### 11.2 Classificação das mudanças (insumo do GOV-01)
+### 11.2 Change classification (input to GOV-01)
 
-| Mudança no relatório | Classe |
+| Change in the report | Class |
 | --- | --- |
-| Remover ou renomear token (renomear = remover + adicionar) | major |
-| Mudar `cssName`, `type`, `category`, `layer` ou `role` de um token | major |
-| Mudar `placement` de `base` ou `brand` para `brand-exclusive`, ou trocar `exclusiveBrand` | major |
-| Remover marca, adicionar ou remover modo (data-model) | major |
-| Mudar `defaultBrand`, `defaultMode`, nomes de atributo, `layer` ou a posição de camada existente em `layerOrder` | major |
-| Remover entrada ou exportação; incrementar o `version` do formato de um arquivo JSON de `./meta/*` | major |
-| Adicionar token, marca, entrada ou exportação; acrescentar camada no fim de `layerOrder` | minor |
-| Depreciar token (`deprecated` deixa de ser `false`) | minor |
-| Mudar `axis` de um token, ou `placement` de `brand-exclusive` para `base` ou `brand` | minor |
-| Nenhuma mudança no relatório | patch (mudanças de valor seguem o changelog e a regressão visual) |
+| Remove or rename a token (rename = remove + add) | major |
+| Change a token's `cssName`, `type`, `category`, `layer` or `role` | major |
+| Change `placement` from `base` or `brand` to `brand-exclusive`, or switch `exclusiveBrand` | major |
+| Remove a brand, add or remove a mode (data-model) | major |
+| Change `defaultBrand`, `defaultMode`, attribute names, `layer` or the position of an existing layer in `layerOrder` | major |
+| Remove an entry or export; increment the `version` of the format of a JSON file in `./meta/*` | major |
+| Add a token, brand, entry or export; add a layer at the end of `layerOrder` | minor |
+| Deprecate a token (`deprecated` stops being `false`) | minor |
+| Change a token's `axis`, or `placement` from `brand-exclusive` to `base` or `brand` | minor |
+| No change in the report | patch (value changes follow the changelog and the visual regression) |
 
-### 11.3 Relação com FR-009 e SC-005
+### 11.3 Relationship with FR-009 and SC-005
 
-Adicionar uma marca altera a superfície pública (`Brand`, `brands` e a lista de arquivos de marca),
-então o relatório regenerado muda. A checagem de diff do FR-009 e do SC-005 DEVE aceitar, além de
-`packages/tokens/src/**`, o `packages/tokens/api/tokens.api.json` regenerado, artefato derivado da
-fonte que nunca é editado à mão. É arquivo de tokens no sentido do TOK-07, conforme a seção
-Clarifications do spec (FR-009, SC-005).
+Adding a brand changes the public surface (`Brand`, `brands` and the list of brand files), so the
+regenerated report changes. The diff check of FR-009 and SC-005 MUST accept, besides
+`packages/tokens/src/**`, the regenerated `packages/tokens/api/tokens.api.json`, a derived artifact of
+the source that is never hand-edited. It is a token file in the sense of TOK-07, per the spec
+Clarifications section (FR-009, SC-005).
 
-## 12. Premissas e pendências
+## 12. Assumptions and pending items
 
-Premissas usadas, sem decidir questão em aberto do requerente:
+Assumptions used, without deciding an open question of the requester:
 
-- Marcas sintéticas `a` e `b` até a entrega das marcas reais; marca padrão indicada pelo requerente
-  (CMP-24); modo padrão `light`.
-- Prefixo `<prefixo>` (TODO(PREFIXO)); licença `UNLICENSED` como marcador (premissa do ENG-22).
-- TypeScript 6.0 como valor provisório do piso e 7.0 como mais recente; Node 22 LTS como piso de
-  `engines` (premissa "Node em LTS", D2).
-- Versão única dos pacotes publicados (premissa do GOV-01).
-- Plataforma de CI: GitHub Actions, inferida do ENG-18 (D2).
+- Synthetic brands `a` and `b` until the real brands are delivered; default brand designated by the
+  requester (CMP-24); default mode `light`.
+- Prefix `<prefixo>` (TODO(PREFIXO)); license `UNLICENSED` as a marker (ENG-22 assumption).
+- TypeScript 6.0 as the provisional floor value and 7.0 as the latest; Node 22 LTS as the floor of
+  `engines` (assumption "Node on LTS", D2).
+- Single version of the published packages (GOV-01 assumption).
+- CI platform: GitHub Actions, inferred from ENG-18 (D2).
 
-Pendências:
+Pending items:
 
-- **P-01** Nome do arquivo de avisos de terceiros (`THIRD-PARTY-NOTICES.md` é provisório) e local da
-  allowlist versionada do ENG-17, a fixar com a feature de CI e publicação.
-- **P-02** O relatório de API usa formato próprio; se a feature de CI e publicação adotar um formato
-  comum para todos os pacotes, este relatório migra sem mudar a classificação da §11.2.
-- **P-03** Decidida no spec (Clarifications): o relatório de API regenerado é arquivo de tokens e
-  entra na checagem de diff do FR-009 e do SC-005 (§11.3).
+- **P-01** Name of the third-party notices file (`THIRD-PARTY-NOTICES.md` is provisional) and location
+  of the versioned ENG-17 allowlist, to be fixed with the CI and publishing feature.
+- **P-02** The API report uses its own format; if the CI and publishing feature adopts a common format
+  for all packages, this report migrates without changing the classification of §11.2.
+- **P-03** Decided in the spec (Clarifications): the regenerated API report is a token file and enters
+  the diff check of FR-009 and SC-005 (§11.3).
