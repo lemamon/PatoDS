@@ -11,7 +11,7 @@ async function main(): Promise<number> {
     options: { json: { type: 'boolean', default: false }, pkg: { type: 'string' } },
   })
   if (positionals[0] !== 'check') {
-    process.stderr.write('uso: tokens-contrast check [--json] [--pkg <dir>]\n')
+    process.stderr.write('usage: tokens-contrast check [--json] [--pkg <dir>]\n')
     return 2
   }
   const pkgDir = resolve(values.pkg ?? '.')
@@ -20,7 +20,7 @@ async function main(): Promise<number> {
   try {
     thresholds = JSON.parse(readFileSync(join(root, 'quality/thresholds.json'), 'utf8')).contrast
   } catch {
-    process.stderr.write('config: quality/thresholds.json não encontrado ou inválido.\n')
+    process.stderr.write('config: quality/thresholds.json not found or invalid.\n')
     return 2
   }
 
@@ -28,7 +28,7 @@ async function main(): Promise<number> {
   try {
     result = runContrastCheck(pkgDir, thresholds)
   } catch (err) {
-    process.stderr.write(`erro interno: ${(err as Error).message}\n`)
+    process.stderr.write(`internal error: ${(err as Error).message}\n`)
     return 3
   }
 
@@ -38,7 +38,7 @@ async function main(): Promise<number> {
     for (const f of result.findings) process.stderr.write(`${f.code}  ${f.pair}  ${f.perm}  ${f.message}\n`)
     const n = result.report.rows.length
     const exempt = result.report.rows.filter((r) => r.exempt).length
-    process.stdout.write(`contraste: ${n} medições (${exempt} isentas), ${result.findings.length} reprovações.\n`)
+    process.stdout.write(`contrast: ${n} measurements (${exempt} exempt), ${result.findings.length} failures.\n`)
   }
   return result.findings.length ? 1 : 0
 }
@@ -46,7 +46,7 @@ async function main(): Promise<number> {
 main().then(
   (c) => process.exit(c),
   (e) => {
-    process.stderr.write(`erro interno: ${e?.stack ?? e}\n`)
+    process.stderr.write(`internal error: ${e?.stack ?? e}\n`)
     process.exit(3)
   },
 )
