@@ -1,71 +1,71 @@
-# Contrato: sincronização com a ferramenta de design
+# Contract: design-tool sync
 
-**Feature**: [spec.md](../spec.md) | **Pesquisa**: [research.md](../research.md) (D4, D7) |
-**Modelo**: [data-model.md](../data-model.md) | **CLI**: [tools-cli.md](tools-cli.md) |
-**ADR**: [ADR-14](../../../docs/adr/ADR-14-sincronizacao-ferramenta-design.md) (Proposto) |
-**Data**: 2026-10-21
+**Feature**: [spec.md](../spec.md) | **Research**: [research.md](../research.md) (D4, D7) |
+**Model**: [data-model.md](../data-model.md) | **CLI**: [tools-cli.md](tools-cli.md) |
+**ADR**: [ADR-14](../../../docs/adr/ADR-14-sincronizacao-ferramenta-design.md) (Proposed) |
+**Date**: 2026-10-21
 
-Este contrato define formatos, interfaces e regras do pacote privado `@<prefixo>/design-sync`
-(`tools/design-sync`). Ele cobre FR-025 a FR-030, SC-010, SC-011 e a User Story 6 do spec. Os
-trechos de código são assinaturas e formatos; nenhuma implementação é definida aqui. `<prefixo>` é
-o marcador da constituição (TODO(PREFIXO)).
+This contract defines the formats, interfaces and rules of the private package `@<prefixo>/design-sync`
+(`tools/design-sync`). It covers FR-025 to FR-030, SC-010, SC-011 and User Story 6 of the spec. The
+code snippets are signatures and formats; no implementation is defined here. `<prefixo>` is the
+constitution's marker (TODO(PREFIXO)).
 
-## 1. Escopo, premissas e garantias
+## 1. Scope, assumptions and guarantees
 
-**Premissas assumidas** (nenhuma é decidida aqui):
+**Assumptions made** (none is decided here):
 
-| Decisão em aberto | Premissa usada | Efeito neste contrato |
+| Open decision | Assumption used | Effect in this contract |
 | --- | --- | --- |
-| Ferramenta de design e direção da sincronização (DSN-01) | O repositório é a fonte; a ferramenta recebe as variáveis. Nenhuma ferramenta escolhida. | Só existem o núcleo, as portas e o adaptador `memory` (fake). O adaptador real é escrito depois da decisão do requerente e registrado no ADR-14. |
-| Marcas da versão 1.0 e marca padrão | Todas as marcas das apps atuais; até a entrega dos valores, marcas sintéticas A e B (QA-15), com A como padrão de teste | Fixtures e exemplos usam só A, B e, no teste de marca nova, C. |
-| Plataforma de repositório e CI | GitHub e GitHub Actions (inferida do ENG-18, pendente de confirmação) | Adaptadores de tracker e alerta para GitHub; o núcleo depende só das portas. |
-| Plano do GitHub do requerente | Plano que permite environments com segredos e política de branch em repositório privado | Sem esse plano, vale o fallback da seção 11. |
-| "Versão publicada" (ENG-26) | Versão promovida à tag principal; até o pipeline existir, execução manual pelo dono da sincronização | Gatilho manual com o mesmo log (seção 10). |
+| Design tool and sync direction (DSN-01) | The repository is the source; the tool receives the variables. No tool chosen. | Only the core, the ports and the `memory` adapter (fake) exist. The real adapter is written after the requester's decision and recorded in ADR-14. |
+| Version 1.0 brands and default brand | All brands of the current apps; until the values are delivered, synthetic brands A and B (QA-15), with A as the test default | Fixtures and examples use only A, B and, in the new-brand test, C. |
+| Repository and CI platform | GitHub and GitHub Actions (inferred from ENG-18, pending confirmation) | Tracker and alert adapters for GitHub; the core depends only on the ports. |
+| The requester's GitHub plan | A plan that allows environments with secrets and a branch policy in a private repository | Without that plan, the fallback of section 11 applies. |
+| "Published version" (ENG-26) | Version promoted to the main tag; until the pipeline exists, manual execution by the sync owner | Manual trigger with the same log (section 10). |
 
-**Garantias por construção**:
+**Guarantees by construction**:
 
-- G-1 (FR-025, US6 cenário 6): nenhuma porta tem operação que leve dados da ferramenta para o
-  repositório. A CLI não tem comando de importação. O único destino de escrita em disco é o
-  diretório `--out`, que é recusado (código 2) quando resolve para dentro de `packages/tokens/`.
-  `repo-checks layers` falha se o código de `tools/design-sync` importar `@<prefixo>/tokens` fora
-  do subcaminho `./meta/*` ou referenciar `packages/tokens/src`.
-- G-2 (FR-028, DSN-04): toda variável criada pelo núcleo corresponde a um token do
-  `sync-manifest.json`. O núcleo nunca cria variável auxiliar; a variação marca × modo chega pronta
-  na forma do FR-033 (validada por `tokens-build validate`, regra V-08).
-- G-3 (TOK-05, Princípio I): plano, log e relatório de divergência têm conteúdo canônico idêntico
-  byte a byte para as mesmas entradas. Data, hora e URL da execução ficam num envelope separado.
-- G-4 (FR-026): toda falha (códigos 2 a 5) chama `AlertPort.raise` antes de o processo terminar.
+- G-1 (FR-025, US6 scenario 6): no port has an operation that carries data from the tool to the
+  repository. The CLI has no import command. The only write target on disk is the `--out` directory,
+  which is refused (code 2) when it resolves to inside `packages/tokens/`.
+  `repo-checks layers` fails if the code of `tools/design-sync` imports `@<prefixo>/tokens` outside the
+  `./meta/*` subpath or references `packages/tokens/src`.
+- G-2 (FR-028, DSN-04): every variable created by the core corresponds to a token of the
+  `sync-manifest.json`. The core never creates an auxiliary variable; the brand × mode variation
+  arrives ready in the FR-033 form (validated by `tokens-build validate`, rule V-08).
+- G-3 (TOK-05, Principle I): the plan, log and divergence report have byte-for-byte identical canonical
+  content for the same inputs. The date, time and run URL sit in a separate envelope.
+- G-4 (FR-026): every failure (codes 2 to 5) calls `AlertPort.raise` before the process ends.
 
-**Fora do escopo**: ícones, componentes, variantes, propriedades e estágio (demais partes do
-DSN-11 e DSN-06 a DSN-09).
+**Out of scope**: icons, components, variants, properties and stage (the rest of DSN-11 and DSN-06 to
+DSN-09).
 
-## 2. Componentes e fluxo
+## 2. Components and flow
 
 ```text
 @<prefixo>/tokens (tokens-build build)
-   └─► dist/meta/sync-manifest.json ......... estado desejado (determinístico, versão N)
-       + sync-manifest.json da última versão verificada ... estado anterior (classificação)
+   └─► dist/meta/sync-manifest.json ......... desired state (deterministic, version N)
+       + sync-manifest.json of the last verified version ... previous state (classification)
 
 design-sync plan    ─► DesignToolPort.readSnapshot() ─► diff ─► sync-plan.json
-design-sync apply   ─► plan ─► DesignToolPort.apply(plan, {dryRun}) ─► verify (novo snapshot,
-                       diff vazio) ─► DesignToolPort.requestPublish() ─► sync-log.json/.md
-design-sync detect  ─► readSnapshot ─► divergências ─► TrackerPort.upsert / resolve
-qualquer falha      ─► AlertPort.raise (dono da sincronização, FR-026)
+design-sync apply   ─► plan ─► DesignToolPort.apply(plan, {dryRun}) ─► verify (new snapshot,
+                       empty diff) ─► DesignToolPort.requestPublish() ─► sync-log.json/.md
+design-sync detect  ─► readSnapshot ─► divergences ─► TrackerPort.upsert / resolve
+any failure         ─► AlertPort.raise (sync owner, FR-026)
 
-Não existe seta ferramenta ─► repositório.
+There is no tool ─► repository arrow.
 ```
 
-Pacote: `private: true`, nunca publicado, sem dependência de runtime (só `fetch`, `crypto`, `fs` e
-`util.parseArgs` do Node). Camada `tools`; aresta permitida: `tools/design-sync -(dev)-> tokens`
-(somente `./meta/*`).
+Package: `private: true`, never published, with no runtime dependency (only `fetch`, `crypto`, `fs` and
+`util.parseArgs` from Node). Layer `tools`; allowed edge: `tools/design-sync -(dev)-> tokens`
+(only `./meta/*`).
 
-## 3. Formato do `sync-manifest.json`
+## 3. Format of `sync-manifest.json`
 
-Gerado por `tokens-build build` em `packages/tokens/dist/meta/sync-manifest.json` e exposto pelo
-export `./meta/*` de `@<prefixo>/tokens` (manifesto para ferramentas; apps não o importam). É o
-único insumo de estado desejado do núcleo, que não lê a sintaxe do Resolver DTCG.
+Generated by `tokens-build build` at `packages/tokens/dist/meta/sync-manifest.json` and exposed by the
+export `./meta/*` of `@<prefixo>/tokens` (manifest for tools; apps do not import it). It is the core's
+only desired-state input, and the core does not read the DTCG Resolver syntax.
 
-### 3.1 Estrutura
+### 3.1 Structure
 
 ```json
 {
@@ -77,11 +77,11 @@ export `./meta/*` de `@<prefixo>/tokens` (manifesto para ferramentas; apps não 
     { "id": "mode", "contexts": ["dark", "light"], "default": "light" }
   ],
   "collections": [
-    { "id": "primitive", "name": "Primitivos", "axis": null },
-    { "id": "brand", "name": "Marca", "axis": "brand" },
-    { "id": "mode", "name": "Modo", "axis": "mode" },
-    { "id": "semantic", "name": "Semânticos invariantes", "axis": null },
-    { "id": "component", "name": "Componentes", "axis": null }
+    { "id": "primitive", "name": "Primitives", "axis": null },
+    { "id": "brand", "name": "Brand", "axis": "brand" },
+    { "id": "mode", "name": "Mode", "axis": "mode" },
+    { "id": "semantic", "name": "Invariant semantics", "axis": null },
+    { "id": "component", "name": "Components", "axis": null }
   ],
   "variables": [
     {
@@ -108,7 +108,7 @@ export `./meta/*` de `@<prefixo>/tokens` (manifesto para ferramentas; apps não 
       "role": "public",
       "type": "color",
       "cssName": "--<prefixo>-color-bg-surface",
-      "description": "Fundo padrão de superfície.",
+      "description": "Default surface background.",
       "values": {
         "dark": { "alias": ["brand", "color", "bg", "surface", "dark"] },
         "light": { "alias": ["brand", "color", "bg", "surface", "light"] }
@@ -130,42 +130,40 @@ export `./meta/*` de `@<prefixo>/tokens` (manifesto para ferramentas; apps não 
 }
 ```
 
-### 3.2 Regras
+### 3.2 Rules
 
-| Campo | Regra |
+| Field | Rule |
 | --- | --- |
-| `format`, `version` | Constantes. Mudança incompatível no formato incrementa `version`; o núcleo recusa versão desconhecida (código 2). |
-| `source` | Nome e versão do pacote de origem. Sem commit, data ou caminho absoluto. |
-| `axes` | Exatamente `brand` e `mode`, com `contexts` em ordem de code point e `default` presente em `contexts`. |
-| `collections` | Exatamente as cinco coleções, nesta ordem (ordem de dependência dos aliases). `name` vem da convenção de nomes ([token-source.md](token-source.md), seção 8.9, publicada em `docs/tokens/convencao-de-nomes.md`). A coleção não é segmento do caminho. |
-| `variables[].key` | Id do token na versão: segmentos unidos por `.`. Único. Guardado na ferramenta para detectar renomeação manual (seção 5.3). |
-| `variables[].path` | Segmentos do caminho DTCG, ASCII minúsculo kebab. O nome na ferramenta é `path` unido pelo separador da ferramenta (`/` no Figma, `.` no Penpot), fixado na convenção. |
-| `variables[].collection` | `primitive` para camada primitiva; `brand` para token semântico de eixo marca (público ou `brand-mode-source`); `mode` para semântico de eixo modo; `semantic` para semântico invariante; `component` para camada de componente. |
-| `variables[].role` | `public` ou `brand-mode-source` (data-model). O adaptador pode aplicar política própria da ferramenta a `brand-mode-source` (ex.: ocultar da publicação), registrada no ADR-14. |
-| `variables[].type` | `$type` DTCG resolvido (nunca inferido). |
-| `variables[].values` | Chaves = contextos do eixo da coleção (ids de marca em `brand`; `light` e `dark` em `mode`; a chave reservada `*` nas coleções sem eixo). Cada valor é `{ "literal": … }` ou `{ "alias": [segmentos] }`. |
-| `literal` | Só na coleção `primitive` (FR-003). Cor: `hex` de 6 dígitos minúsculos igual à quantização de 8 bits de `toEmittedSrgb()` e `alpha` com a mesma serialização decimal do CSS, de modo que ferramenta, CSS e contraste mostram o mesmo valor (D5). Dimensão e duração: `{ "value", "unit" }` do DTCG. Número e peso: `{ "value" }`. Família tipográfica: `{ "value": [nomes] }`. Curva: `{ "value": [x1, y1, x2, y2] }`. Compostos (`border`, `shadow`, `typography`, `transition`): `{ "composite": { … } }` com subvalores na mesma forma. |
-| `alias` | Caminho do token alvo, que existe no mesmo manifesto (V-03). Um único salto, como escrito na fonte. |
-| Ordem e serialização | `variables` ordenadas por `key` em code point; chaves de objeto em code point; JSON canônico (ver [tools-cli.md](tools-cli.md), seção 1.4). |
+| `format`, `version` | Constants. An incompatible format change increments `version`; the core refuses an unknown version (code 2). |
+| `source` | Name and version of the source package. No commit, date or absolute path. |
+| `axes` | Exactly `brand` and `mode`, with `contexts` in code-point order and `default` present in `contexts`. |
+| `collections` | Exactly the five collections, in this order (alias dependency order). `name` comes from the naming convention ([token-source.md](token-source.md), section 8.9, published in `docs/tokens/convencao-de-nomes.md`). The collection is not a path segment. |
+| `variables[].key` | Token id in the version: segments joined by `.`. Unique. Stored in the tool to detect a manual rename (section 5.3). |
+| `variables[].path` | DTCG path segments, lowercase ASCII kebab. The name in the tool is `path` joined by the tool's separator (`/` in Figma, `.` in Penpot), fixed in the convention. |
+| `variables[].collection` | `primitive` for the primitive layer; `brand` for a brand-axis semantic token (public or `brand-mode-source`); `mode` for a mode-axis semantic; `semantic` for an invariant semantic; `component` for the component layer. |
+| `variables[].role` | `public` or `brand-mode-source` (data-model). The adapter may apply its own tool policy to `brand-mode-source` (e.g. hide from publication), recorded in ADR-14. |
+| `variables[].type` | Resolved DTCG `$type` (never inferred). |
+| `variables[].values` | Keys = contexts of the collection's axis (brand ids in `brand`; `light` and `dark` in `mode`; the reserved key `*` in the axis-less collections). Each value is `{ "literal": … }` or `{ "alias": [segments] }`. |
+| `literal` | Only in the `primitive` collection (FR-003). Color: `hex` of 6 lowercase digits equal to the 8-bit quantization of `toEmittedSrgb()` and `alpha` with the same decimal serialization as the CSS, so that tool, CSS and contrast show the same value (D5). Dimension and duration: `{ "value", "unit" }` of the DTCG. Number and weight: `{ "value" }`. Font family: `{ "value": [names] }`. Curve: `{ "value": [x1, y1, x2, y2] }`. Composites (`border`, `shadow`, `typography`, `transition`): `{ "composite": { … } }` with subvalues in the same form. |
+| `alias` | Path of the target token, which exists in the same manifest (V-03). A single hop, as written in the source. |
+| Order and serialization | `variables` ordered by `key` in code point; object keys in code point; canonical JSON (see [tools-cli.md](tools-cli.md), section 1.4). |
 
-O manifesto é validado na leitura contra um JSON Schema versionado junto ao gerador
-(`tools/tokens-build`); falha de schema é erro de configuração (código 2).
+The manifest is validated on reading against a JSON Schema versioned alongside the generator
+(`tools/tokens-build`); a schema failure is a configuration error (code 2).
 
-## 4. Portas
+## 4. Ports
 
-Assinaturas em TypeScript, sem corpo. Nenhuma operação devolve dados destinados a arquivos do
-repositório.
+Signatures in TypeScript, without a body. No operation returns data destined for repository files.
 
-### 4.1 Tipos de apoio
+### 4.1 Support types
 
 ```ts
 export type TokenPath = readonly string[];
-export type TokenKey = string;                     // segmentos unidos por '.'
-export type ContextId = string;                    // id de marca, 'light' | 'dark', ou '*'
-export type CollectionId = 'primitive' | 'brand' | 'mode' | 'semantic' | 'component';
-export type NativeRef = string;                    // identificador opaco da ferramenta
+export type TokenKey = string;                     // segments joined by '.'
+export type ContextId = string;                    // brand id, 'light' | 'dark', or '*'
+export type NativeRef = string;                    // opaque tool identifier
 export type Sha256 = `sha256:${string}`;
-export type IsoDate = string;                      // AAAA-MM-DD, vindo do relógio injetado
+export type IsoDate = string;                      // YYYY-MM-DD, from the injected clock
 export type Fingerprint = Sha256;
 
 export type SyncValueType =
@@ -184,7 +182,7 @@ export type SyncValue = { readonly literal: LiteralValue } | { readonly alias: T
 
 export interface ReleaseRef {
   readonly version: string;
-  readonly changelogExcerpt: string;               // trecho do changelog da versão (GOV-03)
+  readonly changelogExcerpt: string;               // excerpt from the version's changelog (GOV-03)
 }
 
 export type SyncErrorCode =
@@ -196,8 +194,8 @@ export type SyncErrorCode =
 export interface SyncError {
   readonly code: SyncErrorCode;
   readonly phase: 'config' | 'access' | 'snapshot' | 'plan' | 'apply' | 'verify' | 'publish' | 'report';
-  readonly message: string;                        // estável, sem segredo nem resposta crua
-  readonly completedOperations: number | null;     // em falha durante apply
+  readonly message: string;                        // stable, no secret or raw response
+  readonly completedOperations: number | null;     // on failure during apply
 }
 ```
 
@@ -209,18 +207,18 @@ export type ReadCapability = 'api' | 'agent-mcp' | 'manual';
 export type PublishCapability = 'api' | 'manual' | 'none';
 
 export interface DesignToolCapabilities {
-  readonly toolId: string;                         // id do adaptador, ex.: 'memory'
-  readonly maxModesPerAxis: number;                // limite de modos por coleção do plano contratado
+  readonly toolId: string;                         // adapter id, e.g. 'memory'
+  readonly maxModesPerAxis: number;                // mode limit per collection of the contracted plan
   readonly maxVariablesPerCollection: number | null;
-  readonly axisScope: 'frame' | 'file';            // troca de modo por quadro ou só no arquivo inteiro
-  readonly aliases: boolean;                       // variável pode apontar para outra variável
-  readonly valueTypes: readonly SyncValueType[];   // tipos representáveis como variável
-  readonly separator: '/' | '.';                   // separador de segmentos (convenção TOK-04)
+  readonly axisScope: 'frame' | 'file';            // mode switch per frame or only on the whole file
+  readonly aliases: boolean;                       // a variable can point to another variable
+  readonly valueTypes: readonly SyncValueType[];   // types representable as a variable
+  readonly separator: '/' | '.';                   // segment separator (TOK-04 convention)
   readonly keyField: 'description-suffix' | 'code-syntax' | 'native-metadata';
   readonly hiddenVariables: boolean;
   readonly codeSyntax: boolean;
-  readonly localPublishedSplit: boolean;           // distingue estado local e publicado
-  readonly maxAtomicBatchBytes: number | null;     // tamanho máximo de um lote atômico
+  readonly localPublishedSplit: boolean;           // distinguishes local and published state
+  readonly maxAtomicBatchBytes: number | null;     // maximum size of an atomic batch
   readonly read: ReadCapability;
   readonly write: WriteCapability;
   readonly publish: PublishCapability;
@@ -236,7 +234,7 @@ export interface AccessReport {
   readonly ok: boolean;
   readonly problems: readonly AccessProblem[];
   readonly scopes: readonly string[];
-  readonly plan: string | null;                    // plano ou assento, quando a ferramenta informa
+  readonly plan: string | null;                    // plan or seat, when the tool reports it
   readonly credentialExpiresOn: IsoDate | null;
 }
 
@@ -249,10 +247,10 @@ export interface SnapshotCollection {
 export interface SnapshotVariable {
   readonly ref: NativeRef;
   readonly collectionRef: NativeRef;
-  readonly path: TokenPath;                        // nome dividido pelo separador, sem outra normalização
+  readonly path: TokenPath;                        // name split by the separator, with no other normalization
   readonly type: SyncValueType | 'unknown';
-  readonly key: TokenKey | null;                   // lida de keyField; null se ausente
-  readonly description: string;                    // sem o marcador de chave
+  readonly key: TokenKey | null;                   // read from keyField; null if absent
+  readonly description: string;                    // without the key marker
   readonly hidden: boolean;
   readonly values: Readonly<Record<string, SyncValue | { readonly unresolved: string }>>;
 }
@@ -285,25 +283,25 @@ export interface DesignToolPort {
 }
 ```
 
-Obrigações do adaptador:
+Adapter obligations:
 
-- `readSnapshot()` normaliza valores da ferramenta de volta para `SyncValue` (cor em `hex` e
-  `alpha`, dimensão na unidade do manifesto). A ida e a volta precisam ser exatas; a regra de
-  conversão de unidades de cada ferramenta fica no ADR-14 e é coberta pela suíte de contrato.
-- `apply()` executa as operações na ordem de `seq`, pode dividir em lotes de até
-  `maxAtomicBatchBytes` sem reordenar, para no primeiro lote com falha e devolve `partial` com
-  `failedAtSeq`. Reexecutar com um plano novo, feito sobre snapshot novo, converge (idempotência).
-- Respostas 429 são repetidas respeitando `Retry-After`, até o limite da configuração; depois,
-  `RATE_LIMITED`. 401 e 403 viram `ACCESS_DENIED`; credencial vencida, `CREDENTIAL_EXPIRED`;
-  rede e 5xx, `TOOL_UNAVAILABLE`.
-- Nenhuma mensagem, log ou snapshot contém a credencial.
+- `readSnapshot()` normalizes the tool's values back into `SyncValue` (color in `hex` and `alpha`,
+  dimension in the manifest's unit). The round trip must be exact; each tool's unit-conversion rule sits
+  in ADR-14 and is covered by the contract suite.
+- `apply()` executes the operations in `seq` order, may split into batches of up to
+  `maxAtomicBatchBytes` without reordering, stops at the first failing batch and returns `partial` with
+  `failedAtSeq`. Re-running with a new plan, made over a new snapshot, converges (idempotence).
+- 429 responses are retried honoring `Retry-After`, up to the configured limit; afterwards,
+  `RATE_LIMITED`. 401 and 403 become `ACCESS_DENIED`; an expired credential, `CREDENTIAL_EXPIRED`;
+  network and 5xx, `TOOL_UNAVAILABLE`.
+- No message, log or snapshot contains the credential.
 
 ### 4.3 `TrackerPort`
 
 ```ts
 export interface RoleRef {
   readonly kind: 'team';
-  readonly slug: string;                           // ex.: '@<org>/<time-dono-da-sincronizacao>'
+  readonly slug: string;                           // e.g. '@<org>/<sync-owner-team>'
   readonly source: 'CODEOWNERS';
 }
 
@@ -314,9 +312,9 @@ export interface TrackedItem {
   readonly fingerprint: Fingerprint;
   readonly kind: TrackedItemKind;
   readonly title: string;
-  readonly body: string;                           // Markdown determinístico
+  readonly body: string;                           // deterministic Markdown
   readonly owner: RoleRef;
-  readonly due: IsoDate;                           // detecção + SLA da configuração
+  readonly due: IsoDate;                           // detection + config SLA
   readonly labels: readonly string[];
 }
 
@@ -338,9 +336,10 @@ export interface TrackerPort {
 }
 ```
 
-Semântica: `upsert` cria o item se não existe; se está aberto, atualiza título, corpo e rótulos e
-preserva `detectedOn` e `due` originais; se estava resolvido, reabre como nova ocorrência, com nova
-data de detecção e novo prazo. `resolve` fecha com nota que cita a execução que viu a convergência.
+Semantics: `upsert` creates the item if it does not exist; if it is open, it updates the title, body and
+labels and preserves the original `detectedOn` and `due`; if it was resolved, it reopens as a new
+occurrence, with a new detection date and a new due date. `resolve` closes with a note that cites the
+run that saw the convergence.
 
 ### 4.4 `AlertPort`
 
@@ -351,7 +350,7 @@ export interface SyncAlert {
   readonly error: SyncError;
   readonly owner: RoleRef;
   readonly tool: string;
-  readonly runUrl: string | null;                  // do envelope; nunca no conteúdo canônico
+  readonly runUrl: string | null;                  // from the envelope; never in the canonical content
 }
 
 export interface AlertPort {
@@ -359,60 +358,60 @@ export interface AlertPort {
 }
 ```
 
-O adaptador GitHub de alerta abre ou atualiza um item com rótulo `design-sync:failure`, que
-menciona o time dono e preenche o responsável (seção 11). Como ele usa o mesmo repositório de itens
-do tracker, a execução seguinte verificada (`verified`) resolve os alertas abertos dessa ferramenta
-por `TrackerPort.resolve`. O job também termina com código diferente de zero (segundo sinal).
+The GitHub alert adapter opens or updates an item with label `design-sync:failure`, which mentions the
+owner team and fills the assignee (section 11). Since it uses the same item repository as the tracker,
+the next verified run (`verified`) resolves that tool's open alerts via `TrackerPort.resolve`. The job
+also ends with a non-zero code (second signal).
 
-## 5. Plano e diff
+## 5. Plan and diff
 
-### 5.1 Entradas
+### 5.1 Inputs
 
-Manifesto atual (obrigatório), manifesto da versão anterior (opcional, ver seção 6), snapshot,
-capacidades e configuração (seção 15). A saída é um `SyncPlan` em JSON canônico.
+Current manifest (required), previous-version manifest (optional, see section 6), snapshot, capabilities
+and configuration (section 15). The output is a `SyncPlan` in canonical JSON.
 
-### 5.2 Pré-condições (plano recusado, nada é escrito)
+### 5.2 Preconditions (plan refused, nothing is written)
 
-| Condição | Código de erro | Saída |
+| Condition | Error code | Exit |
 | --- | --- | --- |
-| Manifesto inválido ou de versão desconhecida | `MANIFEST_INVALID` | 2 |
-| `capabilities.aliases = false` (a topologia por eixos depende de alias, FR-033) | `ALIASES_UNSUPPORTED` | 2 |
-| `maxModesPerAxis` menor que o número de marcas ou de modos | `CAPABILITY_EXCEEDED` | 2 |
-| `read = 'manual'` (sem snapshot automático, não há diff nem verify) | `READ_UNAVAILABLE` | 2 |
-| Remoções acima do limite configurado sem `--allow-mass-delete` | `MASS_DELETE_BLOCKED` | 2 |
+| Invalid manifest or of an unknown version | `MANIFEST_INVALID` | 2 |
+| `capabilities.aliases = false` (the per-axis topology depends on aliases, FR-033) | `ALIASES_UNSUPPORTED` | 2 |
+| `maxModesPerAxis` smaller than the number of brands or of modes | `CAPABILITY_EXCEEDED` | 2 |
+| `read = 'manual'` (no automatic snapshot, there is no diff or verify) | `READ_UNAVAILABLE` | 2 |
+| Removals above the configured limit without `--allow-mass-delete` | `MASS_DELETE_BLOCKED` | 2 |
 
-Toda recusa é registrada no log em `capabilityChecks` e dispara alerta. O resultado da checagem de
-modos entra em todo log, aprovado ou não (registro de limites do FR-029 e do DSN-05).
+Every refusal is recorded in the log under `capabilityChecks` and raises an alert. The result of the
+mode check enters every log, approved or not (record of the limits of FR-029 and DSN-05).
 
-### 5.3 Casamento entre manifesto e snapshot
+### 5.3 Matching between manifest and snapshot
 
-Só as coleções gerenciadas (as cinco da seção 3, identificadas pelo nome da convenção) são lidas
-para diff. Variáveis de outras coleções nunca são alteradas, renomeadas ou removidas.
+Only the managed collections (the five of section 3, identified by the convention name) are read for
+the diff. Variables of other collections are never changed, renamed or removed.
 
-1. Por chave: variável do snapshot cuja `key` é igual à `key` desejada.
-2. Sem chave, por caminho: variável sem `key` cujo `path` normalizado (segmentos do nome divididos
-   pelo separador, comparação exata, sem mudança de caixa) é igual ao desejado, na mesma coleção.
-   Ela é adotada (`setMetadata` grava a chave), o que preserva os vínculos de camadas.
-3. Empate (duas variáveis com a mesma chave): fica a de caminho igual ao desejado; se nenhuma,
-   a de menor `ref` em code point. As demais são extras.
-4. Sem correspondência: `missing` (criação). Variável de coleção gerenciada sem correspondência:
-   `extra` (remoção).
+1. By key: a snapshot variable whose `key` equals the desired `key`.
+2. Without a key, by path: a variable without `key` whose normalized `path` (name segments split by the
+   separator, exact comparison, with no case change) equals the desired one, in the same collection. It
+   is adopted (`setMetadata` writes the key), which preserves the layer links.
+3. Tie (two variables with the same key): the one with a path equal to the desired one remains; if
+   neither, the one with the lowest `ref` in code point. The others are extras.
+4. No match: `missing` (creation). A managed-collection variable with no match: `extra` (removal).
 
-### 5.4 Operações e ordem
+### 5.4 Operations and order
 
-As operações são numeradas por `seq` e agrupadas em fases, sempre nesta ordem. Dentro de cada fase,
-a ordem é: coleção (ordem da seção 3), `path` unido por `.` em code point, contexto em code point.
+The operations are numbered by `seq` and grouped into phases, always in this order. Within each phase,
+the order is: collection (order of section 3), `path` joined by `.` in code point, context in code
+point.
 
-| Fase | Operações | Observação |
+| Phase | Operations | Note |
 | --- | --- | --- |
-| 1 `collections` | `createCollection` | Coleções nunca são removidas. |
-| 2 `modes` | `createMode`, `renameMode` | Modos = contextos do eixo. |
-| 3 `renames` | `renameVariable` | Renomeação de volta por chave, dentro da mesma coleção. Antes das criações, para liberar nomes. |
-| 4 `recreates` | `recreateVariable` | Mudança de `type` (tipo imutável em algumas ferramentas) ou de coleção: remove e cria na mesma operação. Sempre `breaking: true`. |
-| 5 `creates` | `createVariable` | Sem valores; aliases ainda podem apontar para variáveis não criadas. |
-| 6 `metadata` | `setMetadata` | Chave, descrição, code syntax e ocultação. |
-| 7 `values` | `setValue` | Literal ou alias por contexto, depois que todas as variáveis existem. Alvos de alias são referenciados por caminho; o adaptador traduz para `NativeRef` (inclusive ids temporários de criação). |
-| 8 `deletes` | `deleteVariable`, depois `deleteMode` | Por último e só em coleções gerenciadas. Extras contam como edição manual (DSN-03) salvo remoção de release. |
+| 1 `collections` | `createCollection` | Collections are never removed. |
+| 2 `modes` | `createMode`, `renameMode` | Modes = contexts of the axis. |
+| 3 `renames` | `renameVariable` | Rename back by key, within the same collection. Before the creations, to free names. |
+| 4 `recreates` | `recreateVariable` | Change of `type` (immutable type in some tools) or of collection: removes and creates in the same operation. Always `breaking: true`. |
+| 5 `creates` | `createVariable` | Without values; aliases may still point to variables not yet created. |
+| 6 `metadata` | `setMetadata` | Key, description, code syntax and hiding. |
+| 7 `values` | `setValue` | Literal or alias per context, after all variables exist. Alias targets are referenced by path; the adapter translates them to `NativeRef` (including temporary creation ids). |
+| 8 `deletes` | `deleteVariable`, then `deleteMode` | Last and only in managed collections. Extras count as a manual edit (DSN-03) except for a release removal. |
 
 ```ts
 interface PlanOperationBase {
@@ -421,7 +420,7 @@ interface PlanOperationBase {
     | 'metadata' | 'values' | 'deletes';
   readonly collection: CollectionId;
   readonly cause: 'release' | 'manual' | 'initial' | 'unclassified';
-  readonly breaking: boolean;                      // quebra vínculos de camadas no destino
+  readonly breaking: boolean;                      // breaks layer links in the target
 }
 
 export type PlanOperation = PlanOperationBase & (
@@ -454,69 +453,70 @@ export interface SyncPlan {
   readonly summary: Readonly<Record<'create' | 'rename' | 'recreate' | 'update' | 'delete'
     | 'unchanged' | 'unsupported', number>>;
   readonly operations: readonly PlanOperation[];
-  readonly outcomes: readonly CapabilityOutcome[];  // seção 9
+  readonly outcomes: readonly CapabilityOutcome[];  // section 9
 }
 
 export interface CapabilityCheck {
   readonly check: 'maxModesPerAxis' | 'maxVariablesPerCollection' | 'aliases' | 'axisScope'
     | 'read' | 'write' | 'publish' | 'valueTypes';
-  readonly subject: string;                        // ex.: 'brand', 'mode', 'shadow'
+  readonly subject: string;                        // e.g. 'brand', 'mode', 'shadow'
   readonly required: number | string;
   readonly limit: number | string;
   readonly ok: boolean;
 }
 ```
 
-Regras adicionais:
+Additional rules:
 
-- Token removido ou renomeado no repositório aparece como `deleteVariable` (e, no renomeado,
-  `createVariable`) com `cause: "release"` e `breaking: true`. Isso só é esperado em versão major
-  (GOV-01, Princípio X); o log destaca a operação, e a verificação de API pública é da feature de
-  CI e publicação.
-- Variável cujo `type` não está em `capabilities.valueTypes` não gera operação; entra em
-  `summary.unsupported` e no resultado de capacidade `unsupported-type` (seção 9). O núcleo nunca a
-  aproxima com variáveis auxiliares.
-- Plano vazio significa ferramenta igual ao manifesto em todas as coleções gerenciadas (excluídos
-  os tipos `unsupported`).
+- A token removed or renamed in the repository appears as `deleteVariable` (and, when renamed,
+  `createVariable`) with `cause: "release"` and `breaking: true`. This is only expected in a major
+  version (GOV-01, Principle X); the log highlights the operation, and the public API check is part of
+  the CI and publishing feature.
+- A variable whose `type` is not in `capabilities.valueTypes` generates no operation; it goes into
+  `summary.unsupported` and into the capability outcome `unsupported-type` (section 9). The core never
+  approximates it with auxiliary variables.
+- An empty plan means the tool equals the manifest in all managed collections (excluding the
+  `unsupported` types).
 
-### 5.5 Verificação após aplicar
+### 5.5 Verification after applying
 
-Depois de `apply` com status `applied`, o núcleo lê um snapshot novo e refaz o diff. Diff vazio:
-resultado `verified`. Diff não vazio: `VERIFY_MISMATCH`, alerta e código 5. Falha no meio de
-`apply` (status `partial`): resultado `failed`, alerta e código conforme o erro (4 para acesso,
-rede, 5xx ou limite de taxa esgotado; 3 para erro interno). A execução seguinte parte de snapshot
-novo e converge; os itens reparados aparecem no log dela com a causa calculada na seção 6.
+After `apply` with status `applied`, the core reads a new snapshot and redoes the diff. Empty diff:
+result `verified`. Non-empty diff: `VERIFY_MISMATCH`, an alert and code 5. A failure in the middle of
+`apply` (status `partial`): result `failed`, an alert and a code depending on the error (4 for access,
+network, 5xx or exhausted rate limit; 3 for an internal error). The next run starts from a new snapshot
+and converges; the repaired items appear in its log with the cause computed in section 6.
 
-## 6. Classificação de divergência (drift)
+## 6. Divergence classification (drift)
 
-Para cada diferença entre o estado real (snapshot) e o desejado da versão atual, o núcleo compara o
-mesmo elemento (variável, campo e contexto) com o desejado da versão anterior:
+For each difference between the real state (snapshot) and the desired state of the current version, the
+core compares the same element (variable, field and context) with the desired state of the previous
+version:
 
-| Real = desejado(anterior)? | Desejado(anterior) = desejado(atual)? | Classe | Tratamento |
+| Real = desired(previous)? | Desired(previous) = desired(current)? | Class | Treatment |
 | --- | --- | --- | --- |
-| Sim | Não | `release` | Mudança da versão; vai para `changes[]` do log. |
-| Não | Qualquer | `manual` | Edição manual no destino; restaurada e registrada em `restored[]` (FR-027, DSN-03). |
-| Sim | Sim | (sem diferença) | Não ocorre: real = atual. |
-| Sem versão anterior (primeira sincronização) | n/a | `initial` | Vai para `changes[]`. |
-| Manifesto anterior não fornecido | n/a | `unclassified` | Restaurado e registrado em `restored[]`, com o log marcando `previous: null`. |
+| Yes | No | `release` | Change of the version; goes to `changes[]` of the log. |
+| No | Any | `manual` | Manual edit in the target; restored and recorded in `restored[]` (FR-027, DSN-03). |
+| Yes | Yes | (no difference) | Does not occur: real = current. |
+| No previous version (first sync) | n/a | `initial` | Goes to `changes[]`. |
+| Previous manifest not provided | n/a | `unclassified` | Restored and recorded in `restored[]`, with the log marking `previous: null`. |
 
-O manifesto anterior é o `sync-manifest.json` da última versão sincronizada com resultado
-`verified` naquele destino (registrada no log retido dessa versão). Em geral é a versão promovida
-imediatamente antes; se uma sincronização intermediária falhou, usar a última verificada evita
-classificar como `manual` o atraso de release. O workflow obtém o arquivo do pacote publicado dessa
-versão (export `./meta/*`) e o passa em `--previous`; o log registra a versão usada. No gatilho de
-release, a ausência do manifesto anterior, fora da primeira sincronização, é erro de configuração
-(código 2).
+The previous manifest is the `sync-manifest.json` of the last version synced with result `verified` on
+that target (recorded in the retained log of that version). It is usually the version promoted
+immediately before; if an intermediate sync failed, using the last verified one avoids classifying the
+release lag as `manual`. The workflow obtains the file from the published package of that version
+(export `./meta/*`) and passes it in `--previous`; the log records the version used. On the release
+trigger, the absence of the previous manifest, outside the first sync, is a configuration error
+(code 2).
 
-## 7. Registro de sincronização (log)
+## 7. Sync record (log)
 
-Cada execução de `apply` (inclusive `--dry-run`) grava três arquivos no diretório `--out`:
+Each `apply` run (including `--dry-run`) writes three files in the `--out` directory:
 
-| Arquivo | Conteúdo | Determinístico |
+| File | Content | Deterministic |
 | --- | --- | --- |
-| `sync-log.json` | Conteúdo canônico (abaixo) | Sim, byte a byte para as mesmas entradas |
-| `sync-log.md` | Renderização Markdown gerada só a partir de `sync-log.json` | Sim |
-| `sync-envelope.json` | Data e hora, URL da execução, gatilho, sha256 de `sync-log.json`, detalhe cru de erro da ferramenta (sem segredo) | Não |
+| `sync-log.json` | Canonical content (below) | Yes, byte-for-byte for the same inputs |
+| `sync-log.md` | Markdown rendering generated only from `sync-log.json` | Yes |
+| `sync-envelope.json` | Date and time, run URL, trigger, sha256 of `sync-log.json`, raw detail of the tool's error (no secret) | No |
 
 ```json
 {
@@ -524,7 +524,7 @@ Cada execução de `apply` (inclusive `--dry-run`) grava três arquivos no diret
   "version": 1,
   "command": "apply",
   "tool": "memory:sandbox",
-  "source": { "package": "@<prefixo>/tokens", "version": "1.4.0", "changelog": "<referência à entrada do changelog da versão (GOV-03)>" },
+  "source": { "package": "@<prefixo>/tokens", "version": "1.4.0", "changelog": "<reference to the version's changelog entry (GOV-03)>" },
   "previous": { "version": "1.3.2" },
   "result": "verified",
   "digests": {
@@ -553,24 +553,25 @@ Cada execução de `apply` (inclusive `--dry-run`) grava três arquivos no diret
 }
 ```
 
-Regras:
+Rules:
 
-- `result`: `planned` (só plano ou saída manual), `dry-run`, `verified` ou `failed` (máquina de
-  estados do data-model).
-- `changes[]` e `restored[]` ordenados por caminho (code point), depois contexto, depois `op`.
-  Uma mudança de release nunca aparece em `restored[]`, e vice-versa.
-- `divergenceAfter` vem do diff de verificação; após cada sincronização verificada, `name` e
-  `hierarchy` são zero (SC-010).
-- `error`: `SyncError` da seção 4.1, sem texto variável de resposta da ferramenta (que fica no
+- `result`: `planned` (plan or manual output only), `dry-run`, `verified` or `failed` (data-model state
+  machine).
+- `changes[]` and `restored[]` ordered by path (code point), then context, then `op`. A release change
+  never appears in `restored[]`, and vice versa.
+- `divergenceAfter` comes from the verification diff; after each verified sync, `name` and `hierarchy`
+  are zero (SC-010).
+- `error`: `SyncError` of section 4.1, with no variable text from the tool's response (which sits in the
   envelope).
-- Retenção: o log vai como asset da versão (evidência retida do ACE-02 e do FR-031) e como artefato
-  do workflow.
-- `sync-log.md` tem as seções Resumo, Mudanças da versão, Edições manuais restauradas, Resultados de
-  capacidade, Limites registrados e Digests, com as mesmas ordenações do JSON.
+- Retention: the log goes as a version asset (retained evidence of ACE-02 and FR-031) and as a workflow
+  artifact.
+- `sync-log.md` has the sections Summary, Version changes, Restored manual edits, Capability outcomes,
+  Recorded limits and Digests, with the same orderings as the JSON.
 
-## 8. Item de divergência e impressão digital
+## 8. Divergence item and fingerprint
 
-`design-sync detect` gera `divergence-report.json`, `divergence-report.md` e envelope. Cada item:
+`design-sync detect` generates `divergence-report.json`, `divergence-report.md` and an envelope. Each
+item:
 
 ```json
 {
@@ -588,111 +589,111 @@ Regras:
 }
 ```
 
-| Campo | Regra |
+| Field | Rule |
 | --- | --- |
-| `kind` | Lista fechada do data-model: `missing`, `extra`, `value`, `alias`, `name` (só o último segmento difere), `hierarchy` (segmentos de grupo diferem ou a coleção difere), `type`. |
-| `field` | Detalhe do campo: `value`, `description`, `key`, `codeSyntax`, `hidden`, `collection` ou `modes`. Não altera `kind`. |
-| `mode` | Contexto afetado, ou `null` quando não se aplica. |
-| `classification` | Classe da seção 6. |
-| `fingerprint` | Fórmula abaixo. O valor fica fora da impressão digital, para que a mesma divergência atualize o mesmo item. |
-| `tool` | `<adapterId>:<targetId>`; `targetId` é identificador não secreto do arquivo ou projeto, vindo da configuração. |
+| `kind` | Closed list of the data-model: `missing`, `extra`, `value`, `alias`, `name` (only the last segment differs), `hierarchy` (group segments differ or the collection differs), `type`. |
+| `field` | Field detail: `value`, `description`, `key`, `codeSyntax`, `hidden`, `collection` or `modes`. Does not change `kind`. |
+| `mode` | Affected context, or `null` when it does not apply. |
+| `classification` | Class of section 6. |
+| `fingerprint` | Formula below. The value sits outside the fingerprint, so that the same divergence updates the same item. |
+| `tool` | `<adapterId>:<targetId>`; `targetId` is a non-secret identifier of the file or project, from the configuration. |
 
 ```text
 fingerprint = "sha256:" + hex(sha256(utf8(kind + "|" + path.join(".") + "|" + (mode ?? "") + "|" + tool)))
 ```
 
-O separador `|` não ocorre em segmentos (kebab ASCII), em `kind` nem em `tool`. A mesma fórmula
-vale para os demais itens rastreáveis, com `kind` igual ao tipo do item: `failure` (caminho = código
-do erro), `capability` (caminho = capacidade ou tipo de valor), `credential` (caminho = `read` ou
-`write`), `manual-write` e `manual-publish` (caminho = versão), sempre sem modo.
+The separator `|` does not occur in segments (kebab ASCII), in `kind` nor in `tool`. The same formula
+applies to the other trackable items, with `kind` equal to the item type: `failure` (path = error
+code), `capability` (path = capability or value type), `credential` (path = `read` or `write`),
+`manual-write` and `manual-publish` (path = version), always without a mode.
 
-O relatório é determinístico: itens ordenados por `kind`, caminho, contexto. Datas não entram no
-relatório; elas existem só no item rastreável:
+The report is deterministic: items ordered by `kind`, path, context. Dates do not enter the report;
+they exist only in the trackable item:
 
-| Campo do item rastreável | Origem |
+| Trackable item field | Source |
 | --- | --- |
-| `owner` | `RoleRef` do time dono da linha do arquivo de donos que cobre `ownerPath` da configuração (DSN-02). Linha ausente ou com mais de um time: código 2. |
-| `detectedOn` | Relógio injetado na primeira detecção. |
-| `due` | `detectedOn` + `slaDays.divergence` da configuração. |
-| `state` | `open` → `resolved`, automaticamente quando a próxima execução de `apply` ou `detect` não vê mais a impressão digital. |
+| `owner` | `RoleRef` of the owner team from the line of the owners file that covers the config's `ownerPath` (DSN-02). A missing line or one with more than one team: code 2. |
+| `detectedOn` | Injected clock on first detection. |
+| `due` | `detectedOn` + `slaDays.divergence` from the configuration. |
+| `state` | `open` → `resolved`, automatically when the next run of `apply` or `detect` no longer sees the fingerprint. |
 
-No GitHub, o título segue `[design-sync] <kind> <caminho> (<modo>)`, os rótulos são `design-sync`,
-`design-sync:divergence` e `kind:<kind>`, e o corpo traz o marcador oculto
-`<!-- <prefixo>-design-sync fingerprint: sha256:… -->`, usado por `listOpen` e `resolve`.
+On GitHub, the title follows `[design-sync] <kind> <path> (<mode>)`, the labels are `design-sync`,
+`design-sync:divergence` and `kind:<kind>`, and the body carries the hidden marker
+`<!-- <prefixo>-design-sync fingerprint: sha256:… -->`, used by `listOpen` and `resolve`.
 
-## 9. Resultados de capacidade e itens rastreáveis
+## 9. Capability outcomes and trackable items
 
-Limitações da ferramenta são resultados de primeira classe, nunca falhas silenciosas.
+Tool limitations are first-class outcomes, never silent failures.
 
-| Capacidade | Valor | Efeito | Item rastreável (`kind`) |
+| Capability | Value | Effect | Trackable item (`kind`) |
 | --- | --- | --- | --- |
-| `write` | `api` | `apply` executa e verifica. | Nenhum. |
-| `write` | `agent-mcp` | Escrita por agente via servidor MCP da ferramenta; candidata não comprovada. Exige verify por leitura de volta. Até o ADR-14 aceitar o caminho após spike, o núcleo a trata como `manual` em execução não interativa. | Como em `manual`, enquanto não aceita. |
-| `write` | `manual` | `apply` não escreve; grava `sync-plan.md` como instrução passo a passo. Código 1. | `manual-write`: "Aplicar sincronização vX.Y.Z", prazo `slaDays.manualWrite`, fechado pela próxima execução com diff vazio. |
-| `publish` | `api` | `requestPublish` publica após `verified`. | Nenhum. |
-| `publish` | `manual` | Ferramenta sem endpoint de publicação. | `manual-publish`: "Publicar biblioteca vX.Y.Z", com descrição pronta (versão e trecho do changelog), prazo `slaDays.manualPublish`; `detect` fecha quando o estado publicado iguala o local (`localPublishedSplit`) ou o dono fecha com registro. |
-| `publish` | `none` | Ferramenta sem conceito de publicação. | Nenhum; o log registra. |
-| `axisScope` | `file` | Plano segue, mas troca de marca ou modo por quadro (DSN-05) não é atendida. | `capability`, um por ferramenta, para decisão do requerente. |
-| `valueTypes` | tipo ausente | Tokens do tipo ficam `unsupported`, sem variável auxiliar. | `capability`, um por tipo e ferramenta (impressão digital da seção 8, caminho = tipo). |
-| `read` | `manual` | Sem diff, verify ou detecção automática: recusa (código 2). | `capability` e alerta. |
-| `aliases` | `false` | Recusa (código 2). | Alerta. |
-| `maxModesPerAxis` | abaixo do necessário | Recusa (código 2). | Alerta. |
-| Credencial | vence em até `credentialExpiryWarnDays` | `check-access` avisa, código 0. | `credential`, prazo = data de vencimento (rotação do ENG-13). |
+| `write` | `api` | `apply` executes and verifies. | None. |
+| `write` | `agent-mcp` | Write by an agent via the tool's MCP server; unproven candidate. Requires verify by read-back. Until ADR-14 accepts the path after a spike, the core treats it as `manual` in a non-interactive run. | As in `manual`, while not accepted. |
+| `write` | `manual` | `apply` does not write; it writes `sync-plan.md` as a step-by-step instruction. Code 1. | `manual-write`: "Apply sync vX.Y.Z", due `slaDays.manualWrite`, closed by the next run with an empty diff. |
+| `publish` | `api` | `requestPublish` publishes after `verified`. | None. |
+| `publish` | `manual` | Tool with no publish endpoint. | `manual-publish`: "Publish library vX.Y.Z", with a ready description (version and changelog excerpt), due `slaDays.manualPublish`; `detect` closes it when the published state equals the local one (`localPublishedSplit`) or the owner closes it with a record. |
+| `publish` | `none` | Tool with no publication concept. | None; the log records it. |
+| `axisScope` | `file` | The plan proceeds, but a brand or mode switch per frame (DSN-05) is not met. | `capability`, one per tool, for the requester's decision. |
+| `valueTypes` | missing type | Tokens of that type become `unsupported`, with no auxiliary variable. | `capability`, one per type and tool (fingerprint of section 8, path = type). |
+| `read` | `manual` | No diff, verify or automatic detection: refusal (code 2). | `capability` and alert. |
+| `aliases` | `false` | Refusal (code 2). | Alert. |
+| `maxModesPerAxis` | below what is needed | Refusal (code 2). | Alert. |
+| Credential | expires within `credentialExpiryWarnDays` | `check-access` warns, code 0. | `credential`, due = expiration date (ENG-13 rotation). |
 
-O tratamento definitivo de tipos compostos (por exemplo, estilos em vez de variáveis) depende da
-ferramenta e é registrado no ADR-14 depois da escolha.
+The definitive treatment of composite types (for example, styles instead of variables) depends on the
+tool and is recorded in ADR-14 after the choice.
 
-## 10. Gatilhos e concorrência
+## 10. Triggers and concurrency
 
-Workflow `.github/workflows/design-sync.yml` (GitHub Actions como premissa; ações fixadas por SHA,
+Workflow `.github/workflows/design-sync.yml` (GitHub Actions as an assumption; actions pinned by SHA,
 ENG-18):
 
-| Gatilho | Comandos | Ambiente | Observação |
+| Trigger | Commands | Environment | Note |
 | --- | --- | --- | --- |
-| Após promoção à tag principal (ENG-26) | `check-access` → `apply` → anexar log à versão → `detect` | `design-sync-write`, depois `design-sync-read` | O mecanismo de encadeamento com o workflow de publicação é da feature de CI. O `detect` pós-sincronização cobre "a cada versão publicada" (FR-030), já que o cron pode atrasar. |
-| `schedule` semanal (FR-030) | `check-access` → `detect` | `design-sync-read` | Só detecta; a restauração acontece na sincronização seguinte (edge case do spec). Cron do GitHub roda só na branch padrão e pode atrasar. |
-| `workflow_dispatch` | `plan`, `apply` ou `detect`, com entrada `version` | conforme o comando | Disparo manual pelo dono da sincronização enquanto o ENG-26 não existir, com o mesmo log. Restrito por CODEOWNERS no arquivo do workflow e pela política de branch do environment. |
-| Pull request | `plan`, `apply`, `detect` com `--adapter memory` e suíte de contrato contra o fake | nenhum (sem segredo) | Prova de comportamento sem credencial (seção 12). |
+| After promotion to the main tag (ENG-26) | `check-access` → `apply` → attach the log to the version → `detect` | `design-sync-write`, then `design-sync-read` | The chaining mechanism with the publishing workflow is part of the CI feature. The post-sync `detect` covers "on every published version" (FR-030), since the cron may be delayed. |
+| Weekly `schedule` (FR-030) | `check-access` → `detect` | `design-sync-read` | Detects only; restoration happens on the next sync (spec edge case). GitHub cron runs only on the default branch and may be delayed. |
+| `workflow_dispatch` | `plan`, `apply` or `detect`, with input `version` | per the command | Manual dispatch by the sync owner while ENG-26 does not exist, with the same log. Restricted by CODEOWNERS on the workflow file and by the environment's branch policy. |
+| Pull request | `plan`, `apply`, `detect` with `--adapter memory` and the contract suite against the fake | none (no secret) | Proof of behavior without a credential (section 12). |
 
-Concorrência: todos os gatilhos que tocam o mesmo destino compartilham
-`concurrency: { group: design-sync-<targetId>, cancel-in-progress: false }`. Execuções enfileiram;
-um `apply` em andamento nunca é cancelado por outro gatilho. Fora do CI não há credencial do
-adaptador real (seção 11), então execuções locais usam só o adaptador `memory`.
+Concurrency: all triggers that touch the same target share
+`concurrency: { group: design-sync-<targetId>, cancel-in-progress: false }`. Runs queue; an `apply` in
+progress is never canceled by another trigger. Outside CI there is no real adapter credential (section
+11), so local runs use only the `memory` adapter.
 
-## 11. Credenciais e ambientes
+## 11. Credentials and environments
 
-| Item | Regra |
+| Item | Rule |
 | --- | --- |
-| Credencial da ferramenta (escrita) | Segredo fixo no environment `design-sync-write`. Entrada no inventário do ENG-13 com tipo "fixa", justificativa "nenhuma ferramenta candidata oferece credencial federada (OIDC)", dono = papel dono da sincronização, escopo mínimo (escrita só no arquivo da biblioteca), prazo de rotação conforme o limite da ferramenta escolhida. |
-| Credencial da ferramenta (leitura) | Separada da escrita quando a ferramenta permite; environment `design-sync-read`. Mesmo registro no inventário. |
-| Tracker e alerta | Token de instalação de GitHub App de curta duração, emitido no job por ação fixada por SHA, com Issues:write e Members:read da organização (o `GITHUB_TOKEN` não notifica times). Escrita adicional no repositório só se a gravação de campos de issue exigir, a confirmar em spike. A chave privada da App é segredo fixo no inventário do ENG-13, com justificativa, dono, escopo e rotação. |
-| Cofre de segredos | Opcional: se o requerente tiver gerenciador de segredos em nuvem, o job obtém a credencial da ferramenta por OIDC do GitHub; a credencial em si continua fixa. |
-| Pull requests (ENG-14) | O workflow não tem gatilho `pull_request` nem `pull_request_target` com segredo. PR de fork recebe só `GITHUB_TOKEN` de leitura. Jobs de PR usam apenas o adaptador `memory`. Secret scanning ativo. |
-| Environments | `design-sync-write` e `design-sync-read`, com política de implantação restrita à branch padrão e às tags de versão. Revisores obrigatórios só se o plano do GitHub permitir; o fallback é CODEOWNERS no workflow e a política de branch. |
-| Permissões de job | `contents: read` por padrão; `contents: write` só no job que anexa o log à versão; `id-token: write` só se o cofre for usado. |
-| Passagem ao processo | Credenciais só por variável de ambiente, nunca por flag; nomes no inventário do ENG-13. Plano, log, envelope, relatório e itens nunca contêm credencial nem dado pessoal (só `RoleRef`). |
-| Responsável | `owner` vem do campo de issue "Owner" quando um admin da organização o cria; senão, rótulo `owner:<time>`, linha no corpo e menção ao time. `due` usa o campo padrão "Target date" ou, sem ele, linha no corpo. As duas formas são cobertas por teste de contrato do tracker. |
-| Evidência do DSN-02 | Prova única em sandbox de que o time dono é notificado pelo alerta, retida no pacote de aceite. |
+| Tool credential (write) | Fixed secret in the `design-sync-write` environment. Entry in the ENG-13 inventory with type "fixed", justification "no candidate tool offers a federated credential (OIDC)", owner = sync-owner role, minimum scope (write only on the library file), rotation deadline per the chosen tool's limit. |
+| Tool credential (read) | Separate from write when the tool allows; `design-sync-read` environment. Same inventory record. |
+| Tracker and alert | Short-lived GitHub App installation token, issued in the job by a SHA-pinned action, with Issues:write and the organization's Members:read (the `GITHUB_TOKEN` does not notify teams). Additional write on the repository only if writing issue fields requires it, to be confirmed in a spike. The App private key is a fixed secret in the ENG-13 inventory, with justification, owner, scope and rotation. |
+| Secret vault | Optional: if the requester has a cloud secrets manager, the job obtains the tool credential via GitHub OIDC; the credential itself remains fixed. |
+| Pull requests (ENG-14) | The workflow has no `pull_request` or `pull_request_target` trigger with a secret. A fork PR receives only a read `GITHUB_TOKEN`. PR jobs use only the `memory` adapter. Secret scanning active. |
+| Environments | `design-sync-write` and `design-sync-read`, with a deployment policy restricted to the default branch and the version tags. Required reviewers only if the GitHub plan allows; the fallback is CODEOWNERS on the workflow and the branch policy. |
+| Job permissions | `contents: read` by default; `contents: write` only in the job that attaches the log to the version; `id-token: write` only if the vault is used. |
+| Passing to the process | Credentials only via environment variable, never via flag; names in the ENG-13 inventory. Plan, log, envelope, report and items never contain a credential or personal data (only `RoleRef`). |
+| Assignee | `owner` comes from the "Owner" issue field when an org admin creates it; otherwise, label `owner:<team>`, a line in the body and a team mention. `due` uses the standard "Target date" field or, without it, a line in the body. Both forms are covered by a tracker contract test. |
+| DSN-02 evidence | Single sandbox proof that the owner team is notified by the alert, retained in the acceptance package. |
 
 ## 12. Fake `InMemoryDesignTool`
 
-Exportado por `@<prefixo>/design-sync` (subcaminho de teste do pacote privado), junto com
-`InMemoryTracker`, `InMemoryAlert` e `FakeClock`. Sem aleatoriedade e sem relógio real: `NativeRef`
-vem de contador, e esperas de `Retry-After` avançam o `FakeClock`.
+Exported by `@<prefixo>/design-sync` (test subpath of the private package), together with
+`InMemoryTracker`, `InMemoryAlert` and `FakeClock`. Without randomness and without a real clock:
+`NativeRef` comes from a counter, and `Retry-After` waits advance the `FakeClock`.
 
 ```ts
 export interface InMemoryDesignToolOptions {
-  readonly capabilities?: Partial<DesignToolCapabilities>;  // padrão: api/api, frame, 40 modos
-  readonly initial?: ToolSnapshot;                          // fixture com marcas sintéticas
+  readonly capabilities?: Partial<DesignToolCapabilities>;  // default: api/api, frame, 40 modes
+  readonly initial?: ToolSnapshot;                          // fixture with synthetic brands
   readonly clock?: FakeClock;
 }
 
 export interface FaultPlan {
-  failAfterOperations(n: number, error: SyncErrorCode): void;   // apply parcial
+  failAfterOperations(n: number, error: SyncErrorCode): void;   // partial apply
   rateLimit(times: number, retryAfterSeconds: number): void;    // 429
   forbidden(): void;                                            // 403
   expireCredential(): void;
-  unavailable(times: number): void;                             // rede ou 5xx
+  unavailable(times: number): void;                             // network or 5xx
 }
 
 export declare class InMemoryDesignTool implements DesignToolPort {
@@ -705,25 +706,25 @@ export declare class InMemoryDesignTool implements DesignToolPort {
   simulateTypeChange(path: TokenPath, type: SyncValueType): void;
   simulateModeRename(collection: CollectionId, from: ContextId, to: string): void;
   simulatePublish(): void;
-  resolve(path: TokenPath, brand: ContextId, mode: ContextId): SyncValue;  // segue a cadeia de alias
+  resolve(path: TokenPath, brand: ContextId, mode: ContextId): SyncValue;  // follows the alias chain
   operationsLog(): readonly PlanOperation[];
-  // métodos do DesignToolPort omitidos (mesmas assinaturas da seção 4.2)
+  // DesignToolPort methods omitted (same signatures as section 4.2)
 }
 ```
 
-Capacidades configuráveis cobrem os cenários das ferramentas candidatas: limites de modos 10, 20 e
-40; `axisScope` `frame` ou `file`; `write` `api`, `agent-mcp` ou `manual`; `publish` `api`,
-`manual` ou `none`; lotes atômicos ou divididos; `valueTypes` sem compostos. Pela CLI, o fake é
-selecionado com `--adapter memory`, lê o estado de `--memory-state <arquivo>` e grava o estado
-final em `--memory-out <arquivo>` (ver [tools-cli.md](tools-cli.md)).
+Configurable capabilities cover the scenarios of the candidate tools: mode limits 10, 20 and 40;
+`axisScope` `frame` or `file`; `write` `api`, `agent-mcp` or `manual`; `publish` `api`, `manual` or
+`none`; atomic or split batches; `valueTypes` without composites. Via the CLI, the fake is selected
+with `--adapter memory`, reads the state from `--memory-state <file>` and writes the final state to
+`--memory-out <file>` (see [tools-cli.md](tools-cli.md)).
 
-## 13. Suíte de contrato `describeDesignToolPortContract`
+## 13. Contract suite `describeDesignToolPortContract`
 
 ```ts
 export interface ContractHarness {
   readonly port: DesignToolPort;
-  seed(snapshot: ToolSnapshot): Promise<void>;     // prepara o destino (sandbox ou memória)
-  readonly manual: {                               // edições "manuais" pelo meio nativo da ferramenta
+  seed(snapshot: ToolSnapshot): Promise<void>;     // prepares the target (sandbox or memory)
+  readonly manual: {                               // "manual" edits through the tool's native means
     edit(path: TokenPath, mode: ContextId, value: SyncValue): Promise<void>;
     rename(path: TokenPath, newPath: TokenPath): Promise<void>;
     addExtra(collection: CollectionId, path: TokenPath): Promise<void>;
@@ -737,56 +738,55 @@ export declare function describeDesignToolPortContract(
 ): void;
 ```
 
-Casos (ids estáveis, citados na matriz de rastreabilidade):
+Cases (stable ids, cited in the traceability matrix):
 
-| Id | Caso | Prova |
+| Id | Case | Proves |
 | --- | --- | --- |
-| C-01 | Capacidades estáticas e válidas (enums, `maxModesPerAxis` ≥ 1). | Base |
-| C-02 | `checkAccess` aprova credencial válida e aponta problema tipado com credencial inválida. | ENG-13, código 4 |
-| C-03 | Duas leituras seguidas dão o mesmo snapshot e o mesmo sha256. | G-3 |
-| C-04 | Sincronização inicial a partir da fixture termina `verified`. | FR-025 |
-| C-05 | Segunda execução gera plano vazio (idempotência). | Edge case de interrupção |
-| C-06 | `dryRun` não altera o destino e devolve as operações previstas. | Base |
-| C-07 | Ordem das fases respeitada (`operationsLog`). | Seção 5.4 |
-| C-08 | Edição manual de valor é restaurada e classificada `manual`. | FR-027, DSN-03 |
-| C-09 | Renomeação manual é desfeita por chave, preservando `NativeRef` (vínculos). | FR-028, DSN-04 |
-| C-10 | Variável extra em coleção gerenciada é removida por último; coleção não gerenciada fica intacta. | DSN-03 |
-| C-11 | Mudança de tipo vira `recreateVariable` com `breaking: true`. | Seção 5.4 |
-| C-12 | Duas coleções de eixo com modos independentes: para todo par marca × modo, seguir a cadeia de alias no destino dá o mesmo valor que seguir a cadeia no próprio manifesto, trocando só um eixo por vez; toda variável tem chave do manifesto (zero auxiliares). A troca visual num quadro real é evidência retida do sandbox. | FR-029, FR-033, DSN-05 |
-| C-13 | Falha após N operações deixa `partial`; a execução seguinte converge e registra os itens reparados. | Edge case de interrupção |
-| C-14 | 429 com `Retry-After` é respeitado até o limite; depois, `RATE_LIMITED`. | Seção 4.2 |
-| C-15 | `maxModesPerAxis` abaixo do número de marcas recusa o plano sem escrita. | FR-029 |
-| C-16 | `requestPublish` devolve o resultado da capacidade `publish`. | Seção 9 |
-| C-17 | Ida e volta de valores (cor, dimensão, duração, número) é exata. | Seção 4.2 |
-| C-18 | Mesmas entradas, duas execuções: plano e log byte a byte iguais. | G-3, TOK-05 |
+| C-01 | Static and valid capabilities (enums, `maxModesPerAxis` ≥ 1). | Base |
+| C-02 | `checkAccess` approves a valid credential and points to a typed problem with an invalid credential. | ENG-13, code 4 |
+| C-03 | Two consecutive reads give the same snapshot and the same sha256. | G-3 |
+| C-04 | Initial sync from the fixture ends `verified`. | FR-025 |
+| C-05 | A second run generates an empty plan (idempotence). | Interruption edge case |
+| C-06 | `dryRun` does not change the target and returns the planned operations. | Base |
+| C-07 | Phase order respected (`operationsLog`). | Section 5.4 |
+| C-08 | A manual value edit is restored and classified `manual`. | FR-027, DSN-03 |
+| C-09 | A manual rename is undone by key, preserving `NativeRef` (links). | FR-028, DSN-04 |
+| C-10 | An extra variable in a managed collection is removed last; an unmanaged collection stays intact. | DSN-03 |
+| C-11 | A type change becomes `recreateVariable` with `breaking: true`. | Section 5.4 |
+| C-12 | Two axis collections with independent modes: for every brand × mode pair, following the alias chain in the target gives the same value as following the chain in the manifest itself, switching only one axis at a time; every variable has a key from the manifest (zero auxiliaries). The visual switch in a real frame is retained sandbox evidence. | FR-029, FR-033, DSN-05 |
+| C-13 | A failure after N operations leaves `partial`; the next run converges and records the repaired items. | Interruption edge case |
+| C-14 | 429 with `Retry-After` is honored up to the limit; afterwards, `RATE_LIMITED`. | Section 4.2 |
+| C-15 | `maxModesPerAxis` below the number of brands refuses the plan without writing. | FR-029 |
+| C-16 | `requestPublish` returns the outcome of the `publish` capability. | Section 9 |
+| C-17 | The round trip of values (color, dimension, duration, number) is exact. | Section 4.2 |
+| C-18 | Same inputs, two runs: plan and log byte-for-byte identical. | G-3, TOK-05 |
 
-Execução: contra o fake em todo PR (Vitest, dentro de `pnpm test`); contra o adaptador real num
-arquivo sandbox à noite e sob demanda, só na branch protegida, depois que a ferramenta for escolhida.
-Um teste de arquitetura confirma que `DesignToolPort` tem exatamente os cinco membros da seção 4.2
-(G-1).
+Execution: against the fake on every PR (Vitest, inside `pnpm test`); against the real adapter on a
+sandbox file nightly and on demand, only on the protected branch, after the tool is chosen. An
+architecture test confirms that `DesignToolPort` has exactly the five members of section 4.2 (G-1).
 
-## 14. Restrições por ferramenta (registro para o requerente, sem escolha)
+## 14. Per-tool restrictions (record for the requester, no choice)
 
-Resumo de [research.md](../research.md), D4, e do relatório
-[research/design-sync.md](../research/design-sync.md). Este contrato não escolhe ferramenta nem
-plano; a tabela só mostra como cada candidata se traduz em capacidades.
+Summary of [research.md](../research.md), D4, and of the report
+[research/design-sync.md](../research/design-sync.md). This contract chooses neither a tool nor a plan;
+the table only shows how each candidate translates into capabilities.
 
-| Ferramenta e plano | `write` | `read` | `publish` | Modos por coleção | `axisScope` | Credencial (ENG-13) | Outras restrições |
+| Tool and plan | `write` | `read` | `publish` | Modes per collection | `axisScope` | Credential (ENG-13) | Other restrictions |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| Figma Enterprise (REST de variáveis) | `api` (POST com assento Full e escopo `file_variables:write`) | `api` (GET só no Enterprise) | `manual` (sem endpoint de publicação de biblioteca) | Até 40; até 5.000 variáveis por coleção | `frame` (spike deve confirmar seletores independentes com variáveis de marca ocultas da publicação) | PAT de até 90 dias, ligado a usuário, ou app OAuth; token de plano de até 1 ano não escreve variáveis e só é candidato à leitura (spike) | POST atômico por requisição, corpo até 4 MB (lotes); nomes sem `.`, `{`, `}` (separador `/`); variáveis remotas não são graváveis, só o arquivo da biblioteca; limites de taxa com `Retry-After`; coleções estendidas acoplam marca e modo e não servem como topologia padrão. |
-| Figma Professional ou Organization | `agent-mcp` candidato não comprovado (servidor MCP remoto, `use_figma`, beta); senão `manual` (plugin executado por pessoa) | idem (REST GET indisponível) | `manual` | Professional 10; Organization 20 (Starter sem modos) | `frame` | OAuth ligado a usuário; clientes restritos ao catálogo do MCP | Beta com preço futuro por uso; saída de até 20 KB por chamada; sem uso em CI documentado; exige spike. Se falhar, a escrita é manual e "automaticamente" do DSN-01 dependeria de pedido de mudança. |
-| Penpot (MPL-2.0, auto-hospedável) | `manual` (sem API headless documentada para tokens; Plugins API desde a 2.14; MCP exige aba aberta; RPC sem referência) | `manual` pelo mesmo motivo | `none` ou `manual` (a confirmar) | Grupos de tema (Marca, Modo), um tema ativo por grupo | `file` (sem escopo por quadro em 2026-07): não atende o DSN-05 por quadro | Tokens de acesso com validade nunca, 30, 60, 90 ou 180 dias | Tokens DTCG nativos; importação substitui todos os tokens; auto-hospedagem exige alcance dos runners de CI. |
-| Tokens Studio (plugin do Figma) | `manual` (exportação por botão) | `manual` | herda o Figma | Herda o plano do Figma; modos acima do limite são ignorados em silêncio | herda o Figma | Herda o Figma | Temas e Git sync pagos; segundo formato (`$themes`); o plugin pode empurrar para o Git e exigiria bloqueio para respeitar o DSN-01. Rejeitado como mecanismo no D4; serve só como fallback manual alimentado por arquivos gerados pelo núcleo. |
+| Figma Enterprise (variables REST) | `api` (POST with a Full seat and scope `file_variables:write`) | `api` (GET only on Enterprise) | `manual` (no library publish endpoint) | Up to 40; up to 5,000 variables per collection | `frame` (a spike must confirm independent selectors with brand variables hidden from publication) | PAT of up to 90 days, tied to a user, or an OAuth app; a plan token of up to 1 year does not write variables and is only a read candidate (spike) | Atomic POST per request, body up to 4 MB (batches); names without `.`, `{`, `}` (separator `/`); remote variables are not writable, only the library file; rate limits with `Retry-After`; extended collections couple brand and mode and do not serve as the default topology. |
+| Figma Professional or Organization | `agent-mcp` unproven candidate (remote MCP server, `use_figma`, beta); otherwise `manual` (plugin run by a person) | same (REST GET unavailable) | `manual` | Professional 10; Organization 20 (Starter without modes) | `frame` | OAuth tied to a user; clients restricted to the MCP catalog | Beta with future usage-based pricing; output up to 20 KB per call; no documented CI use; requires a spike. If it fails, writing is manual and the "automatically" of DSN-01 would depend on a change request. |
+| Penpot (MPL-2.0, self-hostable) | `manual` (no documented headless API for tokens; Plugins API since 2.14; MCP requires an open tab; RPC without a reference) | `manual` for the same reason | `none` or `manual` (to be confirmed) | Theme groups (Brand, Mode), one active theme per group | `file` (no per-frame scope in 2026-07): does not meet DSN-05 per frame | Access tokens with validity of never, 30, 60, 90 or 180 days | Native DTCG tokens; import replaces all tokens; self-hosting requires reachability by the CI runners. |
+| Tokens Studio (Figma plugin) | `manual` (button export) | `manual` | inherits Figma | Inherits the Figma plan; modes above the limit are silently ignored | inherits Figma | Inherits Figma | Themes and Git sync paid; a second format (`$themes`); the plugin can push to Git and would require a block to respect DSN-01. Rejected as a mechanism in D4; it serves only as a manual fallback fed by files generated by the core. |
 
-Comum a todas: nenhuma oferece credencial federada, então a credencial é segredo fixo com a
-justificativa do ENG-13. O núcleo confere `maxModesPerAxis` por conta própria porque algumas
-ferramentas descartam modos excedentes sem erro.
+Common to all: none offers a federated credential, so the credential is a fixed secret with the ENG-13
+justification. The core checks `maxModesPerAxis` on its own because some tools drop excess modes
+without an error.
 
-## 15. Configuração versionada
+## 15. Versioned configuration
 
-`tools/design-sync/design-sync.config.json`, validada por JSON Schema do pacote e coberta pelo
-arquivo de donos (papel dono da sincronização). Valores entre `<>` são definidos pelo dono, com
-aprovação registrada; não são limiares do QA-14.
+`tools/design-sync/design-sync.config.json`, validated by the package's JSON Schema and covered by the
+owners file (sync-owner role). Values between `<>` are defined by the owner, with a recorded approval;
+they are not QA-14 thresholds.
 
 ```json
 {
@@ -794,22 +794,22 @@ aprovação registrada; não são limiares do QA-14.
   "tool": { "adapter": "memory", "target": "sandbox" },
   "managedCollections": ["primitive", "brand", "mode", "semantic", "component"],
   "ownerPath": "tools/design-sync/",
-  "slaDays": { "divergence": "<dias>", "manualWrite": "<dias>", "manualPublish": "<dias>", "capability": "<dias>" },
-  "credentialExpiryWarnDays": "<dias>",
+  "slaDays": { "divergence": "<days>", "manualWrite": "<days>", "manualPublish": "<days>", "capability": "<days>" },
+  "credentialExpiryWarnDays": "<days>",
   "retry": { "maxRetries": "<n>", "maxRetryAfterSeconds": "<s>" },
-  "maxDeleteFraction": "<fração de variáveis gerenciadas removíveis numa execução sem --allow-mass-delete>"
+  "maxDeleteFraction": "<fraction of managed variables removable in a run without --allow-mass-delete>"
 }
 ```
 
-## 16. Rastreabilidade
+## 16. Traceability
 
-| Requisito | Mecanismo deste contrato | Check de CI ou evidência retida |
+| Requirement | Mechanism of this contract | CI check or retained evidence |
 | --- | --- | --- |
-| FR-025 (DSN-01) | `apply` após a promoção; G-1 | Job `sync`; log anexado à versão; `repo-checks layers`; teste de arquitetura da porta |
-| FR-026 (DSN-02) | `AlertPort` e `RoleRef` do arquivo de donos | Testes do alerta com o fake; prova em sandbox da notificação ao time |
-| FR-027 (DSN-03) | Classificação da seção 6; `restored[]` | C-08 e C-10 em todo PR; mesma suíte à noite no sandbox; log de edição proposital retido |
-| FR-028 (DSN-04) | Casamento por chave e por segmentos; zero auxiliares | `detect` após cada `apply` com `name` e `hierarchy` iguais a zero; C-09, C-12 |
-| FR-029 (DSN-05) | Duas coleções de eixo; `capabilityChecks` em todo log | C-12, C-15; limites e topologia no ADR-14 e no log |
-| FR-030 (DSN-11, tokens) | `detect` semanal e pós-sincronização; itens com dono e prazo | Jobs `detect` agendado e pós-`sync`; itens no tracker |
-| SC-010 | `divergenceAfter` e `restored[]` | Log de cada versão |
-| SC-011 | Cron semanal e `detect` pós-versão; `owner` e `due` obrigatórios | Histórico do workflow e dos itens |
+| FR-025 (DSN-01) | `apply` after promotion; G-1 | Job `sync`; log attached to the version; `repo-checks layers`; port architecture test |
+| FR-026 (DSN-02) | `AlertPort` and `RoleRef` from the owners file | Alert tests with the fake; sandbox proof of the notification to the team |
+| FR-027 (DSN-03) | Classification of section 6; `restored[]` | C-08 and C-10 on every PR; the same suite nightly in the sandbox; retained deliberate-edit log |
+| FR-028 (DSN-04) | Matching by key and by segments; zero auxiliaries | `detect` after each `apply` with `name` and `hierarchy` equal to zero; C-09, C-12 |
+| FR-029 (DSN-05) | Two axis collections; `capabilityChecks` in every log | C-12, C-15; limits and topology in ADR-14 and in the log |
+| FR-030 (DSN-11, tokens) | Weekly and post-sync `detect`; items with owner and due date | Scheduled and post-`sync` `detect` jobs; items in the tracker |
+| SC-010 | `divergenceAfter` and `restored[]` | Log of each version |
+| SC-011 | Weekly cron and post-version `detect`; `owner` and `due` required | History of the workflow and of the items |
