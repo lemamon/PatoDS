@@ -22,38 +22,38 @@ describe('patods/design-tokens', () => {
     execFileSync('node', [join(PKG, '../../tools/tokens-build/src/cli.ts'), 'build'], { cwd: PKG, stdio: 'pipe' })
   })
 
-  it('uso válido de tokens semânticos não gera aviso', async () => {
+  it('valid usage of semantic tokens generates no warning', async () => {
     expect(
       await lintCodes('.x { color: var(--patods-color-fg-default); background-color: var(--patods-color-bg-surface); }'),
     ).toEqual([])
   })
 
-  it('token primitivo', async () => {
+  it('primitive token', async () => {
     expect(await lintCodes('.x { color: var(--patods-color-blue-500); }')).toContain('primitive-token')
   })
 
-  it('token brand-mode-source', async () => {
+  it('brand-mode-source token', async () => {
     expect(await lintCodes('.x { color: var(--patods-brand-color-bg-surface-light); }')).toContain('brand-mode-source-token')
   })
 
-  it('token desconhecido', async () => {
+  it('unknown token', async () => {
     expect(await lintCodes('.x { color: var(--patods-color-nope); }')).toContain('unknown-token')
   })
 
-  it('valor literal', async () => {
+  it('literal value', async () => {
     expect(await lintCodes('.x { color: #fff; }')).toContain('literal-value')
     expect(await lintCodes('.x { height: 10px; }')).toContain('literal-value')
   })
 
-  it('fallback literal em var()', async () => {
+  it('literal fallback in var()', async () => {
     expect(await lintCodes('.x { color: var(--patods-color-fg-default, #fff); }')).toContain('var-fallback-literal')
   })
 
-  it('definição de custom property', async () => {
+  it('custom property definition', async () => {
     expect(await lintCodes('.x { --patods-color-x: red; }')).toContain('token-definition')
   })
 
-  it('palavras-chave e var() válido não disparam literal', async () => {
+  it('keywords and valid var() do not trigger literal', async () => {
     expect(await lintCodes('.x { color: inherit; background-color: transparent; gap: var(--patods-space-inline-sm); }')).toEqual([])
   })
 })
