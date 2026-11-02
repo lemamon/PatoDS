@@ -196,7 +196,7 @@ token; two byte-for-byte identical builds (spec US2).
 - [x] T037 [P] [US2] Formatter unit tests in
   `tools/tokens-build/test/format-css.test.ts` and `format-esm.test.ts`: selectors, no-space form
   between toggles, literal `initial`, placement by `placement`, ordered output (QA-02)
-- [ ] T038 [P] [US2] Create `apps/tokens-example` (Vite 8 without a framework, `@<prefixo>/tokens-example`)
+- [x] T038 [P] [US2] Create `apps/tokens-example` (Vite 8 without a framework, `@<prefixo>/tokens-example`)
   that installs the **packaged tarball** of the token package (never the source code; QA-06, Principle
   VII), imports `./css/base.css` and `./css/brand-a.css`, and reads the `./values` map
 - [ ] T039 [P] [US2] Real-browser tests in `apps/tokens-example/tests/scopes.spec.ts`
