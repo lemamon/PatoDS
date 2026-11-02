@@ -199,7 +199,7 @@ token; two byte-for-byte identical builds (spec US2).
 - [x] T038 [P] [US2] Create `apps/tokens-example` (Vite 8 without a framework, `@<prefixo>/tokens-example`)
   that installs the **packaged tarball** of the token package (never the source code; QA-06, Principle
   VII), imports `./css/base.css` and `./css/brand-a.css`, and reads the `./values` map
-- [ ] T039 [P] [US2] Real-browser tests in `apps/tokens-example/tests/scopes.spec.ts`
+- [x] T039 [P] [US2] Real-browser tests in `apps/tokens-example/tests/scopes.spec.ts`
   (@playwright/test, image `mcr.microsoft.com/playwright:v1.64.x-noble` pinned by digest, no network)
   covering the 21 cases of css-output.md §16: no attribute (default brand + light), mode only at the root,
   mode-only nested scope, brand-only scope inheriting mode, A→B→A, mode toggle, interleaved
