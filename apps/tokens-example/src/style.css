@@ -1,0 +1,108 @@
+/* Demo chrome, styled only with public PatoDS tokens (no literal values) so the
+   whole page reacts to brand/mode switches. */
+:root {
+  color-scheme: light dark;
+}
+
+body {
+  margin: 0;
+  padding: var(--patods-space-6, 1.5rem);
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  line-height: 1.5;
+  background: var(--patods-color-bg-surface);
+  color: var(--patods-color-fg-default);
+  transition:
+    background var(--patods-motion-duration-fast) var(--patods-motion-easing-standard),
+    color var(--patods-motion-duration-fast) var(--patods-motion-easing-standard);
+}
+
+.panel {
+  max-width: 48rem;
+  margin: 0 auto;
+}
+
+h1 {
+  margin: 0 0 var(--patods-space-1);
+}
+
+.muted {
+  opacity: var(--patods-opacity-60, 0.6);
+}
+
+.controls {
+  display: flex;
+  gap: var(--patods-space-4);
+  margin: var(--patods-space-4) 0;
+}
+
+.controls label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--patods-space-1);
+  font-size: 0.875rem;
+}
+
+.controls select {
+  height: var(--patods-size-h-md);
+  padding: 0 var(--patods-space-2);
+  border: var(--patods-border-width-default, 1px) solid var(--patods-color-border-default);
+  border-radius: var(--patods-radius-sm);
+  background: var(--patods-color-bg-surface);
+  color: var(--patods-color-fg-default);
+}
+
+.card {
+  padding: var(--patods-space-4);
+  border: var(--patods-border-width-default, 1px) solid var(--patods-color-border-default);
+  border-radius: var(--patods-radius-md);
+  box-shadow: var(--patods-shadow-overlay);
+  background: var(--patods-color-bg-surface);
+}
+
+.card h2 {
+  margin-top: 0;
+}
+
+button.accent {
+  height: var(--patods-size-h-md);
+  padding: 0 var(--patods-space-4);
+  border: none;
+  border-radius: var(--patods-radius-sm);
+  background: var(--patods-color-bg-accent);
+  color: var(--patods-color-fg-on-accent);
+  cursor: pointer;
+}
+
+.values {
+  width: 100%;
+  margin-top: var(--patods-space-6, 1.5rem);
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.values caption {
+  text-align: left;
+  margin-bottom: var(--patods-space-2);
+}
+
+.values th,
+.values td {
+  text-align: left;
+  padding: var(--patods-space-2);
+  border-bottom: var(--patods-border-width-default, 1px) solid var(--patods-color-border-default);
+}
+
+.swatch {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  margin-right: var(--patods-space-2);
+  vertical-align: -2px;
+  border: var(--patods-border-width-default, 1px) solid var(--patods-color-border-default);
+  border-radius: var(--patods-radius-sm);
+}
+
+tr[data-match='false'] .match {
+  color: #b91c1c;
+  font-weight: 700;
+}
