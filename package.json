@@ -26,7 +26,8 @@
     "check:drift": "turbo run check:drift",
     "check:scan": "turbo run check:scan",
     "check:layers": "turbo run check:layers",
-    "design-sync": "turbo run design-sync --"
+    "design-sync": "turbo run design-sync --",
+    "pack:tokens": "pnpm tokens:build && cd packages/tokens && pnpm pack --pack-destination ../../apps/tokens-example/vendor"
   },
   "devDependencies": {
     "turbo": "catalog:"
