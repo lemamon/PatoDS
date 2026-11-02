@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "tokens-example",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "apps/tokens-example/node_modules/vite/bin/vite.js",
+        "apps/tokens-example",
+        "--port",
+        "5173",
+        "--strictPort"
+      ],
+      "port": 5173
+    }
+  ]
+}
