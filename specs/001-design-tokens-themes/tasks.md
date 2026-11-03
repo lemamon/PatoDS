@@ -135,7 +135,7 @@ valid ones pass, with a report by category (spec US1).
   both axes off the `brand.` form (V-08), semantic value in a shared set (V-09), `hex`
   diverging from the components (V-10), control height outside the scale (V-12), semantic key
   missing/excess in a permutation (V-13)
-- [ ] T025 [P] [US1] Create valid fixtures in `tools/tokens-build/fixtures/valid/` that pass with
+- [x] T025 [P] [US1] Create valid fixtures in `tools/tokens-build/fixtures/valid/` that pass with
   zero violations, covering all 11 categories and the height scale
 - [x] T026 [P] [US1] Validator unit tests in `tools/tokens-build/test/validate.test.ts`
   (Vitest), comparing the expected and obtained multiset of `{file, line, column, code}` (100%
