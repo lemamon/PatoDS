@@ -251,11 +251,10 @@ importers:
         version: 2.11.10
 
   apps/tokens-example:
-    dependencies:
+    devDependencies:
       '@patods/tokens':
         specifier: file:./vendor/patods-tokens-0.0.0.tgz
         version: file:apps/tokens-example/vendor/patods-tokens-0.0.0.tgz
-    devDependencies:
       '@playwright/test':
         specifier: 'catalog:'
         version: 1.64.1
