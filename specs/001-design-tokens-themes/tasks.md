@@ -107,7 +107,7 @@ layer boundaries. **No story starts before this.**
   edges from the plan (`tokens -(dev)-> tools/tokens-build, tools/color`; `tools/tokens-build ->
   tools/color`; `apps -> tokens only via tarball`); `tools/color` and `tools/repo-checks` with no workspace
   dependency (ADR-12 check a)
-- [ ] T023 Wire into `.github/workflows/tokens-ci.yml` the `install --frozen-lockfile` and
+- [x] T023 Wire into `.github/workflows/tokens-ci.yml` the `install --frozen-lockfile` and
   `check:layers` jobs (turbo boundaries + `repo-checks layers`), with the T021 violation fixture proving
   the block
 
@@ -175,7 +175,7 @@ valid ones pass, with a report by category (spec US1).
   JSON detected 100% (SC-001, SC-009)
 - [ ] T035 [US1] Add the "logic module without a sibling test" check to `tools/repo-checks` and
   run it in `pnpm test` (QA-02)
-- [ ] T036 [US1] Wire `tokens:validate` and `check:scan` into `tokens-ci.yml` as required PR
+- [x] T036 [US1] Wire `tokens:validate` and `check:scan` into `tokens-ci.yml` as required PR
   checks; run over the real source (100% of the tokens pass)
 
 **Checkpoint**: US1 testable on its own — `pnpm tokens:validate` passes the source and blocks each violation.
@@ -324,7 +324,7 @@ first and composites the second over the background (spec US4).
   render one swatch per pair and permutation from the tarball, paint the opaque stack on real ancestors,
   assert `getComputedStyle` equals the emitted sRGB and run axe (Principle VII, QA-01; axe/@axe-core
   in `license-policy.json` as MPL-2.0 dev)
-- [ ] T062 [US4] Wire `contrast:check` into `tokens-ci.yml` over the real manifest on every PR and include
+- [x] T062 [US4] Wire `contrast:check` into `tokens-ci.yml` over the real manifest on every PR and include
   the report in the determinism variant between floor and latest Node
 
 **Checkpoint**: US4 testable — contrast of all pairs in all combinations, with exemptions.
