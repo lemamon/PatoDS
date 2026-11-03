@@ -2,10 +2,12 @@
 // tokens-build CLI (tools-cli.md). Exit codes: 0 ok; 1 violation; 2 usage/config; 3 internal.
 import { parseArgs } from 'node:util'
 import { resolve } from 'node:path'
+import { pathToFileURL } from 'node:url'
 import { loadTokens } from './adapter.ts'
 import { buildModel } from './model.ts'
 import { validateModel, validationSummary, type Finding } from './validate.ts'
-import { runBuild } from './build.ts'
+import { runBuild, BuildConfigError } from './build.ts'
+import { CssLintError } from './css-lint.ts'
 
 function printFindings(findings: Finding[], json: boolean): void {
   if (json) {
@@ -15,13 +17,14 @@ function printFindings(findings: Finding[], json: boolean): void {
     return
   }
   for (const f of findings) {
-    const loc = f.file ? `${f.file}` : '—'
+    const loc = f.file ? `${f.file}${f.line ? `:${f.line}${f.column ? `:${f.column}` : ''}` : ''}` : '—'
     process.stderr.write(`${loc}  error  ${f.code}  ${f.id ?? ''}: ${f.message} [${f.rule}]\n`)
   }
 }
 
-async function main(): Promise<number> {
+export async function main(argv: string[] = process.argv.slice(2)): Promise<number> {
   const { values, positionals } = parseArgs({
+    args: argv,
     allowPositionals: true,
     options: {
       json: { type: 'boolean', default: false },
@@ -70,15 +73,30 @@ async function main(): Promise<number> {
     await runBuild(model, srcDir)
     return 0
   } catch (err) {
+    if (err instanceof CssLintError) {
+      printFindings(err.findings, Boolean(values.json))
+      if (!values.json) process.stderr.write('build aborted: generated-CSS lint failed.\n')
+      return 1
+    }
+    if (err instanceof BuildConfigError) {
+      process.stderr.write(`error  TKN-CONFIG  ${err.message}\n`)
+      return 2
+    }
     process.stderr.write(`error  TKN-BUILD-INTERNAL  ${(err as Error).message}\n`)
     return 3
   }
 }
 
-main().then(
-  (code) => process.exit(code),
-  (err) => {
-    process.stderr.write(`internal error: ${err?.stack ?? err}\n`)
-    process.exit(3)
-  },
-)
+// Run only when invoked as the CLI entry, so tests can import main() without side effects.
+// `import.meta.main` lands in Node 24.2+; fall back to argv[1] so the bin still runs on Node 22 LTS.
+const isEntry =
+  import.meta.main ?? (!!process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href)
+if (isEntry) {
+  main().then(
+    (code) => process.exit(code),
+    (err) => {
+      process.stderr.write(`internal error: ${err?.stack ?? err}\n`)
+      process.exit(3)
+    },
+  )
+}
