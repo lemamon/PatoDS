@@ -21,6 +21,7 @@ function tok(p: Partial<ModelToken> & { id: string }): ModelToken {
     aliasOf: p.aliasOf,
     aliasChain: p.aliasChain,
     hasAlias: p.hasAlias ?? true,
+    directRefs: p.directRefs ?? [],
     raw: p.raw ?? {},
   }
 }
@@ -55,8 +56,8 @@ describe('validateModel', () => {
     expect(codes(validateModel(m))).toContain('TKN-LITERAL-OUTSIDE-PRIMITIVE')
   })
 
-  it('V-04: forbidden reference direction (primitive → semantic)', () => {
-    const prim = tok({ id: 'color.p', layer: 'primitive', axis: 'invariant', hasAlias: false, raw: { dependencies: ['color.ok'] } })
+  it('V-04: forbidden reference direction (primitive → semantic, over the direct alias)', () => {
+    const prim = tok({ id: 'color.p', layer: 'primitive', axis: 'invariant', directRefs: ['color.ok'] })
     const m = model([...validBase(), prim])
     expect(codes(validateModel(m))).toContain('TKN-LAYER-DIRECTION')
   })
@@ -98,5 +99,89 @@ describe('validateModel', () => {
     const m = model(base)
     m.load.permutations[0]!.set = {} // remove all keys from the permutation
     expect(codes(validateModel(m))).toContain('TKN-PARITY-MISSING')
+  })
+
+  // Source-form rules (V-05, V-07, V-09) read the source index on load, not the token list.
+  type Src = Model['load']['source']
+  const withSource = (src: Partial<Src>): Model => {
+    const m = model(validBase())
+    m.load.source = {
+      occurrences: new Map(),
+      bucketOf: new Map(),
+      directRefs: new Map(),
+      refs: [],
+      roots: [],
+      ...src,
+    }
+    return m
+  }
+
+  it('V-05: $ref outside the primitive layer', () => {
+    const m = withSource({ refs: [{ id: 'color.x', file: 'semantic/invariant.tokens.json', bucket: 'invariant', value: '#/color/blue/500' }] })
+    expect(codes(validateModel(m))).toContain('TKN-REF-OUTSIDE-PRIMITIVE')
+  })
+
+  it('V-05: a remote $ref inside the primitive layer', () => {
+    const m = withSource({ refs: [{ id: 'color.x', file: 'primitive.tokens.json', bucket: 'primitive', value: 'https://example.com/x.json#/a' }] })
+    expect(codes(validateModel(m))).toContain('TKN-REF-NOT-LOCAL')
+  })
+
+  it('V-05: a local $ref inside the primitive layer is allowed', () => {
+    const m = withSource({ refs: [{ id: 'color.x', file: 'primitive.tokens.json', bucket: 'primitive', value: '#/color/blue/500' }] })
+    expect(codes(validateModel(m))).not.toContain('TKN-REF-OUTSIDE-PRIMITIVE')
+    expect(codes(validateModel(m))).not.toContain('TKN-REF-NOT-LOCAL')
+  })
+
+  it('V-05: $root is forbidden', () => {
+    const m = withSource({ roots: [{ file: 'semantic/invariant.tokens.json', path: 'color' }] })
+    expect(codes(validateModel(m))).toContain('TKN-ROOT-FORBIDDEN')
+  })
+
+  it('V-07/V-09: a path in a shared set and another set is a duplicate', () => {
+    const m = withSource({
+      occurrences: new Map([
+        ['color.dup', [
+          { file: 'semantic/invariant.tokens.json', bucket: 'invariant' },
+          { file: 'component/component.tokens.json', bucket: 'component' },
+        ]],
+      ]),
+    })
+    expect(codes(validateModel(m))).toContain('TKN-PATH-DUPLICATE')
+  })
+
+  it('V-07/V-09: a path repeated across brand files is not a duplicate', () => {
+    const m = withSource({
+      occurrences: new Map([
+        ['brand.color.x.light', [
+          { file: 'semantic/brand/a.tokens.json', bucket: 'brand' },
+          { file: 'semantic/brand/b.tokens.json', bucket: 'brand' },
+        ]],
+      ]),
+    })
+    expect(codes(validateModel(m))).not.toContain('TKN-PATH-DUPLICATE')
+  })
+
+  it('V-07: an invariant token depending on a mode axis (AX-1)', () => {
+    const m = withSource({
+      bucketOf: new Map([['color.inv', 'invariant'], ['color.m', 'mode']]),
+      directRefs: new Map([['color.inv', ['color.m']]]),
+    })
+    expect(codes(validateModel(m))).toContain('TKN-AXIS-DEPENDENCY')
+  })
+
+  it('V-07: a brand token depending on a mode axis (AX-2)', () => {
+    const m = withSource({
+      bucketOf: new Map([['brand.color.x.light', 'brand'], ['color.m', 'mode']]),
+      directRefs: new Map([['brand.color.x.light', ['color.m']]]),
+    })
+    expect(codes(validateModel(m))).toContain('TKN-AXIS-DEPENDENCY')
+  })
+
+  it('V-07: a mode token depending on a brand axis is allowed (AX-3 form)', () => {
+    const m = withSource({
+      bucketOf: new Map([['color.m', 'mode'], ['brand.color.x.light', 'brand']]),
+      directRefs: new Map([['color.m', ['brand.color.x.light']]]),
+    })
+    expect(codes(validateModel(m))).not.toContain('TKN-AXIS-DEPENDENCY')
   })
 })
