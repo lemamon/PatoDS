@@ -41,6 +41,9 @@ export interface ModelToken {
   aliasOf?: string
   aliasChain?: string[]
   hasAlias: boolean
+  /** Ids this token references by a direct `{path}` alias in the source (V-04 direction). Empty for a
+   * literal. Read from the source-form index, not the resolved alias leaf. */
+  directRefs: string[]
   raw: any
 }
 
@@ -103,6 +106,7 @@ export function buildModel(load: LoadResult): Model {
       aliasOf: base?.aliasOf,
       aliasChain: base?.aliasChain,
       hasAlias: hasAlias(base),
+      directRefs: load.source?.directRefs.get(id) ?? [],
       raw: base,
     }
     if (t.layer === 'semantic' && t.id.startsWith('size.control.')) t.scale = 'control-height'
