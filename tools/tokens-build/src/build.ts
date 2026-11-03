@@ -7,6 +7,37 @@ import { gzipSync } from 'node:zlib'
 import { PREFIX, type Model, type ModelToken } from './model.ts'
 import { emitValue } from './emit.ts'
 import { canonicalJson, writeText } from './write.ts'
+import { lintGeneratedCss, CssLintError } from './css-lint.ts'
+
+/** Thrown for a build configuration error (e.g. invalid layers.json); the CLI maps it to exit code 2. */
+export class BuildConfigError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'BuildConfigError'
+  }
+}
+
+/** Reads the single source of the layer order (layers.json); throws BuildConfigError if unusable (L-03). */
+async function readLayerOrder(srcDir: string): Promise<string[]> {
+  const path = join(srcDir, 'layers.json')
+  let raw: string
+  try {
+    raw = await readFile(path, 'utf8')
+  } catch {
+    throw new BuildConfigError(`Cannot read layers.json at ${path} (L-03).`)
+  }
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(raw)
+  } catch (err) {
+    throw new BuildConfigError(`Invalid JSON in layers.json: ${(err as Error).message}`)
+  }
+  const order = (parsed as { order?: unknown } | null)?.order
+  if (!Array.isArray(order) || order.length === 0 || !order.every((x) => typeof x === 'string' && x.length > 0)) {
+    throw new BuildConfigError('layers.json "order" must be a non-empty array of layer names (L-03).')
+  }
+  return order as string[]
+}
 
 const cssVar = (id: string) => `--${PREFIX}-${id.split('.').join('-')}`
 const varRef = (id: string) => `var(${cssVar(id)})`
@@ -54,7 +85,7 @@ function block(selector: string, decls: string[]): string {
   return `  ${selector} {\n${decls.map((d) => `    ${d}`).join('\n')}\n  }`
 }
 
-function renderBaseCss(model: Model, meta: ResolverMeta, applied: Map<string, Record<string, any>>): string {
+function renderBaseCss(model: Model, meta: ResolverMeta, applied: Map<string, Record<string, any>>, layerOrder: string[]): string {
   const prims = model.tokens.filter((t) => t.layer === 'primitive').sort(byCss)
   const primDecls = prims.map((t) => `${t.cssName}: ${emitValue(t.type, t.raw.$value, t.id)};`)
 
@@ -74,7 +105,7 @@ function renderBaseCss(model: Model, meta: ResolverMeta, applied: Map<string, Re
   }
 
   const parts = [
-    `@layer ${LAYER};`,
+    `@layer ${layerOrder.join(', ')};`,
     '',
     `@layer ${LAYER} {`,
     block(':where(:root)', primDecls),
@@ -89,7 +120,7 @@ function renderBaseCss(model: Model, meta: ResolverMeta, applied: Map<string, Re
   return parts.join('\n')
 }
 
-function renderBrandCss(model: Model, brand: string, isDefault: boolean, applied: Map<string, Record<string, any>>): string {
+function renderBrandCss(model: Model, brand: string, isDefault: boolean, applied: Map<string, Record<string, any>>, layerOrder: string[]): string {
   const sources = model.tokens.filter((t) => t.role === 'brand-mode-source').sort(byCss)
   const set = applied.get(`${brand}/light`)!
   const decls = sources.map((t) => {
@@ -97,7 +128,7 @@ function renderBrandCss(model: Model, brand: string, isDefault: boolean, applied
     return `${t.cssName}: ${target ? varRef(target) : emitValue(t.type, set[t.id]?.$value, t.id)};`
   })
   const selector = isDefault ? `:where(:root), [${ATTR_BRAND}="${brand}"]` : `[${ATTR_BRAND}="${brand}"]`
-  return [`@layer ${LAYER};`, '', `@layer ${LAYER} {`, block(selector, decls), '}', ''].join('\n')
+  return [`@layer ${layerOrder.join(', ')};`, '', `@layer ${LAYER} {`, block(selector, decls), '}', ''].join('\n')
 }
 
 function byCss(a: ModelToken, b: ModelToken): number {
@@ -137,7 +168,7 @@ function renderValues(model: Model, meta: ResolverMeta, applied: Map<string, Rec
   return { js, dts }
 }
 
-function renderTokensManifest(model: Model, meta: ResolverMeta, applied: Map<string, Record<string, any>>): any {
+function renderTokensManifest(model: Model, meta: ResolverMeta, applied: Map<string, Record<string, any>>, layerOrder: string[]): any {
   const permIds = [...applied.keys()].sort()
   const tokens = model.tokens
     .filter((t) => t.role === 'public' || t.role === 'brand-mode-source')
@@ -170,7 +201,7 @@ function renderTokensManifest(model: Model, meta: ResolverMeta, applied: Map<str
     attributes: { brand: ATTR_BRAND, mode: ATTR_MODE },
     brands: meta.brands.map((id) => ({ id, default: id === meta.defaultBrand })),
     modes: meta.modes.map((id) => ({ id, default: id === meta.defaultMode })),
-    layerOrder: [LAYER],
+    layerOrder,
     permutations: permIds,
     scales: {
       'control-height': model.tokens.filter((t) => t.scale === 'control-height').map((t) => t.id).sort(),
@@ -220,11 +251,63 @@ function renderApi(model: Model, meta: ResolverMeta): any {
   }
 }
 
-export async function runBuild(model: Model, srcDir: string): Promise<void> {
+export interface RenderedBuild {
+  meta: ResolverMeta
+  layerOrder: string[]
+  cssOut: { leaf: string; css: string }[]
+  esm: { js: string; dts: string }
+  vals: { js: string; dts: string }
+  manifest: ReturnType<typeof renderTokensManifest>
+  syncManifest: ReturnType<typeof renderSyncManifest>
+  api: ReturnType<typeof renderApi>
+}
+
+/** Renders every build output in memory (no I/O), so it can be linted before writing (css-output.md §13). */
+export async function renderAll(model: Model, srcDir: string): Promise<RenderedBuild> {
   const meta = await readResolverMeta(srcDir)
   const applied = appliedMap(model)
+  const layerOrder = await readLayerOrder(srcDir)
+  const cssOut = [
+    { leaf: 'base.css', css: renderBaseCss(model, meta, applied, layerOrder) },
+    ...meta.brands.map((brand) => ({
+      leaf: `brand-${brand}.css`,
+      css: renderBrandCss(model, brand, brand === meta.defaultBrand, applied, layerOrder),
+    })),
+  ]
+  return {
+    meta,
+    layerOrder,
+    cssOut,
+    esm: renderEsm(model),
+    vals: renderValues(model, meta, applied),
+    manifest: renderTokensManifest(model, meta, applied, layerOrder),
+    syncManifest: renderSyncManifest(model, meta),
+    api: renderApi(model, meta),
+  }
+}
+
+/** Builds the generated-CSS lint input from a rendered build. */
+export function lintInputFrom(model: Model, r: RenderedBuild) {
+  return {
+    cssFiles: r.cssOut.map((f) => ({ rel: f.leaf, css: f.css })),
+    model,
+    meta: r.meta,
+    layerOrder: r.layerOrder,
+    esm: r.esm,
+    manifest: r.manifest,
+    api: r.api,
+  }
+}
+
+export async function runBuild(model: Model, srcDir: string): Promise<void> {
   const pkgDir = resolve(srcDir, '..')
   const dist = join(pkgDir, 'dist')
+  const r = await renderAll(model, srcDir)
+  const { meta, cssOut, esm, vals, manifest, syncManifest, api } = r
+
+  // Generated-CSS lint gate: any finding aborts the build with no artifact written (exit 1).
+  const findings = lintGeneratedCss(lintInputFrom(model, r))
+  if (findings.length > 0) throw new CssLintError(findings)
 
   // CSS
   const files: { path: string; bytes: number; gzipBytes: number }[] = []
@@ -232,22 +315,17 @@ export async function runBuild(model: Model, srcDir: string): Promise<void> {
     await writeText(join(dist, rel), css)
     files.push({ path: `dist/${rel}`, bytes: Buffer.byteLength(css), gzipBytes: gzipSync(Buffer.from(css), { level: 9 }).length })
   }
-  await writeCss('css/base.css', renderBaseCss(model, meta, applied))
-  for (const brand of meta.brands) {
-    await writeCss(`css/brand-${brand}.css`, renderBrandCss(model, brand, brand === meta.defaultBrand, applied))
-  }
+  for (const f of cssOut) await writeCss(`css/${f.leaf}`, f.css)
 
   // ESM
-  const esm = renderEsm(model)
   await writeText(join(dist, 'esm/index.js'), esm.js)
   await writeText(join(dist, 'esm/index.d.ts'), esm.dts)
-  const vals = renderValues(model, meta, applied)
   await writeText(join(dist, 'esm/values.js'), vals.js)
   await writeText(join(dist, 'esm/values.d.ts'), vals.dts)
 
   // Manifests and report
-  await writeText(join(dist, 'meta/tokens.manifest.json'), canonicalJson(renderTokensManifest(model, meta, applied)))
-  await writeText(join(dist, 'meta/sync-manifest.json'), canonicalJson(renderSyncManifest(model, meta)))
+  await writeText(join(dist, 'meta/tokens.manifest.json'), canonicalJson(manifest))
+  await writeText(join(dist, 'meta/sync-manifest.json'), canonicalJson(syncManifest))
   await writeText(join(dist, 'meta/report.json'), canonicalJson(renderReport(model, meta, files)))
-  await writeText(join(pkgDir, 'api/tokens.api.json'), canonicalJson(renderApi(model, meta)))
+  await writeText(join(pkgDir, 'api/tokens.api.json'), canonicalJson(api))
 }
