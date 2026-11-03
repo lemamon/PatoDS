@@ -1,0 +1,6 @@
+{
+  "description": "V-04: a primitive with a direct alias to a semantic token (reference to a layer above)",
+  "codes": [
+    "TKN-LAYER-DIRECTION"
+  ]
+}

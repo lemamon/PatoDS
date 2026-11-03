@@ -1,0 +1,6 @@
+{
+  "description": "V-05: a $root on a group (forbidden in any layer)",
+  "codes": [
+    "TKN-ROOT-FORBIDDEN"
+  ]
+}

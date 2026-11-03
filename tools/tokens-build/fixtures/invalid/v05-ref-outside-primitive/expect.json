@@ -1,0 +1,6 @@
+{
+  "description": "V-05: a $ref in a semantic token ($ref is accepted only in the primitive layer)",
+  "codes": [
+    "TKN-REF-OUTSIDE-PRIMITIVE"
+  ]
+}

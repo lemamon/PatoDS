@@ -1,0 +1,4 @@
+{
+  "description": "V-05: $extends in the object form (parser-enforced, like V-01/V-03)",
+  "throws": "$extends must be a string"
+}

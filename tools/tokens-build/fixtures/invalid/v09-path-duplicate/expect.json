@@ -1,0 +1,6 @@
+{
+  "description": "V-07/V-09: a path defined in two places (shared set + another set)",
+  "codes": [
+    "TKN-PATH-DUPLICATE"
+  ]
+}

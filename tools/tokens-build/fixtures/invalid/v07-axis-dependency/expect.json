@@ -1,0 +1,6 @@
+{
+  "description": "V-07: an invariant token that depends on a mode-axis token (AX-1)",
+  "codes": [
+    "TKN-AXIS-DEPENDENCY"
+  ]
+}
