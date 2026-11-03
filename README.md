@@ -18,8 +18,8 @@ specified and planned — see [the feature spec](specs/001-design-tokens-themes/
 | ------------- | ------------------------------------------------------------------------ |
 | `packages/`   | Published packages (currently `@patods/tokens`).                         |
 | `tools/`      | Internal build and quality tooling (not published).                      |
-| `apps/`       | Reserved for example/documentation apps.                                 |
-| `tests/`      | Reserved for cross-package end-to-end tests.                             |
+| `apps/`       | Example and documentation apps (e.g. `tokens-example`).                   |
+| `tests/`      | Cross-package end-to-end and type-consumer tests.                        |
 | `specs/`      | Spec-driven development artifacts (spec, plan, tasks, contracts).        |
 | `.specify/`   | GitHub Spec Kit setup and the project constitution.                      |
 
@@ -67,7 +67,7 @@ Every command runs through [Turborepo](https://turbo.build/):
 | `pnpm contrast:check`       | Check WCAG 2.2 contrast for the token color pairs.        |
 | `pnpm lint:styles`          | Lint CSS with the token-usage rule.                       |
 | `pnpm test`                 | Run the unit test suites.                                 |
-| `pnpm test:types`           | Type-check the packages.                                  |
+| `pnpm test:types`           | Type-check the published tarball in a consumer (TS 6/7).  |
 | `pnpm check:scan`           | Scan for literal values outside the primitive layer.      |
 | `pnpm check:layers`         | Enforce the package layer boundaries.                     |
 | `pnpm check:determinism`    | Verify the build is byte-for-byte deterministic.          |
