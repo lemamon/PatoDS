@@ -1,4 +1,5 @@
-// PatoDS Stylelint plugin. Exports the patods/design-tokens rule (patods/contrast-pairs pending).
+// PatoDS Stylelint plugin. Exports the patods/design-tokens and patods/contrast-pairs rules.
 import designTokens from './design-tokens.ts'
+import contrastPairs from './contrast-pairs.ts'
 
-export default [designTokens]
+export default [designTokens, contrastPairs]
