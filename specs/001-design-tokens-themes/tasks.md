@@ -220,7 +220,7 @@ token; two byte-for-byte identical builds (spec US2).
   invariants and components, in the no-space form) and `brand-<id>.css` (public brand-axis tokens
   and brand-exclusive primitives; `:where(:root)` only in the default brand) — css-output.md §4 to §8,
   FR-015, FR-017
-- [ ] T042 [US2] Implement the generated-CSS lint in `tools/tokens-build/src/format/css-lint.ts`:
+- [x] T042 [US2] Implement the generated-CSS lint in `tools/tokens-build/src/format/css-lint.ts`:
   no-space form, literal `initial` (WebKit bug 243247), every `var()` target declared, public
   token only in the resolver or in the brand scope, `css-layer` vs `layers.json`, `dist-parity`
   (css-output.md §13) — fails in the build
