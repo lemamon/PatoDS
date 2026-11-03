@@ -206,7 +206,7 @@ token; two byte-for-byte identical builds (spec US2).
   chain, two attributes on one element, invalid values inherit the ancestor, brand not
   imported, runtime switch, exact string comparison; and importing only A with no B variable
   or public variable without a value (ENG-06, FR-012 to FR-014, FR-017, SC-006, SC-007)
-- [ ] T040 [P] [US2] Create `tests/types-consumer` (`@<prefixo>/types-consumer`) that installs the tarball
+- [x] T040 [P] [US2] Create `tests/types-consumer` (`@<prefixo>/types-consumer`) that installs the tarball
   and runs strict `tsc --noEmit` in `moduleResolution` `bundler` and `nodenext`, in TS versions 6.0.x and
   7.0.x (catalog `typescript7`), with `expect-type` in the positive cases and `@ts-expect-error` in the
   negatives (nonexistent token, brand, and mode); `publint` on the tarball (FR-016, QA-08, ENG-05)
