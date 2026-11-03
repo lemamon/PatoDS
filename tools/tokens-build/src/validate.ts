@@ -8,6 +8,10 @@ export interface Finding {
   rule: string
   id?: string
   file?: string
+  /** 1-based line in `file` (generated-CSS lint reports a position per css-output.md §13). */
+  line?: number
+  /** 1-based column in `file`, when known. */
+  column?: number
   message: string
 }
 
