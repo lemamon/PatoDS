@@ -49,7 +49,7 @@ export interface LintInput {
 }
 
 interface Decl {
-  /** The declaration text without the leading indent, e.g. `--patods-space-4: var(...);`. */
+  /** The declaration text without the leading indent (custom-property name, value and semicolon). */
   text: string
   /** The custom-property name on the left-hand side, if this declaration declares one. */
   name?: string
