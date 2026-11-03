@@ -47,12 +47,12 @@ const LAYER_ALLOWED: Record<string, Set<string>> = {
   component: new Set(['primitive', 'semantic', 'component']),
 }
 
-/** V-04: cross-layer reference direction. */
+/** V-04: cross-layer reference direction, over the DIRECT alias target (not the resolved leaf).
+ * A primitive aliasing a semantic token is forbidden even though the leaf is a primitive. */
 function direction(m: Model, out: Finding[]): void {
   for (const t of m.tokens) {
-    const deps: string[] = t.raw?.dependencies ?? []
-    for (const dep of deps) {
-      const d = m.byId.get(dep)
+    for (const ref of t.directRefs) {
+      const d = m.byId.get(ref)
       if (!d) continue
       if (!LAYER_ALLOWED[t.layer]?.has(d.layer)) {
         out.push({
@@ -60,9 +60,123 @@ function direction(m: Model, out: Finding[]): void {
           rule: 'V-04',
           id: t.id,
           file: t.file,
-          message: `Token ${t.layer} "${t.id}" references ${d.layer} "${dep}"; forbidden direction (TOK-02, FR-004).`,
+          message: `Token ${t.layer} "${t.id}" references ${d.layer} "${ref}"; forbidden direction (TOK-02, FR-004).`,
         })
       }
+    }
+  }
+}
+
+/** V-05: `$ref` only in the primitive layer and local; `$root` forbidden anywhere.
+ * (`$extends` in the object form is rejected earlier by the parser, like V-01/V-03.) */
+function refForm(m: Model, out: Finding[]): void {
+  const src = m.load.source
+  if (!src) return
+  for (const r of src.refs) {
+    if (r.bucket !== 'primitive') {
+      out.push({
+        code: 'TKN-REF-OUTSIDE-PRIMITIVE',
+        rule: 'V-05',
+        id: r.id,
+        file: r.file,
+        message: `"$ref" is accepted only in the primitive layer; "${r.id}" uses it in ${r.bucket} (FR-003, FR-004).`,
+      })
+      continue
+    }
+    // Inside the primitive layer: must be a local fragment or a relative path under src/primitive/.
+    const v = r.value.trim()
+    const local = v.startsWith('#') || (!/^[a-z][a-z0-9+.-]*:/i.test(v) && !v.startsWith('/') && !v.includes('..'))
+    if (!local) {
+      out.push({
+        code: 'TKN-REF-NOT-LOCAL',
+        rule: 'V-05',
+        id: r.id,
+        file: r.file,
+        message: `"$ref" "${r.value}" in "${r.id}" is remote or outside src/primitive/ (FR-002).`,
+      })
+    }
+  }
+  for (const root of src.roots) {
+    out.push({
+      code: 'TKN-ROOT-FORBIDDEN',
+      rule: 'V-05',
+      file: root.file,
+      message: `"$root" is forbidden (path "${root.path || '(top level)'}"); it detaches the CSS name from the token path (FR-005).`,
+    })
+  }
+}
+
+const SHARED_BUCKETS = new Set(['primitive', 'invariant', 'component'])
+
+/** Which variation class an occurrence belongs to: each shared file is its own class, while all brand
+ * files share one class and both mode files another (a path MAY repeat within one modifier). */
+function variationClass(file: string, bucket: string): string {
+  if (bucket === 'brand') return 'brand'
+  if (bucket === 'mode') return 'mode'
+  return `shared:${file}`
+}
+
+/** V-07/V-09: axis by location. A path defined in more than one variation class (a shared set and a
+ * context, both modifiers, or two shared files) carries an axis value it must not, or is duplicated. */
+function pathDuplicate(m: Model, out: Finding[]): void {
+  const src = m.load.source
+  if (!src) return
+  for (const [id, occs] of src.occurrences) {
+    const classes = new Set(occs.map((o) => variationClass(o.file, o.bucket)))
+    if (classes.size > 1) {
+      out.push({
+        code: 'TKN-PATH-DUPLICATE',
+        rule: 'V-07',
+        id,
+        file: occs[0]!.file,
+        message: `Path "${id}" is defined in more than one place (${occs
+          .map((o) => o.file)
+          .join(', ')}); shared sets carry no axis value and a path belongs to one modifier (V-09, TOK-09, FR-011).`,
+      })
+    }
+  }
+}
+
+/** Transitive axis reach of a token over its direct aliases: the axes (brand/mode) its dependency
+ * graph touches. Cycle-safe via the in-progress marker in `memo`. */
+function axisReach(id: string, src: NonNullable<Model['load']['source']>, memo: Map<string, Set<string>>): Set<string> {
+  const cached = memo.get(id)
+  if (cached) return cached
+  const acc = new Set<string>()
+  memo.set(id, acc) // cycle guard: a token in progress contributes nothing yet
+  for (const target of src.directRefs.get(id) ?? []) {
+    const b = src.bucketOf.get(target)
+    if (b === 'brand') acc.add('brand')
+    if (b === 'mode') acc.add('mode')
+    for (const a of axisReach(target, src, memo)) acc.add(a)
+  }
+  return acc
+}
+
+/** V-07 (axis dependency, section 7.2): an invariant token must not depend on any axis (AX-1); a brand
+ * token must not depend on mode (AX-2). The mode→brand form of section 7.3 (AX-3) is a V-08 concern. */
+function axisDependency(m: Model, out: Finding[]): void {
+  const src = m.load.source
+  if (!src) return
+  const memo = new Map<string, Set<string>>()
+  for (const [id, bucket] of src.bucketOf) {
+    const reach = axisReach(id, src, memo)
+    if (bucket === 'invariant' && reach.size > 0) {
+      out.push({
+        code: 'TKN-AXIS-DEPENDENCY',
+        rule: 'V-07',
+        id,
+        file: src.occurrences.get(id)?.[0]?.file,
+        message: `Invariant token "${id}" depends on the ${[...reach].sort().join('/')} axis; invariant tokens must be axis-free (AX-1, FR-011).`,
+      })
+    } else if (bucket === 'brand' && reach.has('mode')) {
+      out.push({
+        code: 'TKN-AXIS-DEPENDENCY',
+        rule: 'V-07',
+        id,
+        file: src.occurrences.get(id)?.[0]?.file,
+        message: `Brand token "${id}" depends on the mode axis; a brand scope must not freeze a mode (AX-2, FR-012).`,
+      })
     }
   }
 }
@@ -211,6 +325,9 @@ export function validateModel(m: Model): Finding[] {
   const out: Finding[] = []
   literals(m, out)
   direction(m, out)
+  refForm(m, out)
+  pathDuplicate(m, out)
+  axisDependency(m, out)
   naming(m, out)
   brandSource(m, out)
   colorHex(m, out)
