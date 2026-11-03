@@ -1,0 +1,12 @@
+{
+  "name": "@patods/types-consumer-ts7",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:types": "node scripts/check.mjs"
+  },
+  "devDependencies": {
+    "typescript": "catalog:typescript7"
+  }
+}
