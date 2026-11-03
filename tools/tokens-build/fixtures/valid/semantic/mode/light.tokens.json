@@ -1,0 +1,17 @@
+{
+  "$description": "Mode-axis semantic tokens, light mode (FR-033): alias the corresponding brand.* token in light mode.",
+  "color": {
+    "$type": "color",
+    "bg": {
+      "surface": { "$value": "{brand.color.bg.surface.light}" },
+      "accent": { "$value": "{brand.color.bg.accent.light}" }
+    },
+    "fg": {
+      "default": { "$value": "{brand.color.fg.default.light}" },
+      "on-accent": { "$value": "{brand.color.fg.on-accent.light}" }
+    },
+    "border": {
+      "default": { "$value": "{brand.color.border.default.light}" }
+    }
+  }
+}

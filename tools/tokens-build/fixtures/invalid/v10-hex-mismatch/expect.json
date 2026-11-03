@@ -1,0 +1,6 @@
+{
+  "description": "V-10: a hex that diverges from the srgb components",
+  "codes": [
+    "TKN-COLOR-HEX-MISMATCH"
+  ]
+}

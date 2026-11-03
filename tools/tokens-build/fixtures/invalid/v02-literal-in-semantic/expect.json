@@ -1,0 +1,6 @@
+{
+  "description": "V-02: a literal value outside the primitive layer",
+  "codes": [
+    "TKN-LITERAL-OUTSIDE-PRIMITIVE"
+  ]
+}

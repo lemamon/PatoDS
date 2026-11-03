@@ -1,0 +1,128 @@
+{
+  "$description": "Invariant semantic tokens (invariant axis, V-07): same values across every brand and mode. Alias primitives.",
+  "color": {
+    "$type": "color",
+    "border": {
+      "Focus": {
+        "$value": "{color.blue.500}"
+      }
+    }
+  },
+  "typography": {
+    "family": {
+      "$type": "fontFamily",
+      "body": {
+        "$value": "{typography.family.sans}"
+      }
+    },
+    "weight": {
+      "$type": "fontWeight",
+      "body": {
+        "$value": "{typography.weight.regular}"
+      },
+      "strong": {
+        "$value": "{typography.weight.bold}"
+      }
+    },
+    "size": {
+      "$type": "dimension",
+      "body": {
+        "$value": "{typography.size.md}"
+      }
+    },
+    "line-height": {
+      "$type": "dimension",
+      "body": {
+        "$value": "{typography.line-height.md}"
+      }
+    },
+    "letter-spacing": {
+      "$type": "dimension",
+      "body": {
+        "$value": "{typography.letter-spacing.normal}"
+      }
+    }
+  },
+  "space": {
+    "$type": "dimension",
+    "inline": {
+      "sm": {
+        "$value": "{space.2}"
+      }
+    },
+    "stack": {
+      "md": {
+        "$value": "{space.4}"
+      }
+    }
+  },
+  "size": {
+    "$type": "dimension",
+    "control": {
+      "sm": {
+        "$value": "{size.h.sm}"
+      },
+      "md": {
+        "$value": "{size.h.md}"
+      },
+      "lg": {
+        "$value": "{size.h.lg}"
+      }
+    }
+  },
+  "radius": {
+    "$type": "dimension",
+    "control": {
+      "$value": "{radius.md}"
+    },
+    "surface": {
+      "$value": "{radius.sm}"
+    }
+  },
+  "border": {
+    "$type": "dimension",
+    "width": {
+      "default": {
+        "$value": "{border.width.1}"
+      }
+    }
+  },
+  "shadow": {
+    "$type": "shadow",
+    "surface": {
+      "$value": "{shadow.overlay}"
+    }
+  },
+  "motion": {
+    "duration": {
+      "$type": "duration",
+      "ui": {
+        "$value": "{motion.duration.fast}"
+      }
+    },
+    "easing": {
+      "$type": "cubicBezier",
+      "ui": {
+        "$value": "{motion.easing.standard}"
+      }
+    }
+  },
+  "z-index": {
+    "$type": "number",
+    "overlay": {
+      "$value": "{z-index.layer.overlay}"
+    }
+  },
+  "breakpoint": {
+    "$type": "dimension",
+    "page": {
+      "$value": "{breakpoint.md}"
+    }
+  },
+  "opacity": {
+    "$type": "number",
+    "scrim": {
+      "$value": "{opacity.60}"
+    }
+  }
+}

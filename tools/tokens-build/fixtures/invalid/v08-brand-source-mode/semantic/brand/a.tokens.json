@@ -1,0 +1,60 @@
+{
+  "$description": "Synthetic brand A (default). brand.* tokens (role brand-mode-source, FR-033): brand-axis source with one value per mode.",
+  "brand": {
+    "color": {
+      "$type": "color",
+      "bg": {
+        "surface": {
+          "light": {
+            "$value": "{color.white}"
+          },
+          "dark": {
+            "$value": "{color.black}"
+          }
+        },
+        "accent": {
+          "light": {
+            "$value": "{color.blue.500}"
+          },
+          "dark": {
+            "$value": "{color.blue.300}"
+          }
+        }
+      },
+      "fg": {
+        "default": {
+          "light": {
+            "$value": "{color.neutral.900}"
+          },
+          "dark": {
+            "$value": "{color.neutral.100}"
+          }
+        },
+        "on-accent": {
+          "light": {
+            "$value": "{color.white}"
+          },
+          "dark": {
+            "$value": "{color.black}"
+          }
+        }
+      },
+      "border": {
+        "default": {
+          "light": {
+            "$value": "{color.neutral.300}"
+          },
+          "dark": {
+            "$value": "{color.neutral.600}"
+          }
+        }
+      },
+      "rogue": {
+        "$type": "color",
+        "notmode": {
+          "$value": "{color.white}"
+        }
+      }
+    }
+  }
+}

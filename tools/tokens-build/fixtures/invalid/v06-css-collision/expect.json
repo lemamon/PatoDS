@@ -1,0 +1,6 @@
+{
+  "description": "V-06: two ids that map to the same CSS custom-property name",
+  "codes": [
+    "TKN-NAME-COLLISION"
+  ]
+}

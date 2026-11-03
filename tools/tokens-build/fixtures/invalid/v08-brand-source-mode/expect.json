@@ -1,0 +1,6 @@
+{
+  "description": "V-08: a brand.* source not ending in a mode id",
+  "codes": [
+    "TKN-BRAND-SOURCE-MODE"
+  ]
+}

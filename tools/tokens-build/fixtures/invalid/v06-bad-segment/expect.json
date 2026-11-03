@@ -1,0 +1,6 @@
+{
+  "description": "V-06: a name segment outside the lowercase ASCII kebab grammar",
+  "codes": [
+    "TKN-NAME-SEGMENT"
+  ]
+}

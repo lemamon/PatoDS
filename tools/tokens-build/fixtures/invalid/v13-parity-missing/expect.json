@@ -1,0 +1,6 @@
+{
+  "description": "V-13: a public semantic key missing from one permutation",
+  "codes": [
+    "TKN-PARITY-MISSING"
+  ]
+}

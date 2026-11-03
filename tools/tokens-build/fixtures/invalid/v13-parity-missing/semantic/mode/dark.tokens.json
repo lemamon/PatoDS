@@ -1,0 +1,24 @@
+{
+  "$description": "Mode-axis semantic tokens, dark mode (FR-033): alias the corresponding brand.* token in dark mode.",
+  "color": {
+    "$type": "color",
+    "bg": {
+      "accent": {
+        "$value": "{brand.color.bg.accent.dark}"
+      }
+    },
+    "fg": {
+      "default": {
+        "$value": "{brand.color.fg.default.dark}"
+      },
+      "on-accent": {
+        "$value": "{brand.color.fg.on-accent.dark}"
+      }
+    },
+    "border": {
+      "default": {
+        "$value": "{brand.color.border.default.dark}"
+      }
+    }
+  }
+}

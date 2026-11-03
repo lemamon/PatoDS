@@ -1,0 +1,6 @@
+{
+  "description": "V-12: a size.control.* token outside the single control-height scale",
+  "codes": [
+    "TKN-CONTROL-SCALE"
+  ]
+}

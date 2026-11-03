@@ -1,0 +1,4 @@
+{
+  "description": "V-03: an alias to a nonexistent token (caught by the parser)",
+  "throws": "Could not resolve alias"
+}

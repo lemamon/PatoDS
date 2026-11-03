@@ -1,0 +1,16 @@
+{
+  "$description": "Component tokens (component layer): alias semantic tokens; resolve by scope in CSS.",
+  "color": {
+    "$type": "color",
+    "button": {
+      "bg": { "default": { "$value": "{color.bg.accent}" } },
+      "fg": { "default": { "$value": "{color.fg.on-accent}" } }
+    }
+  },
+  "size": {
+    "$type": "dimension",
+    "button": {
+      "height": { "md": { "$value": "{size.control.md}" } }
+    }
+  }
+}
