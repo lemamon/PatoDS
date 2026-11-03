@@ -127,7 +127,7 @@ valid ones pass, with a report by category (spec US1).
 
 ### Fixtures and tests (US1)
 
-- [ ] T024 [P] [US1] Create invalid fixtures in `tools/tokens-build/fixtures/invalid/` with an `expect`
+- [x] T024 [P] [US1] Create invalid fixtures in `tools/tokens-build/fixtures/invalid/` with an `expect`
   of code per case: literal outside a primitive (V-02), nonexistent alias and cycle (V-03), reference
   to a layer above (V-04: `primitive → primitive`, `semantic → primitive|semantic`, `component →
   semantic|component|primitive`), `$ref` outside a primitive, `$root` and `$extends` off the keyed
