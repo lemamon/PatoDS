@@ -1,0 +1,11 @@
+{
+  // Consumer under `moduleResolution: bundler` (Vite/esbuild/webpack-style). Inherits strict,
+  // verbatimModuleSyntax and noUncheckedIndexedAccess from the repo base (QA-08, ENG-05).
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "types": []
+  },
+  "include": ["src"]
+}

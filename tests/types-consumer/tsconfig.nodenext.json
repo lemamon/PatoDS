@@ -1,0 +1,11 @@
+{
+  // Consumer under `moduleResolution: nodenext` (Node ESM resolution honouring the package
+  // `exports` map and its `types` condition). Same strict base as the bundler variant (QA-08, ENG-05).
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "types": []
+  },
+  "include": ["src"]
+}

@@ -1,0 +1,15 @@
+{
+  "name": "@patods/types-consumer",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:types": "node scripts/check.mjs"
+  },
+  "devDependencies": {
+    "@patods/tokens": "file:./vendor/patods-tokens-0.0.0.tgz",
+    "expect-type": "catalog:",
+    "publint": "catalog:",
+    "typescript": "catalog:"
+  }
+}
