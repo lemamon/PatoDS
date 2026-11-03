@@ -27,7 +27,8 @@
     "check:scan": "turbo run check:scan",
     "check:layers": "turbo run check:layers",
     "design-sync": "turbo run design-sync --",
-    "pack:tokens": "pnpm tokens:build && cd packages/tokens && pnpm pack --pack-destination ../../apps/tokens-example/vendor && cp ../../apps/tokens-example/vendor/patods-tokens-0.0.0.tgz ../../tests/types-consumer/vendor/"
+    "pack:tokens": "pnpm tokens:build && cd packages/tokens && pnpm pack --pack-destination ../../apps/tokens-example/vendor && cp ../../apps/tokens-example/vendor/patods-tokens-0.0.0.tgz ../../tests/types-consumer/vendor/",
+    "ci:install": "pnpm install --frozen-lockfile --filter=!@patods/tokens-example --filter=!@patods/types-consumer && pnpm pack:tokens && pnpm install --frozen-lockfile"
   },
   "devDependencies": {
     "turbo": "catalog:"
