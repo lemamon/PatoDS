@@ -360,7 +360,7 @@ errors and zero false positives (spec US5).
   (`transparent`, `currentcolor`, `0`, `auto`, `none`, globals), the 9 subcodes,
   a fixture-only control registry, a rule for `@media`/`@container` (lint-rules.md §3; FR-022,
   FR-023)
-- [ ] T067 [P] [US5] Implement the `<prefixo>/contrast-pairs` rule in
+- [x] T067 [P] [US5] Implement the `<prefixo>/contrast-pairs` rule in
   `tools/stylelint-plugin/src/contrast-pairs.ts`: group by subject and state, require a
   background annotation `/* <prefixo>-contrast: on <token> | @<set> */` when it is not on the same subject,
   error on a non-resolvable expression, skip `@media (forced-colors)` (FR-021)
