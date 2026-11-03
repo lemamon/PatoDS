@@ -253,7 +253,7 @@ token; two byte-for-byte identical builds (spec US2).
 - [x] T050 [US2] Implement the `tools/repo-checks` `drift` subcommand: `dist/` in `.gitignore`; fail
   if `git ls-files` lists a generated file; regenerate `api/tokens.api.json` and require
   `git diff --exit-code` (QA-08)
-- [ ] T051 [US2] Wire `tokens:build`, `test:types`, `test:e2e` (Chromium on the PR; all engines in the
+- [x] T051 [US2] Wire `tokens:build`, `test:types`, `test:e2e` (Chromium on the PR; all engines in the
   nightly), `check:determinism`, and `check:drift` into `tokens-ci.yml`; generate the tarball and install it in
   the apps (QA-06)
 
