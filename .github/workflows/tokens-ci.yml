@@ -86,14 +86,20 @@ jobs:
       - run: pnpm test:e2e
 
   nightly-determinism:
-    # Byte-for-byte reproducible build on main and on the nightly schedule (SC-007).
+    # Byte-for-byte reproducible build (SC-007) plus the contrast report over the real manifest,
+    # across the Node floor and latest (T062), on main and on the nightly schedule.
     if: github.event_name == 'push' || github.event_name == 'schedule'
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ["22", "24"]
     steps:
       - uses: actions/checkout@<sha>
       - uses: actions/setup-node@<sha>
         with:
-          node-version: "24"
+          node-version: ${{ matrix.node }}
       - run: corepack enable
       - run: pnpm ci:install
       - run: pnpm check:determinism
+      - run: pnpm contrast:check
