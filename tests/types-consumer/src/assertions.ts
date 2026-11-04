@@ -3,7 +3,7 @@
 // Compiled under both moduleResolution modes and both TypeScript majors by scripts/check.mjs.
 import { expectTypeOf } from 'expect-type'
 import { tokens, type TokenName } from '@patods/tokens'
-import { values, type Brand, type Mode } from '@patods/tokens/values'
+import { values, type Brand, type Mode, type TokenValues } from '@patods/tokens/values'
 
 // Each token resolves to its exact `var(--patods-…)` string literal, not a widened `string`.
 expectTypeOf(tokens['space.4']).toEqualTypeOf<'var(--patods-space-4)'>()
@@ -24,7 +24,9 @@ expectTypeOf<'radius.md'>().toExtend<TokenName>()
 expectTypeOf<Brand>().toEqualTypeOf<'a' | 'b'>()
 expectTypeOf<Mode>().toEqualTypeOf<'dark' | 'light'>()
 
-// values is Readonly<Record<Brand, Record<Mode, Record<string, string>>>>: every cell is a string.
-expectTypeOf(values).toEqualTypeOf<Readonly<Record<Brand, Record<Mode, Record<string, string>>>>>()
-expectTypeOf(values.a.light).toEqualTypeOf<Record<string, string>>()
-expectTypeOf(values.b.dark).toEqualTypeOf<Record<string, string>>()
+// values is TokenValues (esm-output §5): Readonly at each level, keyed by Brand/Mode/TokenName.
+expectTypeOf(values).toEqualTypeOf<TokenValues>()
+// Each permutation holds every TokenName, and every cell resolves to a string (toEqualTypeOf is
+// avoided on the TokenName-keyed record for the same reason as the union above — it mis-reports).
+expectTypeOf(values.a.light['space.4']).toEqualTypeOf<string>()
+expectTypeOf(values.b.dark['color.bg.surface']).toEqualTypeOf<string>()

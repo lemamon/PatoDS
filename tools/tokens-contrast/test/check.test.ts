@@ -16,7 +16,7 @@ function fixture(pairs: Pair[], colors: Record<string, Record<string, string>>):
     join(dir, 'dist/meta/tokens.manifest.json'),
     JSON.stringify({
       permutations: perms,
-      tokens: Object.entries(colors).map(([id, emitted]) => ({ id, type: 'color', color: { emitted } })),
+      tokens: Object.entries(colors).map(([id, emitted]) => ({ path: id, type: 'color', color: { emitted } })),
     }),
   )
   return dir
