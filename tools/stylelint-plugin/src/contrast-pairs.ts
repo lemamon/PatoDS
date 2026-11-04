@@ -91,7 +91,7 @@ function loadTokenManifest(path: string): { byCss: Map<string, TokenEntry>; pref
   const byCss = new Map<string, TokenEntry>()
   let prefix = 'patods'
   for (const t of json.tokens ?? []) {
-    byCss.set(t.cssName, { id: t.id, layer: t.layer, role: t.role, type: t.type })
+    byCss.set(t.cssName, { id: t.path, layer: t.layer, role: t.role, type: t.type })
     const m = /^--([a-z0-9]+)-/.exec(t.cssName)
     if (m) prefix = m[1]!
   }

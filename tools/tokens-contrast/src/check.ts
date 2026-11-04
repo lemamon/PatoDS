@@ -29,7 +29,7 @@ interface Thresholds {
 }
 
 function emittedOf(tokensManifest: any, id: string, perm: string): string | undefined {
-  const t = tokensManifest.tokens.find((x: any) => x.id === id)
+  const t = tokensManifest.tokens.find((x: any) => x.path === id)
   return t?.color?.emitted?.[perm]
 }
 
