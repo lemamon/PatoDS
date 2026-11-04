@@ -341,25 +341,36 @@ errors and zero false positives (spec US5).
 
 ### Tests (US5)
 
-- [x] T063 [P] [US5] Fixtures in `tools/stylelint-plugin/fixtures/valid/` (zero warnings) and
-  `invalid/` (one `/* expect: <code>@<column> */` per case) covering the 9 subcodes:
-  `primitive-token`, `brand-mode-source-token`, `unknown-token` (with and without prefix), `literal-value`,
+- [ ] T063 [P] [US5] On-disk fixtures under `tools/stylelint-plugin/fixtures/` in the §5 layout
+  (`design-tokens/{valid,invalid}/*.css`, `contrast-pairs/{valid,invalid}/*.css`, `gate-probe/probe.css`,
+  synthetic `contrast/{manifest,surfaces}.json`, `registry.fixture.json`): `valid/` zero warnings,
+  `invalid/` one `/* expect: <code>@<column> */` per case, covering the 9 design-tokens subcodes
+  (`primitive-token`, `brand-mode-source-token`, `unknown-token` with and without prefix, `literal-value`,
   `var-fallback-literal`, `token-definition`, `control-height`, `control-height-missing`,
-  `unclassified-component` (lint-rules.md §3)
-- [x] T064 [P] [US5] Fixture harness in `tools/stylelint-plugin/test/rule.test.ts` comparing the
+  `unclassified-component`) and the 6 contrast-pairs subcodes (lint-rules.md §5)
+  — reopened: tests are inline in `test/*.test.ts`; no on-disk fixtures exist yet
+- [ ] T064 [P] [US5] Fixture harness in `tools/stylelint-plugin/test/rule.test.ts` comparing the
   multiset of `{file, line, column, code}`, requiring every code to have an invalid fixture
   (FR-024, SC-009)
+  — reopened: current test uses inline `stylelint.lint({code})`; no multiset harness over on-disk
+  fixtures and no coverage assertion
 
 ### Implementation (US5)
 
-- [x] T065 [US5] Create `tools/stylelint-plugin` (`@<prefixo>/stylelint-plugin`, devDependency of
+- [ ] T065 [US5] Create `tools/stylelint-plugin` (`@<prefixo>/stylelint-plugin`, devDependency of
   stylelint 17.16.x, `@csstools/*` 4.x, `postcss-selector-parser` 7.x; consumes
   `@<prefixo>/tokens/meta/tokens.manifest.json`)
-- [x] T066 [US5] Implement the `<prefixo>/design-tokens` rule in
+  — reopened: package.json is missing the `@<prefixo>/tokens` devDep (`./meta/*`), `@csstools/*` and
+  `postcss-selector-parser`; the rules do not resolve a package-specifier manifest path (readFileSync
+  only) — §2.1/§2.2
+- [ ] T066 [US5] Implement the `<prefixo>/design-tokens` rule in
   `tools/stylelint-plugin/src/design-tokens.ts`: a map of governed properties, a keyword allowlist
   (`transparent`, `currentcolor`, `0`, `auto`, `none`, globals), the 9 subcodes,
   a fixture-only control registry, a rule for `@media`/`@container` (lint-rules.md §3; FR-022,
   FR-023)
+  — reopened: only 6/9 subcodes implemented; `control-height`, `control-height-missing`,
+  `unclassified-component` and the control registry (`controlRegistryPath`, §3.7) are absent, so FR-023
+  is not enforced
 - [x] T067 [P] [US5] Implement the `<prefixo>/contrast-pairs` rule in
   `tools/stylelint-plugin/src/contrast-pairs.ts`: group by subject and state, require a
   background annotation `/* <prefixo>-contrast: on <token> | @<set> */` when it is not on the same subject,
@@ -367,6 +378,10 @@ errors and zero false positives (spec US5).
 - [ ] T068 [US5] Fill `stylelint.config.mjs` and wire `lint:styles` into `tokens-ci.yml` with
   `ignoreDisables`, `--max-warnings 0`, and a JSON report as proof of zero violations (applied to
   the fixtures in this feature; to the core once it exists)
+  — blocked on T063/T065/T066; must match §6 exactly: gate glob `fixtures/*/valid/*.css` +
+  `gate-probe/*.css`, package-specifier `manifestPath`, synthetic contrast manifest/surfaces,
+  `controlRegistryPath`, report `reports/lint-styles/stylelint.json`, turbo dependsOn
+  `@<prefixo>/tokens#tokens:build`, plus a deliberate-violation CI step
 
 **Checkpoint**: US5 testable — the lint blocks each violation and produces no false positive.
 
