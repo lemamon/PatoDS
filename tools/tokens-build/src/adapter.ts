@@ -3,6 +3,7 @@
 // network (FR-025, D1). Swapping the parser (e.g. Style Dictionary once it has a Resolver) only
 // changes this file.
 import { parse, defineConfig } from '@terrazzo/parser'
+import { parse as parseJsonAst } from '@humanwhocodes/momoa'
 import { readFile, readdir } from 'node:fs/promises'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { join, relative } from 'node:path'
@@ -12,6 +13,10 @@ export type Bucket = 'primitive' | 'invariant' | 'brand' | 'mode' | 'component'
 export interface DeclInfo {
   file: string
   bucket: Bucket
+  /** 1-based line of the token's key in its first declaring file (build-manifests.md §2.2 `source`). */
+  line: number
+  /** 1-based column of the token's key in its first declaring file. */
+  column: number
 }
 
 export interface Permutation {
@@ -77,16 +82,24 @@ function bucketOf(rel: string): Bucket | undefined {
   return undefined
 }
 
-/** Flattens a DTCG document into token ids (groups are objects without `$value`). */
-function flattenIds(node: any, prefix: string, out: string[]): void {
-  if (node === null || typeof node !== 'object' || Array.isArray(node)) return
-  if ('$value' in node) {
-    if (prefix) out.push(prefix)
-    return
-  }
-  for (const key of Object.keys(node)) {
-    if (key.startsWith('$')) continue
-    flattenIds(node[key], prefix ? `${prefix}.${key}` : key, out)
+/** Walks a momoa Object node, recording each token path's key position (first declaration wins, to
+ * match the sorted-file scan order). A token node is an object with a `$value` member; groups are not. */
+function walkDecl(node: any, prefix: string, rel: string, bucket: Bucket, decl: Map<string, DeclInfo>): void {
+  if (!node || node.type !== 'Object') return
+  for (const member of node.members) {
+    const key = member.name?.value
+    if (typeof key !== 'string' || key.startsWith('$')) continue
+    const path = prefix ? `${prefix}.${key}` : key
+    const val = member.value
+    const isToken = val?.type === 'Object' && val.members.some((m: any) => m.name?.value === '$value')
+    if (isToken) {
+      if (!decl.has(path)) {
+        const start = member.name.loc.start
+        decl.set(path, { file: rel, bucket, line: start.line, column: start.column })
+      }
+    } else if (val?.type === 'Object') {
+      walkDecl(val, path, rel, bucket, decl)
+    }
   }
 }
 
@@ -99,19 +112,17 @@ async function listTokenFiles(dir: string, base: string, acc: string[]): Promise
   return acc
 }
 
-/** Reads the source files and classifies each id by layer/axis. */
+/** Reads the source files and classifies each id by layer/axis, with the key's source position
+ * (build-manifests.md §2.2 `source`). Positional parse via momoa; first declaring file wins. */
 async function classify(srcDir: string): Promise<Map<string, DeclInfo>> {
   const decl = new Map<string, DeclInfo>()
   const files = await listTokenFiles(srcDir, srcDir, [])
   for (const rel of files.sort()) {
-    const bucket = bucketOf(rel.split('\\').join('/'))
+    const relN = rel.split('\\').join('/')
+    const bucket = bucketOf(relN)
     if (!bucket) continue
-    const json = JSON.parse(await readFile(join(srcDir, rel), 'utf8'))
-    const ids: string[] = []
-    flattenIds(json, '', ids)
-    for (const id of ids) {
-      if (!decl.has(id)) decl.set(id, { file: rel.split('\\').join('/'), bucket })
-    }
+    const doc = parseJsonAst(await readFile(join(srcDir, rel), 'utf8'))
+    walkDecl(doc.body, '', relN, bucket, decl)
   }
   return decl
 }
