@@ -195,6 +195,9 @@ settings:
 
 catalogs:
   default:
+    '@humanwhocodes/momoa':
+      specifier: 3.3.13
+      version: 3.3.13
     '@playwright/test':
       specifier: 1.64.1
       version: 1.64.1
@@ -352,6 +355,9 @@ importers:
 
   tools/tokens-build:
     dependencies:
+      '@humanwhocodes/momoa':
+        specifier: 'catalog:'
+        version: 3.3.13
       '@patods/color':
         specifier: workspace:*
         version: link:../color
@@ -507,11 +513,11 @@ packages:
     resolution: {integrity: sha512-SeE8JPwW1xs1tHeNycjUtUBdhorRa8o4jlvjwk49R7/Z291i+4DQa7JJIgOm/TaYQZx+QrPQbVJ/9c8dMIZN8Q==}
 
   '@patods/tokens@file:apps/tokens-example/vendor/patods-tokens-0.0.0.tgz':
-    resolution: {integrity: sha512-eOKTPFV1xH/k/dxBCLukSI+bQsSe9C3LnWh+z1aOAHtpGh0ddB32U0varcHfKMSkxkqpkfib1AQKASG8QFngFQ==, tarball: file:apps/tokens-example/vendor/patods-tokens-0.0.0.tgz}
+    resolution: {integrity: sha512-UlQT88Pc+o+wE6f/sb7EbMhSPjzS6nRTQpBkKM+leZ8xmemvjL5aQpY/9khXOrkLs/Y6rBrko/SNRO74PEHRyg==, tarball: file:apps/tokens-example/vendor/patods-tokens-0.0.0.tgz}
     version: 0.0.0
 
   '@patods/tokens@file:tests/types-consumer/vendor/patods-tokens-0.0.0.tgz':
-    resolution: {integrity: sha512-eOKTPFV1xH/k/dxBCLukSI+bQsSe9C3LnWh+z1aOAHtpGh0ddB32U0varcHfKMSkxkqpkfib1AQKASG8QFngFQ==, tarball: file:tests/types-consumer/vendor/patods-tokens-0.0.0.tgz}
+    resolution: {integrity: sha512-UlQT88Pc+o+wE6f/sb7EbMhSPjzS6nRTQpBkKM+leZ8xmemvjL5aQpY/9khXOrkLs/Y6rBrko/SNRO74PEHRyg==, tarball: file:tests/types-consumer/vendor/patods-tokens-0.0.0.tgz}
     version: 0.0.0
 
   '@playwright/test@1.64.1':

@@ -19,6 +19,7 @@ catalogMode: strict
 catalog:
   "@terrazzo/parser": 2.9.0
   "@terrazzo/token-tools": 2.9.0
+  "@humanwhocodes/momoa": 3.3.13
   ajv: 8.20.0
   colorjs.io: 0.7.1
   stylelint: 17.16.0

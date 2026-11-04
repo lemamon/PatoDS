@@ -14,6 +14,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@humanwhocodes/momoa": "catalog:",
     "@patods/color": "workspace:*",
     "@terrazzo/parser": "catalog:",
     "@terrazzo/token-tools": "catalog:",
