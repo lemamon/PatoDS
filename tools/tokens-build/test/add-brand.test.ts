@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { cpSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
+import { pathToFileURL } from 'node:url'
 import { loadTokens } from '../src/adapter.ts'
 import { buildModel } from '../src/model.ts'
 import { validateModel } from '../src/validate.ts'
@@ -35,9 +36,7 @@ describe('add brand (US3)', () => {
     expect(brandC).toContain('[data-patods-brand="c"]')
     expect(brandC).not.toContain(':where(:root)')
 
-    const values = JSON.parse(
-      readFileSync(join(dir, 'dist/esm/values.js'), 'utf8').replace(/^[^{]*/, '').replace(/\)\s*$/, ''),
-    )
+    const { values } = await import(pathToFileURL(join(dir, 'dist/esm/values.js')).href)
     expect(Object.keys(values)).toContain('c')
   })
 })

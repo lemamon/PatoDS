@@ -47,9 +47,45 @@ describe('runBuild (US2)', () => {
     expect(m.scales['control-height']).toContain('size.control.md')
   })
 
-  it('ESM only exposes public tokens (no brand-mode-source)', () => {
+  it('the manifest root carries package and brands[].file (build-manifests §2.1)', () => {
+    const m = JSON.parse(read('meta/tokens.manifest.json'))
+    expect(m.package).toBe('@patods/tokens')
+    expect(m.brands).toContainEqual({ id: 'a', default: true, file: 'dist/css/brand-a.css' })
+    expect(m.brands).toContainEqual({ id: 'b', default: false, file: 'dist/css/brand-b.css' })
+  })
+
+  it('a mode-axis token carries path/aliasOf/aliasChains/source/color (§2.2)', () => {
+    const m = JSON.parse(read('meta/tokens.manifest.json'))
+    const t = m.tokens.find((x: any) => x.path === 'color.bg.surface')
+    expect(t.cssName).toBe('--patods-color-bg-surface')
+    expect(t.axis).toBe('mode')
+    expect(t.placement).toBe('base')
+    expect(t.exclusiveBrand).toBeNull()
+    expect(t.aliasOf).toEqual({ dark: 'brand.color.bg.surface.dark', light: 'brand.color.bg.surface.light' })
+    expect(t.aliasChains['a/light']).toEqual(['color.bg.surface', 'brand.color.bg.surface.light', 'color.white'])
+    expect(Object.keys(t.aliasChains).sort()).toEqual(['a/dark', 'a/light', 'b/dark', 'b/light'])
+    expect(t.color.subRefs).toBeNull()
+    expect(Object.keys(t.color.emitted).sort()).toEqual(['a/dark', 'a/light', 'b/dark', 'b/light'])
+    expect(t.source.file).toBe('src/semantic/mode/dark.tokens.json')
+    expect(typeof t.source.line).toBe('number')
+    expect(typeof t.source.column).toBe('number')
+  })
+
+  it('D7: color.blue.300 is brand-exclusive to a — in brand-a.css, not base.css (§2.2, css-output §4)', () => {
+    const m = JSON.parse(read('meta/tokens.manifest.json'))
+    const t = m.tokens.find((x: any) => x.path === 'color.blue.300')
+    expect(t.placement).toBe('brand-exclusive')
+    expect(t.exclusiveBrand).toBe('a')
+    expect(t.aliasChains).toBeNull() // primitive
+    expect(t.aliasOf).toBeNull()
+    // CSS: declared in brand-a.css, absent from base.css (D7 primitive partition).
+    expect(read('css/brand-a.css')).toContain('--patods-color-blue-300:')
+    expect(read('css/base.css')).not.toContain('--patods-color-blue-300:')
+  })
+
+  it('ESM exposes every published token, brand-mode-source included (esm-output §4)', () => {
     const idx = read('esm/index.js')
     expect(idx).toContain('"color.bg.surface": "var(--patods-color-bg-surface)"')
-    expect(idx).not.toContain('brand.color.bg.surface.light')
+    expect(idx).toContain('"brand.color.bg.surface.light": "var(--patods-brand-color-bg-surface-light)"')
   })
 })

@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll } from 'vitest'
 import { join, dirname } from 'node:path'
-import { mkdtempSync, cpSync, writeFileSync, existsSync } from 'node:fs'
+import { mkdtempSync, cpSync, writeFileSync, readFileSync, existsSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { loadTokens } from '../src/adapter.ts'
 import { buildModel, type Model, type ModelToken } from '../src/model.ts'
@@ -122,9 +122,13 @@ describe('lintGeneratedCss (T042)', () => {
       axis: 'invariant',
       role: 'public',
       placement: 'brand-exclusive',
+      exclusiveBrand: 'a',
       type: 'color',
       deprecated: false,
       file: 'primitive/brand-a.tokens.json',
+      sourceLine: 1,
+      sourceColumn: 1,
+      directRefs: [],
       hasAlias: false,
       raw: {},
     }
@@ -147,7 +151,7 @@ describe('lintGeneratedCss (T042)', () => {
         js: '// x\nexport const tokens = Object.freeze({\n  "color.blue.500": "var(--patods-color-blue-500)",\n})\n',
         dts: 'export declare const tokens: {\n  readonly "color.blue.500": "var(--patods-color-blue-500)"\n}\nexport type TokenName = keyof typeof tokens\n',
       },
-      manifest: { tokens: [{ id: 'color.blue.500', role: 'public' }] },
+      manifest: { tokens: [{ path: 'color.blue.500', role: 'public' }] },
       api: { tokens: ['color.blue.500'] },
     }
     expect(lintGeneratedCss(synthetic)).toEqual([])
@@ -203,8 +207,8 @@ describe('lintGeneratedCss (T042)', () => {
       esm: {
         ...base.esm,
         js: base.esm.js.replace(
-          'export const tokens = Object.freeze({\n',
-          'export const tokens = Object.freeze({\n  "ghost.token": "var(--patods-ghost-token)",\n',
+          'export const tokens = /*#__PURE__*/ Object.freeze({\n',
+          'export const tokens = /*#__PURE__*/ Object.freeze({\n  "ghost.token": "var(--patods-ghost-token)",\n',
         ),
       },
     }
@@ -214,6 +218,49 @@ describe('lintGeneratedCss (T042)', () => {
   it('dist-parity: a token missing from the CSS', () => {
     const input = withCss('base.css', (css) => css.replace(/\n {4}--patods-radius-md:[^\n]*/, ''))
     expect(codes(lintGeneratedCss(input))).toContain('dist-parity')
+  })
+
+  // --- manifest-guarantee (§2.4, M-07/M-08) ---
+  it('manifest-guarantee: exclusiveBrand without brand-exclusive placement (M-08)', () => {
+    const victim = base.model.tokens.find((t) => t.layer === 'primitive' && t.placement === 'base')!
+    const input: LintInput = {
+      ...base,
+      model: { ...base.model, tokens: base.model.tokens.map((t) => (t === victim ? { ...t, exclusiveBrand: 'a' } : t)) },
+    }
+    expect(lintGeneratedCss(input)).toContainEqual(expect.objectContaining({ code: 'manifest-guarantee', rule: 'M-08' }))
+  })
+
+  it('manifest-guarantee: aliasChains missing a permutation key (M-07)', () => {
+    const idx = base.manifest.tokens.findIndex((t) => t.aliasChains)
+    const input: LintInput = {
+      ...base,
+      manifest: { tokens: base.manifest.tokens.map((t, i) => (i === idx ? { ...t, aliasChains: { 'a/light': [] } } : t)) },
+    }
+    expect(lintGeneratedCss(input)).toContainEqual(expect.objectContaining({ code: 'manifest-guarantee', rule: 'M-07' }))
+  })
+})
+
+describe('brand-exclusive primitive partition (D7)', () => {
+  it('a primitive that aliases another primitive emits var(), and the target follows it (DEP-03, §4)', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'patods-primalias-'))
+    cpSync(SRC, join(dir, 'src'), { recursive: true })
+    const srcDir = join(dir, 'src')
+    // Add a primitive that is a whole-token alias to another primitive, reached only via brand a.
+    const primPath = join(srcDir, 'primitive.tokens.json')
+    const prim = JSON.parse(readFileSync(primPath, 'utf8'))
+    prim.color['brand-accent'] = { $type: 'color', $value: '{color.blue.300}' }
+    writeFileSync(primPath, JSON.stringify(prim, null, 2))
+    const aPath = join(srcDir, 'semantic/brand/a.tokens.json')
+    writeFileSync(aPath, readFileSync(aPath, 'utf8').replace('{color.blue.300}', '{color.brand-accent}'))
+
+    const model = buildModel(await loadTokens(srcDir))
+    const r = await renderAll(model, srcDir)
+    const brandA = r.cssOut.find((f) => f.leaf === 'brand-a.css')!.css
+    // DEP-03/§4: the aliasing primitive emits var() of its target, not the resolved literal.
+    expect(brandA).toContain('--patods-color-brand-accent: var(--patods-color-blue-300);')
+    // The target primitive follows its only referrer into brand-a.css (no orphan), and lint is clean.
+    expect(brandA).toContain('--patods-color-blue-300:')
+    expect(lintGeneratedCss(lintInputFrom(model, r))).toEqual([])
   })
 })
 
