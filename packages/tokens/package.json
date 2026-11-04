@@ -7,18 +7,15 @@
   "exports": {
     ".": {
       "types": "./dist/esm/index.d.ts",
-      "import": "./dist/esm/index.js"
+      "default": "./dist/esm/index.js"
     },
     "./values": {
       "types": "./dist/esm/values.d.ts",
-      "import": "./dist/esm/values.js"
+      "default": "./dist/esm/values.js"
     },
     "./css/base.css": "./dist/css/base.css",
-    "./css/brand-a.css": "./dist/css/brand-a.css",
-    "./css/brand-b.css": "./dist/css/brand-b.css",
-    "./meta/tokens.manifest.json": "./dist/meta/tokens.manifest.json",
-    "./meta/sync-manifest.json": "./dist/meta/sync-manifest.json",
-    "./meta/report.json": "./dist/meta/report.json"
+    "./css/brand-*.css": "./dist/css/brand-*.css",
+    "./meta/*": "./dist/meta/*"
   },
   "files": [
     "dist/css/base.css",
