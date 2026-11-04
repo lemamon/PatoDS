@@ -42,8 +42,17 @@ export interface LintInput {
   layerOrder: string[]
   /** The in-memory ESM outputs (index.js + index.d.ts) for dist-parity. */
   esm: { js: string; dts: string }
-  /** The in-memory tokens manifest object for dist-parity. */
-  manifest: { tokens: { id: string; role: string }[] }
+  /** The in-memory tokens manifest object for dist-parity and the M-07 structural check. */
+  manifest: {
+    tokens: {
+      path: string
+      role: string
+      placement?: string
+      exclusiveBrand?: string | null
+      aliasChains?: Record<string, string[]> | null
+      color?: { emitted?: Record<string, string>; subRefs?: Record<string, string[]> | null } | null
+    }[]
+  }
   /** The in-memory API report object for dist-parity. */
   api: { tokens: string[] }
 }
@@ -358,7 +367,7 @@ function checkPublicPlacement(files: ParsedCss[], input: LintInput, out: Finding
           })
           continue
         }
-        const { ok, legal } = placementOk(tok, kind, isBase)
+        const { ok, legal } = placementOk(tok, kind, isBase, f.rel)
         if (!ok) {
           out.push({
             code: 'css-public-outside-resolver',
@@ -384,22 +393,32 @@ function checkPublicPlacement(files: ParsedCss[], input: LintInput, out: Finding
   }
 }
 
-function placementOk(tok: ModelToken, kind: BlockKind, isBase: boolean): { ok: boolean; legal: string } {
+function placementOk(tok: ModelToken, kind: BlockKind, isBase: boolean, rel: string): { ok: boolean; legal: string } {
   if (tok.role === 'brand-mode-source') {
     return { ok: !isBase && kind === 'brand', legal: 'the brand rule of each brand file' }
   }
   if (tok.layer === 'primitive') {
-    // Shared primitive in base; brand-exclusive primitive in a brand rule.
-    return { ok: (isBase && kind === 'primitives') || (!isBase && kind === 'brand'), legal: 'the base.css primitives rule or a brand rule' }
+    if (tok.placement === 'brand-exclusive') {
+      // M-06: a brand-exclusive primitive lives only in the brand rule of its own brand file.
+      const want = `brand-${tok.exclusiveBrand}.css`
+      return { ok: !isBase && kind === 'brand' && rel.endsWith(want), legal: `the ${want} brand rule` }
+    }
+    // Shared primitive: only the base.css primitives rule.
+    return { ok: isBase && kind === 'primitives', legal: 'the base.css primitives rule' }
   }
-  // Public non-primitive (mode-axis, invariant, component): only the base.css resolver.
+  // Brand-axis public (role public, axis brand): every brand rule; other non-primitives: base resolver.
+  if (tok.axis === 'brand') {
+    return { ok: !isBase && kind === 'brand', legal: 'the brand rule of each brand file' }
+  }
   return { ok: isBase && kind === 'resolver', legal: 'the base.css resolver rule' }
 }
 
-/** dist-parity (§13): the same public-token set in CSS, ESM, .d.ts TokenName, manifest, and API report. */
+/** dist-parity (§13): the same published-token set (public + brand-mode-source, esm-output.md §4/E-08)
+ * in CSS, ESM, .d.ts TokenName, manifest, and API report. */
 function checkDistParity(files: ParsedCss[], input: LintInput, out: Finding[]): void {
   const byCssName = new Map(input.model.tokens.map((t) => [t.cssName, t]))
-  const expected = new Set(input.model.tokens.filter((t) => t.role === 'public').map((t) => t.id))
+  const isPublished = (t: { role: string }) => t.role === 'public' || t.role === 'brand-mode-source'
+  const expected = new Set(input.model.tokens.filter(isPublished).map((t) => t.id))
 
   const cssIds = new Set<string>()
   for (const f of files) {
@@ -407,13 +426,13 @@ function checkDistParity(files: ParsedCss[], input: LintInput, out: Finding[]): 
       for (const d of b.decls) {
         if (!d.name || PRIVATE_RE.test(d.name)) continue
         const tok = byCssName.get(d.name)
-        if (tok && tok.role === 'public') cssIds.add(tok.id)
+        if (tok && isPublished(tok)) cssIds.add(tok.id)
       }
     }
   }
   const esmIds = new Set([...input.esm.js.matchAll(/^ {2}"(.+?)": "var\(/gm)].map((m) => m[1]!))
   const dtsIds = new Set([...input.esm.dts.matchAll(/^ {2}readonly "(.+?)":/gm)].map((m) => m[1]!))
-  const manifestIds = new Set(input.manifest.tokens.filter((t) => t.role === 'public').map((t) => t.id))
+  const manifestIds = new Set(input.manifest.tokens.filter(isPublished).map((t) => t.path))
   const apiIds = new Set(input.api.tokens)
 
   const surfaces: [string, Set<string>][] = [
@@ -436,7 +455,36 @@ function checkDistParity(files: ParsedCss[], input: LintInput, out: Finding[]): 
   }
 }
 
-/** Lint the generated CSS and cross-check dist-parity. Returns findings (empty = clean). */
+/** manifest-guarantee (build-manifests.md §2.4): M-07 (aliasChains/color.emitted keys are exactly the
+ * permutations) and M-08 (placement `brand-exclusive` ⟺ a real `exclusiveBrand`). The placement↔file
+ * half of M-06 is enforced by checkPublicPlacement; its set half by checkDistParity. */
+function checkManifestGuarantees(input: LintInput, out: Finding[]): void {
+  const brands = new Set(input.meta.brands)
+  // M-08 over the model (the source the manifest is emitted from).
+  for (const t of input.model.tokens) {
+    const exclusive = t.placement === 'brand-exclusive'
+    if (exclusive && (!t.exclusiveBrand || !brands.has(t.exclusiveBrand))) {
+      out.push({ code: 'manifest-guarantee', rule: 'M-08', id: t.id, message: `"${t.id}" is brand-exclusive but exclusiveBrand ${JSON.stringify(t.exclusiveBrand)} is not a known brand.` })
+    } else if (!exclusive && t.exclusiveBrand) {
+      out.push({ code: 'manifest-guarantee', rule: 'M-08', id: t.id, message: `"${t.id}" carries exclusiveBrand ${JSON.stringify(t.exclusiveBrand)} without placement brand-exclusive.` })
+    }
+  }
+  // M-07 over the emitted manifest tokens.
+  const permKey = input.meta.brands.flatMap((b) => input.meta.modes.map((m) => `${b}/${m}`)).sort().join(',')
+  const keysOf = (o: Record<string, unknown> | null | undefined): string | null => (o ? Object.keys(o).sort().join(',') : null)
+  for (const t of input.manifest.tokens) {
+    const ac = keysOf(t.aliasChains)
+    if (ac !== null && ac !== permKey) {
+      out.push({ code: 'manifest-guarantee', rule: 'M-07', id: t.path, message: `"${t.path}" aliasChains keys [${ac}] are not the permutations [${permKey}].` })
+    }
+    const ce = keysOf(t.color?.emitted)
+    if (ce !== null && ce !== permKey) {
+      out.push({ code: 'manifest-guarantee', rule: 'M-07', id: t.path, message: `"${t.path}" color.emitted keys [${ce}] are not the permutations [${permKey}].` })
+    }
+  }
+}
+
+/** Lint the generated CSS and cross-check dist-parity and the manifest guarantees. Returns findings. */
 export function lintGeneratedCss(input: LintInput): Finding[] {
   const out: Finding[] = []
   const files: ParsedCss[] = input.cssFiles.map((f) => ({ ...f, lines: f.css.split('\n'), blocks: parseBlocks(f.css) }))
@@ -445,5 +493,6 @@ export function lintGeneratedCss(input: LintInput): Finding[] {
   checkVarUndeclared(files, out)
   checkPublicPlacement(files, input, out)
   checkDistParity(files, input, out)
+  checkManifestGuarantees(input, out)
   return out
 }
