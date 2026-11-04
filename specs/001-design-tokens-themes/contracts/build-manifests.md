@@ -93,7 +93,7 @@ marker.
   "placement": "base",
   "role": "public",
   "scale": null,
-  "source": { "column": 7, "file": "src/semantic/mode/light.tokens.json", "line": 4 },
+  "source": { "column": 7, "file": "src/semantic/mode/dark.tokens.json", "line": 6 },
   "type": "color"
 }
 ```
@@ -115,7 +115,7 @@ marker.
 | `color` | object \| null | Only for `type` `color` or a composite with color; otherwise `null` (§2.3). |
 | `deprecated` | boolean \| string | From `$deprecated`. |
 | `description` | string \| null | From `$description`. |
-| `source` | object | First definition of the token: file (M-03), line and column, 1-based. |
+| `source` | object | First definition of the token — the first declaring file in code-point-sorted order (so a path in both `mode/dark` and `mode/light` resolves to `dark`): file (M-03), line and column, 1-based. |
 
 ### 2.3 Color and composites
 
