@@ -83,10 +83,14 @@ layer boundaries. **No story starts before this.**
   pnpm `overrides`), exact `ajv`, and `@<prefixo>/color`; `bin` `tokens-build` with subcommands
   `validate` and `build`; exit codes 0 ok, 1 violation, 2 usage/config, 3 internal; flag `--json`
   (tools-cli.md §1)
-- [x] T017 Implement in `tools/tokens-build/src/model.ts` the internal token model (data-model,
+- [ ] T017 Implement in `tools/tokens-build/src/model.ts` the internal token model (data-model,
   "Token": `path`, `cssName`, `layer`, `category`, `type`, `axis`, `role`, `values`, `source`) and the
   reader with Ajv that validates against the versioned DTCG schemas (V-01) and builds the index
   `id → file:line:column` used in every error message
+  — reopened: the model exists in model.ts; the `id → file:line:column` position is now captured
+  (via @humanwhocodes/momoa in the adapter, feeding the manifest `source` under T044), but Ajv schema
+  validation (V-01) is still absent (`ajv` is declared but never imported) and the position is not yet
+  wired into the validator error messages; depends on T014 schemas
 - [x] T018 Implement in `tools/tokens-build/src/resolver.ts` the loading via `@terrazzo/parser`
   with a custom `req` that rejects non-`file:` `$ref` (no network); expose `listPermutations()` and
   `apply()`; fail (code 1) if the permutation list comes back undefined or incomplete
@@ -220,6 +224,9 @@ token; two byte-for-byte identical builds (spec US2).
   invariants and components, in the no-space form) and `brand-<id>.css` (public brand-axis tokens
   and brand-exclusive primitives; `:where(:root)` only in the default brand) — css-output.md §4 to §8,
   FR-015, FR-017
+  — note: the D7 brand-exclusive primitive partition (§4) was missing here (all primitives sat in
+  base.css); completed under T044/FND-02 — exclusive primitives now move to their brand file, and a
+  whole-token-aliased primitive emits `var()` (DEP-03) instead of a resolved literal
 - [x] T042 [US2] Implement the generated-CSS lint in `tools/tokens-build/src/format/css-lint.ts`:
   no-space form, literal `initial` (WebKit bug 243247), every `var()` target declared, public
   token only in the resolver or in the brand scope, `css-layer` vs `layers.json`, `dist-parity`
@@ -233,23 +240,37 @@ token; two byte-for-byte identical builds (spec US2).
   §2 (per token: `cssName`, `layer`, `category`, `type`, `axis`, `role`, `placement`,
   `exclusiveBrand`, `aliasOf`, `aliasChains` per permutation, `scale`, `color.emitted`/`subRefs`,
   `source`), with guarantees M-06 to M-08
+  — done (in build.ts renderTokensManifest, not a separate format/manifest.ts — monolithic build like
+  T041/T045-T047): full §2.2 shape — `path` (was `id`), `aliasOf` (by context "*"/brand/mode),
+  `aliasChains` (per permutation, token itself first), `color.subRefs`, `exclusiveBrand`, `source`
+  (packages/tokens-relative `src/…` file + 1-based line/column via @humanwhocodes/momoa), `deprecated`,
+  `description` + root `package` + `brands[].file`. M-06 (placement→file) in checkPublicPlacement,
+  M-07/M-08 in checkManifestGuarantees (css-lint). D7 brand-exclusive derivation lives in model.ts
+  (FND-02); manifest consumers migrated `id`→`path` (tokens-contrast, stylelint, dist-parity).
+  Adversarial review (workflow) confirmed + fixed: primitive whole-token alias now emits `var()`
+  (DEP-03/§4) so the fixpoint matches the renderer; stale §2.2 `source` example corrected (dark/line 6)
 - [x] T045 [P] [US2] Implement the `dist/meta/sync-manifest.json` emitter in
   `tools/tokens-build/src/format/sync-manifest.ts` (build-manifests.md §3, format in
   [contracts/design-sync.md](contracts/design-sync.md)), from the same resolved model
-- [x] T046 [P] [US2] Implement the `dist/meta/report.json` and `report.md` emitter in
+- [ ] T046 [P] [US2] Implement the `dist/meta/report.json` and `report.md` emitter in
   `tools/tokens-build/src/format/report.ts`: count by category and layer, height scale per
   permutation, out-of-gamut colors mapped, raw and gzip size of each file (build-manifests.md
   §4, FR-006, FR-008, QA-07)
-- [x] T047 [P] [US2] Implement the API-report emitter in
+  — reopened: emits report.json but not report.md (dist/meta has no report.md)
+- [ ] T047 [P] [US2] Implement the API-report emitter in
   `tools/tokens-build/src/format/api-report.ts` → `packages/tokens/api/tokens.api.json` (versioned),
   per esm-output.md §11 (public surface, GOV-01 major/minor/patch classification)
+  — reopened: api/tokens.api.json is a flat stub (brands/modes/tokens-as-path-list); missing the §11
+  document (css/entries/theme + per-token metadata), so GOV-01 drift classification is impossible
 - [x] T048 [US2] Implement the deterministic writer in `tools/tokens-build/src/write.ts` (code-point
   ordering, LF, no timestamp or absolute path; canonical JSON M-02) and wire the
   `tokens-build build` pipeline that runs formatters T041 to T047
-- [x] T049 [US2] Implement the `tools/repo-checks` `determinism` subcommand: two builds from
+- [ ] T049 [US2] Implement the `tools/repo-checks` `determinism` subcommand: two builds from
   two clean `git worktree`s, in different paths, `TZ`, and `LC_ALL`, with task cache
   off, packing with `pnpm pack`; compare sha256 per file and of the tarballs; variant between
   floor and latest Node (FR-015, SC-002, ENG-08)
+  — reopened: determinism.ts builds twice in the SAME checkout (only TZ/LANG vary); no two git
+  worktrees at divergent paths, no pnpm pack / tarball sha256 comparison
 - [x] T050 [US2] Implement the `tools/repo-checks` `drift` subcommand: `dist/` in `.gitignore`; fail
   if `git ls-files` lists a generated file; regenerate `api/tokens.api.json` and require
   `git diff --exit-code` (QA-08)
@@ -295,14 +316,17 @@ first and composites the second over the background (spec US4).
 
 ### Tests (US4)
 
-- [x] T055 [P] [US4] Manifest fixtures in `tools/tokens-contrast/fixtures/`: failing pair, translucent
+- [ ] T055 [P] [US4] Manifest fixtures in `tools/tokens-contrast/fixtures/`: failing pair, translucent
   composited pair, stack without an opaque base (V-16), empty surface set in a mode, a token
   missing in a permutation (V-14), exempt `wcag-inactive` pair below the minimum (reported, does not fail),
   "any-of" group with one passing side and another with no passing side, incoherent thresholds (code 2),
   `emitted-mismatch`
-- [x] T056 [P] [US4] Unit tests in `tools/tokens-contrast/test/check.test.ts` of the compositing
+  — reopened: no on-disk `tools/tokens-contrast/fixtures/` dir exists
+- [ ] T056 [P] [US4] Unit tests in `tools/tokens-contrast/test/check.test.ts` of the compositing
   (float and 8-bit per blend, the smaller of the two), exemption, any-of group, and report
   truncation/order (FR-020, SC-002, QA-02)
+  — reopened: check.test.ts builds inline temp fixtures (mkdtemp/writeFile), not the on-disk matrix;
+  covers only a subset (no any-of group / emitted-mismatch)
 
 ### Implementation (US4)
 
@@ -313,13 +337,18 @@ first and composites the second over the background (spec US4).
 - [x] T058 [US4] Create `tools/tokens-contrast` (`@<prefixo>/tokens-contrast`, devDependency of
   `@<prefixo>/color` and the manifests of `@<prefixo>/tokens`): `bin` `tokens-contrast check`, exit
   codes 0–3
-- [x] T059 [US4] Implement the checker in `tools/tokens-contrast/src/check.ts`: for each pair and
+- [ ] T059 [US4] Implement the checker in `tools/tokens-contrast/src/check.ts`: for each pair and
   permutation, resolve via `tokens.manifest.json` (`color.emitted`), composite alpha over an opaque stack or
   an expanded `@set`, apply the WCAG module of `@<prefixo>/color`, minimums from
   `quality/thresholds.json`, `wcag-inactive` exemption, any-of group, `emitted-mismatch`; a failing pair
   fails the build (FR-020, FR-021 data part, A11Y-09, SC-008)
-- [x] T060 [US4] Emit the JSON and Markdown contrast report (ordered by id, brand, and mode, with no
+  — reopened: check.ts trusts `color.emitted` (no `toEmittedSrgb` recompute → G-2 unmet), has no any-of
+  group evaluation, no `@set` expansion, and emits non-contract finding codes; THRESHOLDS_MISMATCH (G-4)
+  not enforced
+- [ ] T060 [US4] Emit the JSON and Markdown contrast report (ordered by id, brand, and mode, with no
   timestamp, ratios truncated to 2 places in the table) and retain it as evidence (ACE-02)
+  — reopened: no Markdown report, no `--out` file writing; JSON shape diverges from the §10
+  ContrastCheckResult envelope
 - [ ] T061 [P] [US4] Real-browser samples in `apps/tokens-example/tests/contrast.spec.ts`:
   render one swatch per pair and permutation from the tarball, paint the opaque stack on real ancestors,
   assert `getComputedStyle` equals the emitted sRGB and run axe (Principle VII, QA-01; axe/@axe-core
@@ -398,13 +427,17 @@ no routine imports variables into the repository (spec US6).
 
 ### Tests (US6)
 
-- [x] T069 [P] [US6] Implement `InMemoryDesignTool` in `tools/design-sync/src/adapters/memory.ts`
+- [ ] T069 [P] [US6] Implement `InMemoryDesignTool` in `tools/design-sync/src/adapters/memory.ts`
   with configurable capabilities and fault injection (fail after N operations, 429 with Retry-After,
   403, expired credential) and the helpers `simulateManualEdit`, `simulateRename`,
   `simulateExtraVariable`, `faults.failAfterOperations` (design-sync.md)
-- [x] T070 [P] [US6] Implement `describeDesignToolPortContract` in
+  — reopened: memory.ts exists but is a reduced prototype — omits capability fields and returns toy
+  types vs the §4 port shapes (follows T072)
+- [ ] T070 [P] [US6] Implement `describeDesignToolPortContract` in
   `tools/design-sync/test/port-contract.test.ts` (cases C-01 to C-18) and run it against the fake on every
   PR (QA-02); `InMemoryTracker`, `InMemoryAlert`, and `FakeClock`; synthetic brands A/B (QA-15)
+  — reopened: port-contract.test.ts and the C-01..C-18 suite + InMemoryTracker/InMemoryAlert/FakeClock
+  do not exist (only an inline sync.test.ts)
 
 ### Implementation (US6)
 
@@ -412,15 +445,20 @@ no routine imports variables into the repository (spec US6).
   runtime dependencies**; only `fetch`, `crypto`, `fs`, `util.parseArgs`) with `bin` `design-sync`
   (`plan`, `apply`, `detect`, `check-access`, `--adapter memory|<tool>`); codes 0–5 (4 access, 5
   verify)
-- [x] T072 [US6] Define the ports in `tools/design-sync/src/ports.ts`: `DesignToolPort`
+- [ ] T072 [US6] Define the ports in `tools/design-sync/src/ports.ts`: `DesignToolPort`
   (`capabilities`, `checkAccess`, `readSnapshot`, `apply(plan,{dryRun})`, `requestPublish`),
   `TrackerPort`, `AlertPort`, **with no tool → repository operation** (guarantees FR-025 and US6 scenario
   6)
-- [x] T073 [US6] Implement the pure core in `tools/design-sync/src/core/`: desired state from the
+  — reopened: G-1 (no tool→repo op) holds, but signatures diverge from §4 — `apply`→`void` not
+  `ApplyResult`, `readSnapshot`→`ToolVariable[]` not `ToolSnapshot`; capability set reduced
+- [ ] T073 [US6] Implement the pure core in `tools/design-sync/src/core/`: desired state from the
   `sync-manifest.json`, topology per axis, diff and plan (rename by key, recreate on a type
   change, deletes last only in managed collections), divergence classification against the previous
   and current version, canonical JSON log with a separate envelope, divergence fingerprint
   (DSN-01 to DSN-05, DSN-11, FR-025 to FR-030); states `planned|dry-run|verified|failed`
+  — reopened: core.ts (not src/core/) has an idempotent plan + a fingerprint, but no §6 divergence
+  classification, no §7/§8 canonical log/envelope, collapses token values to `${type}:${axis}`, and the
+  fingerprint formula diverges from §8
 - [ ] T074 [P] [US6] Implement the GitHub tracker and alert adapters in
   `tools/design-sync/src/adapters/github/`: a short-lived GitHub App token (Issues:write, org
   Members:read), an item with an owner (CODEOWNERS role) and due date (detection + SLA from
