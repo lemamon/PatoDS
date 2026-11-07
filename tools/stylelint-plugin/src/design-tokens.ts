@@ -7,12 +7,13 @@
 // alias chains, the control-height scale) all come from the build manifest (Principle I, no hand list).
 import stylelint from 'stylelint'
 import { readFileSync } from 'node:fs'
-import { isAbsolute, relative } from 'node:path'
+import { relative } from 'node:path'
 import { tokenize, TokenType } from '@csstools/css-tokenizer'
 import {
   parseListOfComponentValues,
   isFunctionNode,
   isTokenNode,
+  isSimpleBlockNode,
 } from '@csstools/css-parser-algorithms'
 import selectorParser from 'postcss-selector-parser'
 import { resolveDataPath } from './resolve-data-path.ts'
@@ -53,9 +54,15 @@ const ALLOWLIST = new Set(['transparent', 'currentcolor', 'auto', 'none', 'inher
 const CALC = new Set(['calc', 'min', 'max', 'clamp'])
 const COLOR_FUNCS = new Set(['rgb', 'rgba', 'hsl', 'hsla', 'hwb', 'lab', 'lch', 'oklab', 'oklch', 'color', 'color-mix', 'light-dark', 'contrast-color'])
 const SYSTEM_COLORS = new Set([
+  // CSS Color 4 system colors
   'canvas', 'canvastext', 'linktext', 'visitedtext', 'activetext', 'buttonface', 'buttontext',
   'buttonborder', 'field', 'fieldtext', 'highlight', 'highlighttext', 'selecteditem', 'selecteditemtext',
   'mark', 'marktext', 'graytext', 'accentcolor', 'accentcolortext',
+  // Deprecated CSS2 system colors (still "system color" per §3.3: literal outside forced-colors)
+  'activeborder', 'activecaption', 'appworkspace', 'background', 'buttonhighlight', 'buttonshadow',
+  'captiontext', 'inactiveborder', 'inactivecaption', 'inactivecaptiontext', 'infobackground', 'infotext',
+  'menu', 'menutext', 'scrollbar', 'threeddarkshadow', 'threedface', 'threedhighlight', 'threedlightshadow',
+  'threedshadow', 'window', 'windowframe', 'windowtext',
 ])
 const NAMED_COLORS = new Set([
   'aliceblue', 'antiquewhite', 'aqua', 'aquamarine', 'azure', 'beige', 'bisque', 'black', 'blanchedalmond',
@@ -150,7 +157,10 @@ interface Ctx {
   inFallback: boolean
   fallbackVar: string
   forcedColors: boolean
+  inGradient: boolean // inside a gradient function of a non-governed property (named colour → literal)
 }
+
+const GRADIENT_RE = /(^|-)gradient$/
 
 function firstIdent(children: any[]): any {
   for (const c of children) if (isTokenNode(c) && c.value[0] === TokenType.Ident) return c.value
@@ -160,6 +170,10 @@ function firstIdent(children: any[]): any {
 function fallbackAfterComma(children: any[]): any[] {
   const i = children.findIndex((c) => isTokenNode(c) && c.value[0] === TokenType.Comma)
   return i === -1 ? [] : children.slice(i + 1)
+}
+
+function pushLiteral(offset: number, ctx: Ctx, out: Finding[]): void {
+  out.push(ctx.inFallback ? { offset, code: 'fallback', arg: ctx.fallbackVar } : { offset, code: 'literal', arg: ctx.category ?? '' })
 }
 
 function walkValue(nodes: any[], ctx: Ctx, byCss: Map<string, Entry>, out: Finding[]): void {
@@ -175,22 +189,54 @@ function walkValue(nodes: any[], ctx: Ctx, byCss: Map<string, Entry>, out: Findi
           if (cls !== 'ok') out.push({ offset: startOffset, code: cls, arg: varName })
         }
         const fb = fallbackAfterComma(node.value)
-        if (fb.length) walkValue(fb, { ...ctx, inCalc: false, inFallback: true, fallbackVar: varName || ctx.fallbackVar }, byCss, out)
+        if (fb.length) walkValue(fb, { ...ctx, inCalc: false, inGradient: false, inFallback: true, fallbackVar: varName || ctx.fallbackVar }, byCss, out)
       } else if (CALC.has(name)) {
-        walkValue(node.value, { ...ctx, inCalc: true }, byCss, out)
+        walkCalc(node.value, { ...ctx, inCalc: true, inGradient: false }, byCss, out)
+      } else if (COLOR_FUNCS.has(name)) {
+        // Colour function (rgb/hsl/color-mix/light-dark/relative syntax …): a single literal leaf in any
+        // property, governed or not (§3.3). Never descended into.
+        pushLiteral(startOffset, ctx, out)
       } else {
-        // Other function: a colour / easing / url / env / attr / gradient function.
+        // Other function: easing / url / env / attr / image-set / gradient.
         if (ctx.governed) {
-          out.push(ctx.inFallback ? { offset: startOffset, code: 'fallback', arg: ctx.fallbackVar } : { offset: startOffset, code: 'literal', arg: ctx.category ?? '' })
-          // opaque literal leaf: do not descend
+          pushLiteral(startOffset, ctx, out) // opaque literal leaf: do not descend
         } else {
-          walkValue(node.value, ctx, byCss, out) // still classify any nested var()
+          // Non-governed: descend to classify nested var(); a named colour inside a gradient is a literal.
+          walkValue(node.value, { ...ctx, inGradient: ctx.inGradient || GRADIENT_RE.test(name) }, byCss, out)
         }
       }
+    } else if (isSimpleBlockNode(node)) {
+      walkValue(node.value, ctx, byCss, out) // grouping parens / brackets: descend
     } else if (isTokenNode(node)) {
       classifyToken(node.value, ctx, out)
     }
-    // whitespace / comments / blocks: ignored
+    // whitespace / comments: ignored
+  }
+}
+
+/**
+ * calc()/min()/max()/clamp(): each leaf is evaluated, but a unitless number is accepted only as an
+ * operand of `*` or `/` (§3.3). Dimensions and other literals stay governed by the normal rules.
+ */
+function walkCalc(nodes: any[], ctx: Ctx, byCss: Map<string, Entry>, out: Finding[]): void {
+  const meaningful = nodes.filter((n: any) => isFunctionNode(n) || isTokenNode(n) || isSimpleBlockNode(n))
+  const isMulDiv = (n: any): boolean => !!n && isTokenNode(n) && n.value[0] === TokenType.Delim && (n.value[1] === '*' || n.value[1] === '/')
+  for (let i = 0; i < meaningful.length; i++) {
+    const node = meaningful[i]
+    if (isFunctionNode(node)) {
+      walkValue([node], ctx, byCss, out)
+    } else if (isSimpleBlockNode(node)) {
+      walkCalc(node.value, ctx, byCss, out)
+    } else {
+      const tok = node.value
+      if (tok[0] === TokenType.Number) {
+        if (Number(tok[4]?.value) === 0) continue
+        if (isMulDiv(meaningful[i - 1]) || isMulDiv(meaningful[i + 1])) continue // operand of * or /
+        if (ctx.governed) pushLiteral(tok[2] as number, ctx, out)
+      } else {
+        classifyToken(tok, ctx, out)
+      }
+    }
   }
 }
 
@@ -198,7 +244,7 @@ function classifyToken(tok: any, ctx: Ctx, out: Finding[]): void {
   const type = tok[0]
   const start = tok[2] as number
   const data = tok[4]
-  const push = () => out.push(ctx.inFallback ? { offset: start, code: 'fallback', arg: ctx.fallbackVar } : { offset: start, code: 'literal', arg: ctx.category ?? '' })
+  const push = () => pushLiteral(start, ctx, out)
   switch (type) {
     case TokenType.Hash:
       push() // hexadecimal colour: literal in any property (§3.3)
@@ -215,7 +261,7 @@ function classifyToken(tok: any, ctx: Ctx, out: Finding[]): void {
     }
     case TokenType.Number: {
       if (Number(data?.value) === 0) return
-      if (ctx.inCalc) return // unitless operand of * or / (approximated as accepted)
+      if (ctx.inCalc) return // operands are classified by walkCalc
       if (ctx.governed) push()
       return
     }
@@ -227,7 +273,8 @@ function classifyToken(tok: any, ctx: Ctx, out: Finding[]): void {
       const id = String(data?.value ?? tok[1]).toLowerCase()
       if (ALLOWLIST.has(id)) return
       if (NAMED_COLORS.has(id)) {
-        if (ctx.governed) push()
+        // literal in a governed property, or as an argument of a gradient function (§3.3)
+        if (ctx.governed || ctx.inGradient) push()
         return
       }
       if (SYSTEM_COLORS.has(id)) {
@@ -273,9 +320,19 @@ interface CompoundInfo {
   pseudoElements: string[]
 }
 
-/** Parse one complex selector into its compounds (left→right), without expanding :is()/:where(). */
+/**
+ * Parse one complex selector into its compounds (left→right). `:is()`/`:where()` are expanded in place:
+ * the class and data-<prefix>-* simple selectors inside them are folded into the enclosing compound's
+ * simples, so a control box wrapped in `:where(.box)` still counts as sizing the control (§3.7).
+ */
 function compoundsOf(selector: string, prefix: string): CompoundInfo[] {
   const compounds: CompoundInfo[] = []
+  const collectInner = (pseudo: any, cur: CompoundInfo): void => {
+    pseudo.walk((inner: any) => {
+      if (inner.type === 'class') cur.simples.push(`.${inner.value}`)
+      else if (inner.type === 'attribute' && String(inner.attribute).startsWith(`data-${prefix}-`)) cur.simples.push(normAttr(inner))
+    })
+  }
   selectorParser((root: any) => {
     root.each((sel: any) => {
       let cur: CompoundInfo = { simples: [], pseudoClasses: [], pseudoElements: [] }
@@ -289,7 +346,10 @@ function compoundsOf(selector: string, prefix: string): CompoundInfo[] {
         else if (n.type === 'attribute' && String(n.attribute).startsWith(`data-${prefix}-`)) cur.simples.push(normAttr(n))
         else if (n.type === 'pseudo') {
           if (String(n.value).startsWith('::')) cur.pseudoElements.push(n.value)
-          else cur.pseudoClasses.push(n.value)
+          else {
+            cur.pseudoClasses.push(n.value)
+            if (n.value === ':is' || n.value === ':where') collectInner(n, cur)
+          }
         }
       })
       compounds.push(cur)
@@ -417,11 +477,12 @@ const rule = (primary: boolean, secondary?: any) => {
       return false
     }
 
-    // skip @font-face / @page declarations.
+    // Declarations whose value is not analyzed: @font-face and @page (§3.4), and @property descriptors
+    // (the at-rule itself already emits token-definition; its initial-value/syntax must not be analyzed).
     const inSkippedAtRule = (node: any): boolean => {
       let n = node.parent
       while (n) {
-        if (n.type === 'atrule' && /^(font-face|page)$/i.test(String(n.name))) return true
+        if (n.type === 'atrule' && /^(font-face|page|property)$/i.test(String(n.name))) return true
         n = n.parent
       }
       return false
@@ -450,7 +511,7 @@ const rule = (primary: boolean, secondary?: any) => {
       const out: Finding[] = []
       try {
         const nodes = parseListOfComponentValues(tokenize({ css: value }))
-        walkValue(nodes, { governed: isGoverned, category, keywords, inCalc: false, inFallback: false, fallbackVar: '', forcedColors: inForcedColors(decl) }, byCss, out)
+        walkValue(nodes, { governed: isGoverned, category, keywords, inCalc: false, inFallback: false, fallbackVar: '', forcedColors: inForcedColors(decl), inGradient: false }, byCss, out)
       } catch {
         /* unparsable value: no leaf warnings */
       }
@@ -487,23 +548,50 @@ const rule = (primary: boolean, secondary?: any) => {
       } catch {
         return
       }
+      // `style()` container queries are handled as declarations: the name follows the var() rules and the
+      // value follows the leaf rules (§3.6). A plain `(--name)` elsewhere is a custom-media reference.
+      const fnStack: string[] = []
+      const inStyle = () => fnStack.includes('style')
+      let prevType = -1
+      let prevVal = ''
       for (const tok of toks) {
         const type = tok[0]
         const start = tok[2] as number
         const data = tok[4]
-        if (type === TokenType.Ident) {
+        if (type === TokenType.Whitespace || type === TokenType.Comment) continue
+        if (type === TokenType.Function) {
+          fnStack.push(String(data?.value ?? tok[1]).toLowerCase())
+        } else if (type === TokenType.CloseParen) {
+          fnStack.pop()
+        } else if (type === TokenType.Ident) {
           const id = String(data?.value ?? tok[1])
           if (id.startsWith('--')) {
-            const e = byCss.get(id)
-            if (e && e.layer !== 'primitive' && e.role !== 'brand-mode-source' && e.category === 'breakpoint') continue
-            if (e && e.layer === 'primitive') report(at, messages.primitive(id), base + start)
-            else report(at, messages.unknown(id), base + start)
+            if (inStyle()) {
+              const cls = classifyVar(id, byCss)
+              if (cls === 'primitive') report(at, messages.primitive(id), base + start)
+              else if (cls === 'brand') report(at, messages.brandSource(id), base + start)
+              else if (cls === 'unknown') report(at, messages.unknown(id), base + start)
+            } else {
+              const e = byCss.get(id)
+              const okBreakpoint = !!e && e.layer !== 'primitive' && e.role !== 'brand-mode-source' && e.category === 'breakpoint'
+              if (!okBreakpoint) {
+                if (e && e.layer === 'primitive') report(at, messages.primitive(id), base + start)
+                else report(at, messages.unknown(id), base + start)
+              }
+            }
+          } else if (inStyle()) {
+            const low = id.toLowerCase()
+            if (NAMED_COLORS.has(low) || SYSTEM_COLORS.has(low)) report(at, messages.literal(`@${name}`), base + start)
           }
-          continue
+        } else if (type === TokenType.Hash) {
+          if (inStyle()) report(at, messages.literal(`@${name}`), base + start)
+        } else if (type === TokenType.Dimension || type === TokenType.Number || type === TokenType.Percentage) {
+          // A ratio (16/9) is one literal: skip the denominator that follows a `/` (§3.6).
+          const ratioDenom = prevType === TokenType.Delim && prevVal === '/'
+          if (Number(data?.value) !== 0 && !ratioDenom) report(at, messages.literal(`@${name}`), base + start)
         }
-        if ((type === TokenType.Dimension || type === TokenType.Number || type === TokenType.Percentage) && Number(data?.value) !== 0) {
-          report(at, messages.literal(`@${name}`), base + start)
-        }
+        prevType = type
+        prevVal = String(data?.value ?? tok[1] ?? '')
       }
     })
 
@@ -557,7 +645,6 @@ const rule = (primary: boolean, secondary?: any) => {
     if (fileIsRegistered) {
       // single-compound rules that declare a valid control height, keyed by compound.
       const satisfied = new Set<string>()
-      const firstRuleFor = new Map<string, any>() // compoundKey → first rule whose rightmost compound ⊇ it
       root.walkRules((r: any) => {
         if (r.parent?.type === 'atrule' && /keyframes$/i.test(String(r.parent.name))) return
         for (const sel of resolvedSelectors(r)) {
@@ -610,15 +697,15 @@ const rule = (primary: boolean, secondary?: any) => {
     } else {
       root.walkRules((r: any) => {
         if (r.parent?.type === 'atrule' && /keyframes$/i.test(String(r.parent.name))) return
+        // Walk the rule's own written selector so the column is the real source offset (and nested rules
+        // and comma lists keep distinct positions); `index` is relative to the rule's selector start.
         const seen = new Set<string>()
-        for (const sel of resolvedSelectors(r)) {
-          for (const s of allSimples(sel, prefix)) {
-            if (registry.registeredSimple.has(s.value)) continue
-            const dedupe = `${s.value}@${s.index}`
-            if (seen.has(dedupe)) continue
-            seen.add(dedupe)
-            report(r, messages.unclassifiedComponent(s.value), s.index)
-          }
+        for (const s of allSimples(String(r.selector), prefix)) {
+          if (registry.registeredSimple.has(s.value)) continue
+          const dedupe = `${s.value}@${s.index}`
+          if (seen.has(dedupe)) continue
+          seen.add(dedupe)
+          report(r, messages.unclassifiedComponent(s.value), s.index)
         }
       })
     }
