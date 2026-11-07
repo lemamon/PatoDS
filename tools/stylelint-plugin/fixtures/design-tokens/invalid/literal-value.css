@@ -4,4 +4,5 @@
   color: #1a1a1a; /* expect: literal-value@10 */
   margin: 4px 8px; /* expect: literal-value@11, literal-value@15 */
   font-weight: bold; /* expect: literal-value@16 */
+  z-index: calc(var(--patods-z-index-overlay) + 1); /* expect: literal-value@49 */
 }
