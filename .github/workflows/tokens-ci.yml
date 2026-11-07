@@ -36,9 +36,9 @@ jobs:
         node: ["22", "24"]
     steps:
       # actions/checkout@v5 - pin by SHA digest in the CI feature
-      - uses: actions/checkout@<sha>
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
       # actions/setup-node@v4 - pin by SHA digest
-      - uses: actions/setup-node@<sha>
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
           node-version: ${{ matrix.node }}
       - run: corepack enable
@@ -73,8 +73,8 @@ jobs:
     container:
       image: mcr.microsoft.com/playwright:v1.64.1-noble@sha256:<digest>
     steps:
-      - uses: actions/checkout@<sha>
-      - uses: actions/setup-node@<sha>
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
           node-version: "24"
       - run: corepack enable
@@ -90,8 +90,8 @@ jobs:
     env:
       E2E_ALL_ENGINES: "1"
     steps:
-      - uses: actions/checkout@<sha>
-      - uses: actions/setup-node@<sha>
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
           node-version: "24"
       - run: corepack enable
@@ -108,8 +108,8 @@ jobs:
       matrix:
         node: ["22", "24"]
     steps:
-      - uses: actions/checkout@<sha>
-      - uses: actions/setup-node@<sha>
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
           node-version: ${{ matrix.node }}
       - run: corepack enable
