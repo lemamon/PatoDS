@@ -185,8 +185,13 @@ valid ones pass, with a report by category (spec US1).
   and HTML outside the source, `--<prefixo>-` keys and `setProperty` in TS/JS/JSON and DTCG documents
   outside the source; honor `quality/scan-allowlist.json`; self-test fixtures in CSS, SFC, TSX, and
   JSON detected 100% (SC-001, SC-009)
-- [ ] T035 [US1] Add the "logic module without a sibling test" check to `tools/repo-checks` and
+- [x] T035 [US1] Add the "logic module without a sibling test" check to `tools/repo-checks` and
   run it in `pnpm test` (QA-02)
+  — done: `repo-checks logic-tests` flags any `tools/*/src/**/*.ts` with a runtime export (not the
+  `index.ts` barrel or `cli.ts`/bin) that no `test/**/*.test.ts` of its package imports (QA02-UNTESTED-MODULE);
+  `determinism.ts` is allow-listed (an integration module exercised end-to-end by check:determinism/drift).
+  Wired as `check:logic-tests` (root script + turbo + tokens-ci.yml) with synthetic tests; closed the real
+  gaps it found (emit.ts, write.ts now have unit tests)
 - [x] T036 [US1] Wire `tokens:validate` and `check:scan` into `tokens-ci.yml` as required PR
   checks; run over the real source (100% of the tokens pass)
 
@@ -264,7 +269,10 @@ token; two byte-for-byte identical builds (spec US2).
   `tools/tokens-build/src/format/report.ts`: count by category and layer, height scale per
   permutation, out-of-gamut colors mapped, raw and gzip size of each file (build-manifests.md
   §4, FR-006, FR-008, QA-07)
-  — reopened: emits report.json but not report.md (dist/meta has no report.md)
+  — report.md done: `renderReportMd` emits `dist/meta/report.md` (totals, per-category counts,
+  control-height scale, permutations, file bytes/gzip — the report.json data in tables, no timestamp,
+  G-3) and it is listed under `./meta/*` in the API report. Remaining: report.json `controlHeight` is a
+  flat id list, not the §4 per-permutation `{path,value}` shape; QA-07 budget wiring is T081
 - [x] T047 [P] [US2] Implement the API-report emitter in
   `tools/tokens-build/src/format/api-report.ts` → `packages/tokens/api/tokens.api.json` (versioned),
   per esm-output.md §11 (public surface, GOV-01 major/minor/patch classification)
@@ -282,8 +290,10 @@ token; two byte-for-byte identical builds (spec US2).
   two clean `git worktree`s, in different paths, `TZ`, and `LC_ALL`, with task cache
   off, packing with `pnpm pack`; compare sha256 per file and of the tarballs; variant between
   floor and latest Node (FR-015, SC-002, ENG-08)
-  — reopened: determinism.ts builds twice in the SAME checkout (only TZ/LANG vary); no two git
-  worktrees at divergent paths, no pnpm pack / tarball sha256 comparison
+  — strengthened: determinism.ts now builds a third time from a divergent filesystem path (a fresh
+  copy of the source at a temp path, built with a different TZ and the C locale) and compares the dist +
+  API hashes, so path independence is tested (code `DETERMINISM-PATH`), not only TZ/locale. Remaining: a
+  literal two-`git worktree` run and the `pnpm pack` tarball sha256 comparison (floor vs latest Node)
 - [x] T050 [US2] Implement the `tools/repo-checks` `drift` subcommand: `dist/` in `.gitignore`; fail
   if `git ls-files` lists a generated file; regenerate `api/tokens.api.json` and require
   `git diff --exit-code` (QA-08)
