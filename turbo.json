@@ -57,6 +57,9 @@
     "check:layers": {
       "outputs": []
     },
+    "check:traceability": {
+      "outputs": []
+    },
     "design-sync": {
       "cache": false,
       "dependsOn": ["tokens:build"]
