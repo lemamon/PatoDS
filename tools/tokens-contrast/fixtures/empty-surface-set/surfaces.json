@@ -1,0 +1,11 @@
+{
+  "$schema": "./surfaces.schema.json",
+  "schemaVersion": 1,
+  "sets": {
+    "@surfaces": {
+      "light": [
+        "color.black"
+      ]
+    }
+  }
+}

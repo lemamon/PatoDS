@@ -1,0 +1,13 @@
+{
+  "$schema": "./manifest.schema.json",
+  "schemaVersion": 1,
+  "pairs": [
+    {
+      "id": "ring.missing",
+      "fg": "color.white",
+      "bg": "@missing",
+      "state": "focus-visible",
+      "kind": "non-text"
+    }
+  ]
+}

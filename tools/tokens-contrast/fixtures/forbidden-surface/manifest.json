@@ -1,0 +1,13 @@
+{
+  "$schema": "./manifest.schema.json",
+  "schemaVersion": 1,
+  "pairs": [
+    {
+      "id": "ring.badset",
+      "fg": "color.ring",
+      "bg": "@bad",
+      "state": "focus-visible",
+      "kind": "non-text"
+    }
+  ]
+}

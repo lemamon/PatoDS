@@ -1,0 +1,15 @@
+{
+  "$schema": "./manifest.schema.json",
+  "schemaVersion": 1,
+  "pairs": [
+    {
+      "id": "text.fail",
+      "fg": "color.mid",
+      "bg": [
+        "color.white"
+      ],
+      "state": "default",
+      "kind": "text"
+    }
+  ]
+}

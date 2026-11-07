@@ -1,0 +1,14 @@
+{
+  "$schema": "./manifest.schema.json",
+  "schemaVersion": 1,
+  "pairs": [
+    {
+      "id": "text.shape",
+      "fg": "color.black",
+      "bg": [
+        "color.white"
+      ],
+      "state": "default"
+    }
+  ]
+}
