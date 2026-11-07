@@ -35,12 +35,15 @@ async function main(): Promise<number> {
   if (values.json) {
     process.stdout.write(JSON.stringify(result, null, 2) + '\n')
   } else {
-    for (const f of result.findings) process.stderr.write(`${f.code}  ${f.pair}  ${f.perm}  ${f.message}\n`)
-    const n = result.report.rows.length
-    const exempt = result.report.rows.filter((r) => r.exempt).length
-    process.stdout.write(`contrast: ${n} measurements (${exempt} exempt), ${result.findings.length} failures.\n`)
+    for (const e of result.errors) process.stderr.write(`error  ${e.code}  ${e.message}\n`)
+    for (const f of result.findings) {
+      const ctx = f.context ? ` ${f.context.brand}/${f.context.mode}` : ''
+      process.stderr.write(`error  ${f.code}  ${f.pair}${ctx}  ${f.message}\n`)
+    }
+    const s = result.summary
+    process.stdout.write(`contrast: ${s.cases} cases (${s.exempt} exempt), ${s.passed} passed, ${s.failed} failed, ${result.findings.length} findings.\n`)
   }
-  return result.findings.length ? 1 : 0
+  return result.exitCode
 }
 
 main().then(
