@@ -218,6 +218,40 @@ Suggested order, aligned to the user story priorities:
 Parallelizable after the foundation: US4 (`tools/color`) and US6 (`tools/design-sync`) do not touch the
 US2 and US3 files until the manifest integration.
 
+## Remediation plan (post-analyze 2026-11-07)
+
+A `/speckit-analyze` pass over the mid-implementation state found two CRITICAL constitution gaps and
+several HIGH/MEDIUM completeness gaps. The design stays valid — every Constitution Check answer holds at
+the design level; these are implementation-completeness items plus one doc-structure drift. Close in this
+order, before treating US1/US4/US5/US6 as accepted:
+
+1. **ACE-02 traceability (CRITICAL, FR-031)** — pull T079 out of Phase 9 to now: create
+   `quality/traceability.json` mapping each contracted ID to a CI check or retained evidence, plus a
+   `repo-checks traceability` subcommand that fails on an in-progress or accepted ID without a check,
+   wired into `tokens-ci.yml`. ACE-02 requires this for US1/US2/US3, which are already accepted.
+2. **DTCG schema validation (CRITICAL, FR-002 / TOK-01)** — close T014 (vendor the DTCG 2025.10
+   `format.json`/`resolver.json` + `SHA256SUMS` + W3C license) and T017 (import Ajv in the reader, run
+   V-01 schema validation before the model rules, and wire the `src/…:line:column` position — now
+   captured via momoa — into the validator findings). US1 is not a truly "validated source" until schema
+   validation runs in CI.
+3. **API report §11 (HIGH, GOV-01 / Principle X)** — close T047: replace the flat `tokens.api.json`
+   stub with the esm-output §11 document (css/entries/theme + per-token metadata) so `check:drift`
+   can classify major/minor/patch.
+4. **Contrast recompute (HIGH, A11Y-09 / Principle V, non-negotiable)** — close T059 (and its US4 deps
+   T055–T057, T060): recompute emitted sRGB via `@<prefixo>/color` `toEmittedSrgb` (G-2,
+   `emitted-mismatch`), evaluate the any-of group, expand `@set`, and enforce `THRESHOLDS_MISMATCH` (G-4).
+5. **Determinism worktrees (MEDIUM, SC-002)** — close T049: two `git worktree`s at divergent paths plus
+   `pnpm pack` tarball sha256 comparison, floor vs latest Node.
+6. **Build report.md (MEDIUM, FR-008)** and **logic-module test check (MEDIUM, QA-02)** — close T046 and T035.
+7. **momoa dependency (MEDIUM, ENG-25 / ENG-21)** — record owner approval for the new direct dependency
+   `@humanwhocodes/momoa` and confirm its license against `quality/license-policy.json` (exact pin and
+   `minimumReleaseAge` already satisfied).
+
+**Structure note (F1):** the `tools/tokens-build` formatters (T041–T048) are implemented monolithically in
+`src/build.ts` (alongside `css-lint.ts`, `model.ts`, `adapter.ts`, `emit.ts`, `write.ts`), not as the
+separate `src/format/*.ts` files the task texts name. The outputs and the contracts are unchanged; the
+monolithic layout is an accepted deviation, recorded here so the file list above is read as logical, not literal.
+
 ## Main risks
 
 | Risk | Mitigation |
