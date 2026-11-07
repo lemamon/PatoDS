@@ -11,7 +11,9 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@patods/color": "workspace:*"
+    "@humanwhocodes/momoa": "catalog:",
+    "@patods/color": "workspace:*",
+    "ajv": "catalog:"
   },
   "devDependencies": {
     "typescript": "catalog:",
