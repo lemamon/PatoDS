@@ -92,9 +92,11 @@ export function detectDivergences(input: DetectInput): DetectResult {
 
   for (const e of match.extra) {
     const sig = variableSignature(e.collection, e.variable.path, e.variable.type)
-    // An extra variable has no manifest key; it cannot appear in the previous manifest by key, so it is
-    // manual unless a previous-version removal is being reflected (handled per-key where keys exist).
-    emit('extra', 'value', e.collection, e.variable.path, null, null, firstValue(e.variable), sigValue(sig), input.previousProvided ? null : undefined)
+    // Classify against the previous version by the extra's own key: a token present in the previous
+    // version, absent from the current one, still in the tool, is a release removal (§6 release row);
+    // an extra with no such previous entry (or no key) is a manual addition.
+    const ps = e.variable.key ? prevSig(e.variable.key) : input.previousProvided ? null : undefined
+    emit('extra', 'value', e.collection, e.variable.path, null, null, firstValue(e.variable), sigValue(sig), prevSigValue(ps))
   }
 
   for (const pair of match.matched) {

@@ -152,42 +152,49 @@ export function buildPlan(input: PlanInput): SyncPlan {
   for (const pair of match.matched) {
     const { desired: d, snapshot: s, collection } = pair
     const typeChanged = s.type !== d.type
-    if (typeChanged) {
+    const collectionChanged = pair.snapshotCollection !== d.collection
+    const recreated = typeChanged || collectionChanged
+    // Cause compared against the previous desired signature in the same format (collection#path#type).
+    const cause = classifyVar(d.key, snapSig(pair.snapshotCollection, s))
+    if (recreated) {
       drafts.push({
         phase: 'recreates', collection, sortPath: pathJoin(d.path), sortCtx: '', sub: 0,
-        cause: classifyVar(d.key, null), breaking: true,
-        op: { op: 'recreateVariable', ref: s.ref, key: d.key, path: d.path, reason: 'type', type: d.type },
+        cause, breaking: true,
+        op: { op: 'recreateVariable', ref: s.ref, key: d.key, path: d.path, reason: typeChanged ? 'type' : 'collection', type: d.type },
       })
     } else if (!pathEquals(s.path, d.path)) {
       drafts.push({
         phase: 'renames', collection, sortPath: pathJoin(d.path), sortCtx: '', sub: 0,
-        cause: classifyVar(d.key, aliasOrNull(s)), breaking: false,
+        cause, breaking: false,
         op: { op: 'renameVariable', ref: s.ref, key: d.key, from: s.path, to: d.path },
       })
     }
-    const metaFields = metadataFieldsFor(pair, typeChanged)
+    const metaFields = metadataFieldsFor(pair)
     if (metaFields.length > 0) {
       drafts.push({
         phase: 'metadata', collection, sortPath: pathJoin(d.path), sortCtx: '', sub: 0,
-        cause: pair.adopted ? 'manual' : classifyVar(d.key, null), breaking: false,
+        cause: pair.adopted ? 'manual' : cause, breaking: false,
         op: { op: 'setMetadata', key: d.key, path: d.path, fields: metaFields },
       })
     }
+    // Values for a recreated variable are (re-)set by the dedicated recreate loop below, not here.
     let changed = false
-    for (const ctx of contextsOf(manifest, collection)) {
-      const want = d.values[ctx]
-      if (!want) continue
-      const before = typeChanged ? null : asSyncValue(s.values[ctx])
-      if (!typeChanged && valueEquals(before, want)) continue
-      changed = true
-      drafts.push({
-        phase: 'values', collection, sortPath: pathJoin(d.path), sortCtx: ctx, sub: 0,
-        cause: classifyDifference({ real: before, desiredPrevious: prevValue(input, prevByKey, d.key, ctx), firstSync: input.firstSync }),
-        breaking: false,
-        op: { op: 'setValue', key: d.key, path: d.path, mode: ctx, value: want, before },
-      })
+    if (!recreated) {
+      for (const ctx of contextsOf(manifest, collection)) {
+        const want = d.values[ctx]
+        if (!want) continue
+        const before = asSyncValue(s.values[ctx])
+        if (valueEquals(before, want)) continue
+        changed = true
+        drafts.push({
+          phase: 'values', collection, sortPath: pathJoin(d.path), sortCtx: ctx, sub: 0,
+          cause: classifyDifference({ real: before, desiredPrevious: prevValue(input, prevByKey, d.key, ctx), firstSync: input.firstSync }),
+          breaking: false,
+          op: { op: 'setValue', key: d.key, path: d.path, mode: ctx, value: want, before },
+        })
+      }
     }
-    if (typeChanged) summary.recreate += 1
+    if (recreated) summary.recreate += 1
     else if (!pathEquals(s.path, d.path)) summary.rename += 1
     else if (changed || metaFields.length > 0) summary.update += 1
     else summary.unchanged += 1
@@ -219,9 +226,10 @@ export function buildPlan(input: PlanInput): SyncPlan {
     summary.create += 1
   }
 
-  // Recreated variables also need their values re-set (the recreate removed them).
+  // Recreated variables (type or collection change) also need their values re-set (recreate cleared them).
   for (const pair of match.matched) {
-    if (pair.snapshot.type === pair.desired.type) continue
+    const recreated = pair.snapshot.type !== pair.desired.type || pair.snapshotCollection !== pair.desired.collection
+    if (!recreated) continue
     const d = pair.desired
     for (const ctx of contextsOf(manifest, pair.collection)) {
       const want = d.values[ctx]
@@ -300,17 +308,17 @@ function fp(kind: string, path: string, tool: string): Fingerprint {
 // Only the key is written back (it carries its value in the op). description/codeSyntax/hidden are tool
 // policy, not a repository-driven value, so the core detects their drift (§8) but does not write them;
 // a value-carrying metadata write waits for the real adapter (ADR-14).
-function metadataFieldsFor(pair: MatchResult['matched'][number], typeChanged: boolean): ('key')[] {
-  void typeChanged
+function metadataFieldsFor(pair: MatchResult['matched'][number]): ('key')[] {
   return pair.adopted || pair.snapshot.key !== pair.desired.key ? ['key'] : []
 }
 
+/** Variable identity signature for classification, in the same format on both desired and snapshot. */
 function sig(v: DesiredVariable): SyncValue {
   return { literal: { value: `${v.collection}#${pathJoin(v.path)}#${v.type}` } }
 }
 
-function aliasOrNull(s: SnapshotVariable): SyncValue | null {
-  return { literal: { value: `${pathJoin(s.path)}#${s.type}` } }
+function snapSig(collection: CollectionId, s: SnapshotVariable): SyncValue {
+  return { literal: { value: `${collection}#${pathJoin(s.path)}#${s.type}` } }
 }
 
 function asSyncValue(v: SnapshotVariable['values'][string] | undefined): SyncValue | null {

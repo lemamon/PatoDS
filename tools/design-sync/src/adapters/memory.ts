@@ -200,6 +200,12 @@ export class InMemoryDesignTool implements DesignToolPort {
       this.opsLog = [...plan.operations]
       return { status: 'dry-run', completedOperations: 0, failedAtSeq: null, error: null }
     }
+    // write=manual (and agent-mcp in a non-interactive run, §9) performs no API write: the caller emits
+    // a step-by-step sync-plan.md and opens a manual-write item. The target is left unchanged.
+    if (this.caps.write !== 'api') {
+      this.opsLog = []
+      return { status: 'manual', completedOperations: 0, failedAtSeq: null, error: null }
+    }
     const firstSeq = plan.operations[0]?.seq ?? null
 
     const whole = this.wholeRequestFault(firstSeq)

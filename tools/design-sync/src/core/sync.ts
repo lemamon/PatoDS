@@ -126,7 +126,7 @@ export async function runApply(port: DesignToolPort, options: SyncOptions, flags
       allowMassDelete: options.allowMassDelete,
     })
   } catch (err) {
-    return refuse(options, 'apply', err, snapshotBefore, caps)
+    return await refuse(options, 'apply', err, snapshotBefore, caps)
   }
 
   if (flags.dryRun) {
@@ -135,7 +135,12 @@ export async function runApply(port: DesignToolPort, options: SyncOptions, flags
   }
 
   const applyResult = await port.apply(plan, { dryRun: false })
-  if (applyResult.status === 'partial' || applyResult.status === 'manual' || applyResult.error) {
+  if (applyResult.status === 'manual') {
+    // write=manual (§9): nothing was written and no failure occurred. The plan already carries the
+    // manual-write capability outcome; result is `planned` (manual output), exit 1, no failure alert.
+    return finish(options, { command: 'apply', result: 'planned', plan, divergenceAfter: EMPTY_COUNTS, snapshotBefore, snapshotAfter: null, error: null, applyResult, exitCode: 1, toolErrorDetail: null })
+  }
+  if (applyResult.status === 'partial' || applyResult.error) {
     const error: SyncError = applyResult.error ?? { code: 'INTERNAL', phase: 'apply', message: 'apply did not complete', completedOperations: applyResult.completedOperations }
     await raiseAlert(options, error)
     return finish(options, { command: 'apply', result: 'failed', plan, divergenceAfter: EMPTY_COUNTS, snapshotBefore, snapshotAfter: null, error, applyResult, exitCode: exitCodeFor(error.code), toolErrorDetail: error.message })
@@ -168,14 +173,14 @@ export async function runPlan(port: DesignToolPort, options: SyncOptions): Promi
       allowMassDelete: options.allowMassDelete,
     })
   } catch (err) {
-    return refuse(options, 'plan', err, snapshotBefore, caps)
+    return await refuse(options, 'plan', err, snapshotBefore, caps)
   }
   return finish(options, { command: 'plan', result: 'planned', plan, divergenceAfter: EMPTY_COUNTS, snapshotBefore, snapshotAfter: null, error: null, applyResult: null, exitCode: 0, toolErrorDetail: null })
 }
 
-function refuse(options: SyncOptions, command: SyncLog['command'], err: unknown, snapshotBefore: Sha256, caps: ReturnType<DesignToolPort['capabilities']>): SyncOutput {
+async function refuse(options: SyncOptions, command: SyncLog['command'], err: unknown, snapshotBefore: Sha256, caps: ReturnType<DesignToolPort['capabilities']>): Promise<SyncOutput> {
   const error = err instanceof SyncCoreError ? err.toSyncError() : { code: 'INTERNAL' as const, phase: 'plan' as const, message: (err as Error).message, completedOperations: null }
-  // The refused plan still records the capability checks (§5.2) and raises an alert (G-4).
+  // The refused plan still records the capability checks (§5.2) and raises an alert before returning (G-4).
   const refusedPlan: SyncPlan = {
     format: 'patods.sync-plan', version: 1, tool: options.tool,
     source: { package: options.source.package, version: options.source.version },
@@ -185,7 +190,7 @@ function refuse(options: SyncOptions, command: SyncLog['command'], err: unknown,
     summary: { create: 0, rename: 0, recreate: 0, update: 0, delete: 0, unchanged: 0, unsupported: 0 },
     operations: [], outcomes: [],
   }
-  void raiseAlert(options, error)
+  await raiseAlert(options, error)
   return finish(options, { command, result: 'failed', plan: refusedPlan, divergenceAfter: EMPTY_COUNTS, snapshotBefore, snapshotAfter: null, error, applyResult: null, exitCode: exitCodeFor(error.code), toolErrorDetail: error.message })
 }
 

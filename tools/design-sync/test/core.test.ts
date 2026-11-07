@@ -12,8 +12,8 @@ import { matchVariables } from '../src/core/match.ts'
 import { detectDivergences, fingerprint } from '../src/core/divergence.ts'
 import { assertPreconditions, buildPlan, computeCapabilityChecks } from '../src/core/plan.ts'
 import { buildEnvelope, buildLog, deriveChanges, renderLogMarkdown, serializeLog } from '../src/core/log.ts'
-import { buildTrackedItem, runApply, runDetect, systemClock } from '../src/core/sync.ts'
-import { DEFAULT_CAPABILITIES, FakeClock, InMemoryDesignTool, InMemoryTracker } from '../src/adapters/memory.ts'
+import { buildTrackedItem, runApply, runDetect, runPlan, systemClock } from '../src/core/sync.ts'
+import { DEFAULT_CAPABILITIES, FakeClock, InMemoryAlert, InMemoryDesignTool, InMemoryTracker } from '../src/adapters/memory.ts'
 import type { SnapshotVariable, SyncOptions, ToolSnapshot } from '../src/ports.ts'
 import { sampleConfig, sampleManifest, sampleManifestRaw } from './fixtures.ts'
 
@@ -138,6 +138,26 @@ describe('divergence', () => {
     expect(item.kind).toBe('alias')
     expect(item.classification).toBe('manual')
   })
+
+  it('classifies a keyed release-removal extra as release, not manual (§6)', async () => {
+    const current = sampleManifest()
+    // Previous version additionally defined color.gone.500 (removed in the current version).
+    const prevRaw = sampleManifestRaw() as { variables: Record<string, unknown>[] }
+    prevRaw.variables.push({ key: 'color.gone.500', path: ['color', 'gone', '500'], collection: 'primitive', layer: 'primitive', category: 'color', role: 'public', type: 'color', cssName: '--patods-color-gone-500', description: '', values: { '*': { literal: { hex: '#abcdef', alpha: 1 } } } })
+    const previous = parseManifest(prevRaw)
+
+    const tool = new InMemoryDesignTool()
+    await runApply(tool, baseOptions(), { dryRun: false })
+    const snap = await tool.readSnapshot()
+    const primRef = snap.collections.find((c) => c.name === 'Primitives')!.ref
+    const withExtra: ToolSnapshot = {
+      ...snap,
+      variables: [...snap.variables, { ref: 'vGone', collectionRef: primRef, path: ['color', 'gone', '500'], type: 'color', key: 'color.gone.500', description: '', hidden: false, values: { '*': { literal: { hex: '#abcdef', alpha: 1 } } } }],
+    }
+    const report = detectDivergences({ manifest: current, snapshot: withExtra, tool: 'memory:sandbox', previous, previousProvided: true, firstSync: false })
+    const extra = report.items.find((i) => i.kind === 'extra' && i.path.join('.') === 'color.gone.500')!
+    expect(extra.classification).toBe('release')
+  })
 })
 
 describe('plan', () => {
@@ -159,6 +179,33 @@ describe('plan', () => {
     expect(() => assertPreconditions(sampleManifest(), { ...DEFAULT_CAPABILITIES, aliases: false })).toThrow(/aliases/)
     expect(() => assertPreconditions(sampleManifest(), { ...DEFAULT_CAPABILITIES, maxModesPerAxis: 1 })).toThrow(SyncCoreError)
     expect(() => assertPreconditions(sampleManifest(), { ...DEFAULT_CAPABILITIES, read: 'manual' })).toThrow(/read/)
+  })
+
+  it('a type change recreates with exactly one setValue per context (no duplicate)', async () => {
+    const manifest = sampleManifest()
+    const tool = new InMemoryDesignTool()
+    await runApply(tool, baseOptions(), { dryRun: false })
+    tool.simulateTypeChange(['color', 'neutral', '900'], 'dimension')
+    const plan = buildPlan({ manifest, snapshot: await tool.readSnapshot(), capabilities: DEFAULT_CAPABILITIES, config: sampleConfig, tool: 'memory:sandbox', previous: manifest, previousProvided: true, firstSync: false, allowMassDelete: false })
+    const recreate = plan.operations.find((o) => o.op === 'recreateVariable' && o.path.join('.') === 'color.neutral.900')
+    expect(recreate!.breaking).toBe(true)
+    const setVals = plan.operations.filter((o) => o.op === 'setValue' && o.path.join('.') === 'color.neutral.900')
+    expect(setVals).toHaveLength(1) // one context '*', not two
+  })
+
+  it('a same-key cross-collection move recreates with reason collection (§5.3 step 1)', () => {
+    const manifest = sampleManifest()
+    const snapshot: ToolSnapshot = {
+      tool: 'memory:sandbox',
+      collections: [{ ref: 'cB', name: 'Brand', modes: [{ ref: 'mA', name: 'a' }, { ref: 'mB', name: 'b' }] }],
+      variables: [{ ref: 'vX', collectionRef: 'cB', path: ['color', 'neutral', '900'], type: 'color', key: 'color.neutral.900', description: '', hidden: false, values: { a: { literal: { hex: '#16181d', alpha: 1 } }, b: { literal: { hex: '#16181d', alpha: 1 } } } }],
+      published: null,
+    }
+    const plan = buildPlan({ manifest, snapshot, capabilities: DEFAULT_CAPABILITIES, config: sampleConfig, tool: 'memory:sandbox', previous: null, previousProvided: false, firstSync: true, allowMassDelete: false })
+    const recreate = plan.operations.find((o) => o.op === 'recreateVariable' && o.path.join('.') === 'color.neutral.900')
+    expect(recreate).toBeDefined()
+    expect(recreate!.op === 'recreateVariable' && recreate!.reason).toBe('collection')
+    expect(recreate!.breaking).toBe(true)
   })
 })
 
@@ -190,5 +237,25 @@ describe('sync orchestration', () => {
     const item = buildTrackedItem(out.items[0]!, baseOptions())
     expect(item.title.startsWith('[design-sync]')).toBe(true)
     expect(item.labels).toContain('design-sync:divergence')
+  })
+
+  it('awaits an alert on a §5.2 refusal (G-4)', async () => {
+    const tool = new InMemoryDesignTool({ capabilities: { aliases: false } })
+    const alert = new InMemoryAlert()
+    const out = await runPlan(tool, { ...baseOptions(), alert })
+    expect(out.state).toBe('failed')
+    expect(out.error!.code).toBe('ALIASES_UNSUPPORTED')
+    expect(alert.raised).toHaveLength(1)
+    expect(alert.raised[0]!.error.code).toBe('ALIASES_UNSUPPORTED')
+  })
+
+  it('treats write=manual as planned (exit 1), with a manual-write item and no failure alert (§9)', async () => {
+    const tool = new InMemoryDesignTool({ capabilities: { write: 'manual' } })
+    const alert = new InMemoryAlert()
+    const out = await runApply(tool, { ...baseOptions(), alert }, { dryRun: false })
+    expect(out.state).toBe('planned')
+    expect(out.exitCode).toBe(1)
+    expect(alert.raised).toHaveLength(0)
+    expect(out.plan.outcomes.some((o) => o.kind === 'manual-write')).toBe(true)
   })
 })
