@@ -28,6 +28,7 @@
   },
   "notes": {
     "W3C": "Covers the versioned copy of the DTCG 2025.10 JSON Schemas in packages/tokens/schemas; not shipped in the tarball.",
-    "MPL-2.0": "Accepted only as an unmodified dev dependency (e.g. lightningcss via Vite, axe-core via Playwright)."
+    "MPL-2.0": "Accepted only as an unmodified dev dependency (e.g. lightningcss via Vite, axe-core via Playwright).",
+    "@humanwhocodes/momoa": "Apache-2.0 (in `allowed`); a build-time dependency of tools/tokens-build for JSON source positions (manifest `source`, V-01 diagnostics). Not shipped in the published tarball. Owner approval (ENG-25) is the PR/CODEOWNERS gate."
   }
 }
