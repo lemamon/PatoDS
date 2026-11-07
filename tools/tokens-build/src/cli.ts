@@ -6,6 +6,7 @@ import { pathToFileURL } from 'node:url'
 import { loadTokens } from './adapter.ts'
 import { buildModel } from './model.ts'
 import { validateModel, validationSummary, type Finding } from './validate.ts'
+import { validateSchema } from './schema.ts'
 import { runBuild, BuildConfigError } from './build.ts'
 import { CssLintError } from './css-lint.ts'
 
@@ -38,17 +39,22 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<numb
   }
   const srcDir = resolve(values.src ?? 'src')
 
+  // V-01: validate the raw source against the vendored DTCG 2025.10 schemas (FR-002), before the model
+  // rules and independent of the parser. Schema findings combine with V-02..V-13 for validate and build.
+  const schemaFindings = await validateSchema(srcDir)
+
   let load
   try {
     load = await loadTokens(srcDir)
   } catch (err) {
-    // Parser errors (V-01 schema, V-03 alias/cycle) land here.
-    process.stderr.write(`error  TKN-PARSE  ${(err as Error).message}\n`)
+    // A malformed source that the parser also rejects (V-03 alias/cycle, or structure the schema missed).
+    const all: Finding[] = [...schemaFindings, { code: 'TKN-PARSE', rule: 'V-01', message: (err as Error).message }]
+    printFindings(all, Boolean(values.json))
     return 1
   }
 
   const model = buildModel(load)
-  const findings = validateModel(model)
+  const findings = [...schemaFindings, ...validateModel(model)]
 
   if (cmd === 'validate') {
     printFindings(findings, Boolean(values.json))
