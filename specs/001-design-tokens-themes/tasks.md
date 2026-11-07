@@ -73,9 +73,14 @@ layer boundaries. **No story starts before this.**
   `dist/esm/index.js` (types `index.d.ts`), `"./values"` → `dist/esm/values.js`, `"./css/base.css"`,
   `"./css/brand-*.css"`, `"./meta/*"`; `sideEffects: ["**/*.css"]`; `files` allowlist (ENG-17);
   **zero runtime dependencies**; `license` `UNLICENSED` (marker, ENG-22)
-- [ ] T014 [P] Copy `format.json` and `resolver.json` from DTCG 2025.10 to
+- [x] T014 [P] Copy `format.json` and `resolver.json` from DTCG 2025.10 to
   `packages/tokens/schemas/dtcg-2025.10/`, with `SHA256SUMS` and `LICENSE-W3C.md`; record the origin and
   W3C license in `quality/license-policy.json` and in the third-party notices
+  — done: vendored the two official DTCG 2025.10 schemas from designtokens.org (each a self-contained
+  bundle — the sub-schema URLs 404 as standalone files; 18/22 `$id`s embedded, zero dangling), canonical
+  2-space/LF for determinism; `SHA256SUMS`, `SOURCE.md` (provenance + fetch date), `LICENSE-W3C.md`
+  (W3C Document License); the `W3C` entry already in `quality/license-policy.json` (T008), not shipped in
+  the tarball
 - [x] T015 [P] Create `packages/tokens/src/layers.json` in the form `{ "order": ["<prefixo>.tokens"] }`
   (single source of the @layer order, css-output L-03)
 - [x] T016 Create the scaffold of `tools/tokens-build` (`@<prefixo>/tokens-build`, `private: true`):
@@ -83,14 +88,17 @@ layer boundaries. **No story starts before this.**
   pnpm `overrides`), exact `ajv`, and `@<prefixo>/color`; `bin` `tokens-build` with subcommands
   `validate` and `build`; exit codes 0 ok, 1 violation, 2 usage/config, 3 internal; flag `--json`
   (tools-cli.md §1)
-- [ ] T017 Implement in `tools/tokens-build/src/model.ts` the internal token model (data-model,
+- [x] T017 Implement in `tools/tokens-build/src/model.ts` the internal token model (data-model,
   "Token": `path`, `cssName`, `layer`, `category`, `type`, `axis`, `role`, `values`, `source`) and the
   reader with Ajv that validates against the versioned DTCG schemas (V-01) and builds the index
   `id → file:line:column` used in every error message
-  — reopened: the model exists in model.ts; the `id → file:line:column` position is now captured
-  (via @humanwhocodes/momoa in the adapter, feeding the manifest `source` under T044), but Ajv schema
-  validation (V-01) is still absent (`ajv` is declared but never imported) and the position is not yet
-  wired into the validator error messages; depends on T014 schemas
+  — done: V-01 Ajv schema validation lives in `tools/tokens-build/src/schema.ts` (`validateSchema`) —
+  compiles the two vendored bundles in separate Ajv instances (strict:false, logger:false), validates
+  `tokens.resolver.json` + every `*.tokens.json`, and maps each error's JSON pointer to file:line:column
+  via momoa, emitting `TKN-SCHEMA` (rule V-01) with the conditional-wrapper cascade filtered; wired into
+  the CLI before the model rules (validate + build). The real source passes; a bad `$type`/missing
+  `resolutionOrder` is caught with position (schema.test.ts). Model-rule findings (V-02..V-13) now also
+  carry the token position (filled in validateModel from the momoa-captured `sourceLine/sourceColumn`)
 - [x] T018 Implement in `tools/tokens-build/src/resolver.ts` the loading via `@terrazzo/parser`
   with a custom `req` that rejects non-`file:` `$ref` (no network); expose `listPermutations()` and
   `apply()`; fail (code 1) if the permutation list comes back undefined or incomplete
@@ -485,9 +493,14 @@ the requester's decision.
 - [ ] T078 [P] Generate/write `docs/tokens/convencao-de-nomes.md` from the
   [token-source.md](contracts/token-source.md) contract and wire the check that compares the document's
   vocabularies with the validator's (TOK-04)
-- [ ] T079 Create the versioned traceability matrix (`specs/001-design-tokens-themes/traceability.md`
+- [x] T079 Create the versioned traceability matrix (`specs/001-design-tokens-themes/traceability.md`
   or `quality/traceability.json`) linking each FR/ID of this feature to a CI check or evidence, and a
   check that fails with an ID without a check (FR-031, ACE-02)
+  — done (pulled forward from Polish per post-analyze remediation): `quality/traceability.json`
+  (FR-001..033 + SC-001..011 + ENG-01/ENG-06/QA-06/QA-08/GOV-01, status met/planned/deferred with the
+  gating check or owning task) + `repo-checks traceability` subcommand (fails a `met` id whose check is
+  not a real root script, or has no check/evidence, or a duplicate/bad envelope) + `check:traceability`
+  wired into `tokens-ci.yml` before check:scan; negative tests in checks.test.ts
 - [ ] T080 [P] Wire `pnpm sbom` (ENG-19) and `pnpm licenses list --json` against
   `quality/license-policy.json` (ENG-21) into `tokens-ci.yml`, including the `tools/*` packages
 - [ ] T081 [P] Wire the bundle-budget measurement (QA-07) from `report.json` (`files`)
