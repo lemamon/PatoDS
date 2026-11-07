@@ -7,9 +7,21 @@
 // cascade (lint-rules.md §4.8); full specificity and cross-component nesting are out of scope.
 import stylelint from 'stylelint'
 import { readFileSync } from 'node:fs'
+import { resolveDataPath } from './resolve-data-path.ts'
 
 const { createPlugin, utils } = stylelint
 export const ruleName = 'patods/contrast-pairs'
+
+// The stable set of subcodes (lint-rules.md §2.1, G-2). Renaming or removing one requires an ADR-16 record.
+export const contrastPairsCodes = [
+  'pair-not-in-manifest',
+  'missing-background',
+  'missing-foreground',
+  'unresolvable-color',
+  'invalid-annotation',
+  'unmapped-state',
+] as const
+export type ContrastPairsCode = (typeof contrastPairsCodes)[number]
 
 export const messages = utils.ruleMessages(ruleName, {
   notInManifest: (fg: string, bg: string, state: string, kind: string) =>
@@ -281,12 +293,12 @@ const rule = (
     let prefix: string
     let pairs: Pair[]
     try {
-      ;({ byCss, prefix } = loadTokenManifest(manifestPath))
-      pairs = loadContrastManifest(contrastManifestPath)
+      ;({ byCss, prefix } = loadTokenManifest(resolveDataPath(manifestPath)))
+      pairs = loadContrastManifest(resolveDataPath(contrastManifestPath))
     } catch {
       throw new Error(`${ruleName}: could not read the manifests.`)
     }
-    const surfaces = loadSurfaces(surfacesPath)
+    const surfaces = loadSurfaces(surfacesPath ? resolveDataPath(surfacesPath) : undefined)
 
     const report = (node: any, message: string) => utils.report({ message, node, result, ruleName })
     const matches = (fg: string, stack: string[], state: string, kind: string): boolean =>
