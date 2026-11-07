@@ -13,7 +13,8 @@
     "check:layers": "node ./src/cli.ts layers",
     "check:determinism": "node ./src/cli.ts determinism",
     "check:drift": "node ./src/cli.ts drift",
-    "check:traceability": "node ./src/cli.ts traceability"
+    "check:traceability": "node ./src/cli.ts traceability",
+    "check:logic-tests": "node ./src/cli.ts logic-tests"
   },
   "devDependencies": {
     "typescript": "catalog:",

@@ -6,6 +6,7 @@ import { scanRepo } from './scan.ts'
 import { checkLayers } from './layers.ts'
 import { checkDeterminism, checkDrift } from './determinism.ts'
 import { checkTraceability } from './traceability.ts'
+import { checkLogicTests } from './logic-tests.ts'
 
 function findRoot(): string {
   // repo-checks runs in tools/repo-checks; the root has pnpm-workspace.yaml.
@@ -51,7 +52,14 @@ async function main(): Promise<number> {
     if (!findings.length) process.stdout.write('traceability: every contracted id maps to a real check or evidence (ACE-02).\n')
     return findings.length ? 1 : 0
   }
-  process.stderr.write('usage: repo-checks <scan-tokens|layers|determinism|drift|traceability> [--json] [--root <dir>]\n')
+  if (cmd === 'logic-tests') {
+    const findings = checkLogicTests(root)
+    if (values.json) process.stdout.write(JSON.stringify({ findings }, null, 2) + '\n')
+    else for (const f of findings) process.stderr.write(`${f.module}  ${f.code}  ${f.message}\n`)
+    if (!findings.length) process.stdout.write('logic-tests: every runtime module has a test (QA-02).\n')
+    return findings.length ? 1 : 0
+  }
+  process.stderr.write('usage: repo-checks <scan-tokens|layers|determinism|drift|traceability|logic-tests> [--json] [--root <dir>]\n')
   return 2
 }
 
