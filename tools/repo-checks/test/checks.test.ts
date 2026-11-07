@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os'
 import { scanText } from '../src/scan.ts'
 import { checkLayers } from '../src/layers.ts'
 import { checkTraceability } from '../src/traceability.ts'
+import { checkLogicTests } from '../src/logic-tests.ts'
 
 const fx = (n: string) => readFileSync(join(import.meta.dirname, '../fixtures', n), 'utf8')
 
@@ -91,5 +92,28 @@ describe('checkTraceability (ACE-02)', () => {
     const codes = checkTraceability(root).map((f) => f.code)
     expect(codes).toContain('TRACE-MET-NO-CHECK')
     expect(codes).toContain('TRACE-DUPLICATE')
+  })
+})
+
+describe('checkLogicTests (QA-02)', () => {
+  const synth = (importsFoo: boolean): string => {
+    const root = mkdtempSync(join(tmpdir(), 'patods-logic-'))
+    mkdirSync(join(root, 'tools/x/src'), { recursive: true })
+    mkdirSync(join(root, 'tools/x/test'), { recursive: true })
+    writeFileSync(join(root, 'tools/x/src/foo.ts'), 'export function f() { return 1 }\n')
+    writeFileSync(join(root, 'tools/x/test/foo.test.ts'), importsFoo ? "import { f } from '../src/foo.ts'\n" : '// no import\n')
+    return root
+  }
+
+  it('the real repository has every runtime module imported by a test', () => {
+    expect(checkLogicTests(join(import.meta.dirname, '../../..'))).toEqual([])
+  })
+
+  it('flags a runtime module no test imports', () => {
+    expect(checkLogicTests(synth(false)).map((f) => f.code)).toContain('QA02-UNTESTED-MODULE')
+  })
+
+  it('passes when a test imports the module', () => {
+    expect(checkLogicTests(synth(true))).toEqual([])
   })
 })
