@@ -1,0 +1,5 @@
+/* tools/stylelint-plugin/fixtures/contrast-pairs/valid/annotation.css */
+.patods-link {
+  /* patods-contrast: on @surfaces */
+  color: var(--patods-color-fg-default);
+}

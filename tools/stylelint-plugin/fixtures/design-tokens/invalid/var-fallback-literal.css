@@ -1,0 +1,4 @@
+/* tools/stylelint-plugin/fixtures/design-tokens/invalid/var-fallback-literal.css */
+.patods-note {
+  color: var(--patods-color-fg-default, #1a1a1a); /* expect: var-fallback-literal@41 */
+}

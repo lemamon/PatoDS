@@ -1,0 +1,5 @@
+/* tools/stylelint-plugin/fixtures/contrast-pairs/valid/disabled-exempt.css */
+.patods-switch:disabled {
+  color: var(--patods-color-fg-default);
+  background-color: var(--patods-color-bg-surface);
+}

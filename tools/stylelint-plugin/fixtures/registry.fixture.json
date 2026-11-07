@@ -1,0 +1,103 @@
+{
+  "$schema": "../schemas/control-registry.schema.json",
+  "schemaVersion": 1,
+  "source": "fixture",
+  "components": [
+    {
+      "id": "badge",
+      "kind": "non-control",
+      "file": "tools/stylelint-plugin/fixtures/design-tokens/invalid/primitive-token.css",
+      "classes": { "root": [".patods-badge"], "sizing": [], "other": [], "parts": [] }
+    },
+    {
+      "id": "btn",
+      "kind": "non-control",
+      "file": "tools/stylelint-plugin/fixtures/contrast-pairs/valid/pairs.css",
+      "classes": { "root": [".patods-btn"], "sizing": [], "other": [], "parts": [] }
+    },
+    {
+      "id": "button",
+      "kind": "control",
+      "file": "tools/stylelint-plugin/fixtures/design-tokens/valid/button.css",
+      "classes": { "root": [".patods-button"], "sizing": [".patods-button--sm"], "other": [], "parts": [] }
+    },
+    {
+      "id": "card",
+      "kind": "non-control",
+      "file": "tools/stylelint-plugin/fixtures/design-tokens/valid/base.css",
+      "classes": { "root": [".patods-card"], "sizing": [], "other": [], "parts": [] }
+    },
+    {
+      "id": "chip",
+      "kind": "non-control",
+      "file": "tools/stylelint-plugin/fixtures/design-tokens/invalid/literal-value.css",
+      "classes": { "root": [".patods-chip"], "sizing": [], "other": [], "parts": [] }
+    },
+    {
+      "id": "chrome",
+      "kind": "non-control",
+      "file": "tools/stylelint-plugin/fixtures/contrast-pairs/valid/forced-colors.css",
+      "classes": { "root": [".patods-chrome"], "sizing": [], "other": [], "parts": [] }
+    },
+    {
+      "id": "crumb",
+      "kind": "non-control",
+      "file": "tools/stylelint-plugin/fixtures/design-tokens/invalid/token-definition.css",
+      "classes": { "root": [".patods-crumb"], "sizing": [], "other": [".patods-crumb--active"], "parts": [] }
+    },
+    {
+      "id": "field",
+      "kind": "control",
+      "file": "tools/stylelint-plugin/fixtures/design-tokens/invalid/control-height-missing.css",
+      "classes": { "root": [".patods-field"], "sizing": [".patods-field--lg"], "other": [], "parts": [] }
+    },
+    {
+      "id": "link",
+      "kind": "non-control",
+      "file": "tools/stylelint-plugin/fixtures/contrast-pairs/valid/annotation.css",
+      "classes": { "root": [".patods-link"], "sizing": [], "other": [], "parts": [] }
+    },
+    {
+      "id": "note",
+      "kind": "non-control",
+      "file": "tools/stylelint-plugin/fixtures/design-tokens/invalid/var-fallback-literal.css",
+      "classes": { "root": [".patods-note"], "sizing": [], "other": [], "parts": [] }
+    },
+    {
+      "id": "panel",
+      "kind": "non-control",
+      "file": "tools/stylelint-plugin/fixtures/design-tokens/valid/media.css",
+      "classes": { "root": [".patods-panel"], "sizing": [], "other": [], "parts": [] }
+    },
+    {
+      "id": "stepper",
+      "kind": "control",
+      "file": "tools/stylelint-plugin/fixtures/design-tokens/invalid/control-height.css",
+      "classes": { "root": [".patods-stepper"], "sizing": [], "other": [], "parts": [] }
+    },
+    {
+      "id": "surface",
+      "kind": "non-control",
+      "file": "tools/stylelint-plugin/fixtures/design-tokens/invalid/brand-mode-source-token.css",
+      "classes": { "root": [".patods-surface"], "sizing": [], "other": [], "parts": [] }
+    },
+    {
+      "id": "switch",
+      "kind": "non-control",
+      "file": "tools/stylelint-plugin/fixtures/contrast-pairs/valid/disabled-exempt.css",
+      "classes": { "root": [".patods-switch"], "sizing": [], "other": [], "parts": [] }
+    },
+    {
+      "id": "tile",
+      "kind": "non-control",
+      "file": "tools/stylelint-plugin/fixtures/design-tokens/invalid/unknown-token.css",
+      "classes": { "root": [".patods-tile"], "sizing": [], "other": [], "parts": [] }
+    },
+    {
+      "id": "widget",
+      "kind": "non-control",
+      "file": "tools/stylelint-plugin/fixtures/design-tokens/invalid/unclassified-component.css",
+      "classes": { "root": [".patods-widget"], "sizing": [], "other": [], "parts": [".patods-widget__icon"] }
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+/* tools/stylelint-plugin/fixtures/design-tokens/invalid/token-definition.css */
+.patods-crumb--active {
+  --patods-color-button-bg-default: var(--patods-color-bg-accent); /* expect: token-definition@3 */
+}
+.patods-crumb {
+  --card-gap: var(--patods-space-stack-md); /* expect: token-definition@3 */
+}

@@ -1,0 +1,11 @@
+/* tools/stylelint-plugin/fixtures/design-tokens/valid/base.css */
+.patods-card {
+  color: var(--patods-color-fg-default);
+  background-color: var(--patods-color-bg-surface);
+  padding: var(--patods-space-inline-sm);
+  margin: 0;
+  border-color: transparent;
+  border-radius: var(--patods-radius-surface);
+  margin-inline-start: calc(var(--patods-space-inline-sm) * -1);
+  transition: opacity var(--patods-motion-duration-ui) var(--patods-motion-easing-ui);
+}

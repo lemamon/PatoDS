@@ -1,0 +1,18 @@
+/* tools/stylelint-plugin/fixtures/design-tokens/valid/media.css */
+@media (--patods-breakpoint-page) {
+  .patods-panel {
+    /* patods-contrast: on @surfaces */
+    color: var(--patods-color-fg-default);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .patods-panel {
+    /* patods-contrast: on @surfaces */
+    color: var(--patods-color-fg-default);
+  }
+}
+@media (forced-colors: active) {
+  .patods-panel {
+    color: Canvas;
+  }
+}

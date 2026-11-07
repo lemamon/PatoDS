@@ -1,0 +1,5 @@
+/* tools/stylelint-plugin/fixtures/contrast-pairs/invalid/invalid-annotation.css */
+.patods-link2 {
+  /* expect: invalid-annotation@39 */ /* patods-contrast: over @surfaces */
+  color: var(--patods-color-fg-default); /* expect: missing-background@3 */
+}

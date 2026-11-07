@@ -1,0 +1,9 @@
+/* tools/stylelint-plugin/fixtures/design-tokens/valid/button.css */
+.patods-button {
+  block-size: var(--patods-size-control-md);
+  color: var(--patods-color-button-fg-default);
+  background-color: var(--patods-color-button-bg-default);
+}
+.patods-button--sm {
+  block-size: var(--patods-size-control-sm);
+}

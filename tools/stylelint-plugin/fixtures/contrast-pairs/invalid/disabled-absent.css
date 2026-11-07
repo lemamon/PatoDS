@@ -1,0 +1,5 @@
+/* tools/stylelint-plugin/fixtures/contrast-pairs/invalid/disabled-absent.css */
+.patods-sw2:disabled {
+  color: var(--patods-color-fg-default); /* expect: pair-not-in-manifest@3 */
+  background-color: var(--patods-color-bg-accent);
+}

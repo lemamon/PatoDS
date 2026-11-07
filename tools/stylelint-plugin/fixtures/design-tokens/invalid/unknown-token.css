@@ -1,0 +1,6 @@
+/* tools/stylelint-plugin/fixtures/design-tokens/invalid/unknown-token.css */
+.patods-tile {
+  color: var(--brand-blue); /* expect: unknown-token@10 */
+  padding: var(--patods-space-inset-mdd); /* expect: unknown-token@12 */
+  border-color: var(--patods-_on-dark); /* expect: unknown-token@17 */
+}

@@ -1,0 +1,5 @@
+/* tools/stylelint-plugin/fixtures/contrast-pairs/valid/pairs.css */
+.patods-btn {
+  color: var(--patods-color-button-fg-default);
+  background-color: var(--patods-color-button-bg-default);
+}
