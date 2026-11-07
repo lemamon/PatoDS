@@ -4,6 +4,7 @@ import { join, dirname } from 'node:path'
 import { tmpdir } from 'node:os'
 import { scanText } from '../src/scan.ts'
 import { checkLayers } from '../src/layers.ts'
+import { checkTraceability } from '../src/traceability.ts'
 
 const fx = (n: string) => readFileSync(join(import.meta.dirname, '../fixtures', n), 'utf8')
 
@@ -43,5 +44,52 @@ describe('checkLayers (ENG-01)', () => {
     write('apps/demo/package.json', { name: '@x/demo', dependencies: { '@x/ui': '*' } })
     const findings = await checkLayers(root)
     expect(findings.map((f) => f.code)).toContain('ENG01-FORBIDDEN-EDGE')
+  })
+})
+
+describe('checkTraceability (ACE-02)', () => {
+  it('the real matrix maps every met id to an existing check', () => {
+    const root = join(import.meta.dirname, '../../..')
+    expect(checkTraceability(root)).toEqual([])
+  })
+
+  it('blocks a met id that names a nonexistent check', () => {
+    const root = mkdtempSync(join(tmpdir(), 'patods-trace-'))
+    writeFileSync(join(root, 'package.json'), JSON.stringify({ scripts: { 'tokens:validate': 'turbo run tokens:validate' } }))
+    mkdirSync(join(root, 'quality'), { recursive: true })
+    writeFileSync(
+      join(root, 'quality/traceability.json'),
+      JSON.stringify({
+        format: 'patods.traceability',
+        version: 1,
+        entries: [
+          { id: 'FR-001', status: 'met', check: 'tokens:validate' },
+          { id: 'FR-999', status: 'met', check: 'check:does-not-exist' },
+        ],
+      }),
+    )
+    const findings = checkTraceability(root)
+    expect(findings.map((f) => f.code)).toContain('TRACE-CHECK-MISSING')
+    expect(findings.find((f) => f.code === 'TRACE-CHECK-MISSING')?.id).toBe('FR-999')
+  })
+
+  it('blocks a met id with neither check nor evidence, and a duplicate id', () => {
+    const root = mkdtempSync(join(tmpdir(), 'patods-trace-'))
+    writeFileSync(join(root, 'package.json'), JSON.stringify({ scripts: {} }))
+    mkdirSync(join(root, 'quality'), { recursive: true })
+    writeFileSync(
+      join(root, 'quality/traceability.json'),
+      JSON.stringify({
+        format: 'patods.traceability',
+        version: 1,
+        entries: [
+          { id: 'FR-001', status: 'met' },
+          { id: 'FR-001', status: 'planned', task: 'T001' },
+        ],
+      }),
+    )
+    const codes = checkTraceability(root).map((f) => f.code)
+    expect(codes).toContain('TRACE-MET-NO-CHECK')
+    expect(codes).toContain('TRACE-DUPLICATE')
   })
 })
