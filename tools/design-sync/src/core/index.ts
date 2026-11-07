@@ -1,0 +1,11 @@
+// Pure core barrel (design-sync.md §5–§8). No I/O, no tool→repository data flow.
+export * from './canonical.ts'
+export * from './errors.ts'
+export * from './manifest.ts'
+export * from './snapshot.ts'
+export * from './classify.ts'
+export * from './match.ts'
+export * from './divergence.ts'
+export * from './plan.ts'
+export * from './log.ts'
+export * from './sync.ts'
