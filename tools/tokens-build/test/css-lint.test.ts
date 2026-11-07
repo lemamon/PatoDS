@@ -152,7 +152,7 @@ describe('lintGeneratedCss (T042)', () => {
         dts: 'export declare const tokens: {\n  readonly "color.blue.500": "var(--patods-color-blue-500)"\n}\nexport type TokenName = keyof typeof tokens\n',
       },
       manifest: { tokens: [{ path: 'color.blue.500', role: 'public' }] },
-      api: { tokens: ['color.blue.500'] },
+      api: { tokens: [{ name: 'color.blue.500' }] },
     }
     expect(lintGeneratedCss(synthetic)).toEqual([])
   })

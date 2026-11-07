@@ -71,6 +71,24 @@ describe('runBuild (US2)', () => {
     expect(typeof t.source.column).toBe('number')
   })
 
+  it('the API report has the §11 shape: css/theme/entries + per-token metadata', () => {
+    const a = JSON.parse(read('../api/tokens.api.json'))
+    expect(a.format).toBe('patods.tokens-api')
+    expect(a.package).toBe('@patods/tokens')
+    expect(a.css).toEqual({ layer: 'patods.tokens', layerOrder: ['patods.tokens'] })
+    expect(a.theme.defaultBrand).toBe('a')
+    expect(a.theme.modes).toEqual(['light', 'dark'])
+    expect(a.entries.map((e: any) => e.path)).toEqual(['.', './values', './css/base.css', './css/brand-*.css', './meta/*'])
+    expect(a.entries[0].exports).toContainEqual({ kind: 'const', name: 'tokens' })
+    // Per-token metadata, no values/descriptions; brand-exclusive carries exclusiveBrand.
+    const prim = a.tokens.find((t: any) => t.name === 'color.blue.300')
+    expect(prim).toMatchObject({ layer: 'primitive', placement: 'brand-exclusive', exclusiveBrand: 'a', role: 'public' })
+    expect(prim.value).toBeUndefined()
+    const sem = a.tokens.find((t: any) => t.name === 'color.bg.surface')
+    expect(sem).toMatchObject({ axis: 'mode', layer: 'semantic', placement: 'base' })
+    expect(sem.exclusiveBrand).toBeUndefined()
+  })
+
   it('D7: color.blue.300 is brand-exclusive to a — in brand-a.css, not base.css (§2.2, css-output §4)', () => {
     const m = JSON.parse(read('meta/tokens.manifest.json'))
     const t = m.tokens.find((x: any) => x.path === 'color.blue.300')
