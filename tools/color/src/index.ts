@@ -81,13 +81,15 @@ export function parseEmitted(s: string): { rgb: [number, number, number]; alpha:
   if (rgb) {
     const body = rgb[1]!.replace(/\//g, ' ').replace(/,/g, ' ')
     const parts = body.split(/\s+/).filter(Boolean)
-    const num = (x: string) => (x.endsWith('%') ? parseFloat(x) / 100 : parseFloat(x))
-    const r = num(parts[0]!)
-    const g = num(parts[1]!)
-    const b = num(parts[2]!)
-    const a = parts[3] !== undefined ? num(parts[3]) : 1
-    const scale = r > 1 || g > 1 || b > 1 ? 255 : 1
-    return { rgb: [r / scale, g / scale, b / scale], alpha: a }
+    // CSS Color: an rgb() number channel is on the 0..255 scale (so `rgb(1 1 1)` is near-black, not
+    // white), while a percentage is 0..100%. Decide per channel — never from the magnitude — so an
+    // emitted near-black translucent string like `rgb(1 1 1 / 0.8)` reads back as 1/255, not 1.
+    const chan = (x: string) => (x.endsWith('%') ? parseFloat(x) / 100 : parseFloat(x) / 255)
+    const r = chan(parts[0]!)
+    const g = chan(parts[1]!)
+    const b = chan(parts[2]!)
+    const a = parts[3] !== undefined ? (parts[3].endsWith('%') ? parseFloat(parts[3]) / 100 : parseFloat(parts[3])) : 1
+    return { rgb: [r, g, b], alpha: a }
   }
   throw new Error(`Emitted color not recognized: ${s}`)
 }
