@@ -265,11 +265,16 @@ token; two byte-for-byte identical builds (spec US2).
   permutation, out-of-gamut colors mapped, raw and gzip size of each file (build-manifests.md
   §4, FR-006, FR-008, QA-07)
   — reopened: emits report.json but not report.md (dist/meta has no report.md)
-- [ ] T047 [P] [US2] Implement the API-report emitter in
+- [x] T047 [P] [US2] Implement the API-report emitter in
   `tools/tokens-build/src/format/api-report.ts` → `packages/tokens/api/tokens.api.json` (versioned),
   per esm-output.md §11 (public surface, GOV-01 major/minor/patch classification)
-  — reopened: api/tokens.api.json is a flat stub (brands/modes/tokens-as-path-list); missing the §11
-  document (css/entries/theme + per-token metadata), so GOV-01 drift classification is impossible
+  — done (in build.ts renderApi, monolithic like T041-T046): full §11 document — `css` {layer,layerOrder},
+  `theme` {attributes,brands,defaultBrand,defaultMode,modes}, `entries` (the exports map: `.`/`./values`
+  esm with exports[] by name, css base, css brand-* with files[], meta/* with versioned files[]), and
+  `tokens[]` with per-token metadata (name/cssName/type/category/layer/axis/role/placement/exclusiveBrand/
+  deprecated, no values/descriptions), ordered by name. This is the GOV-01 §11.2 classification input; the
+  comparator itself is the CI/publishing feature. dist-parity now reads `api.tokens[].name`. report.md is
+  listed under meta/* once T046 generates it
 - [x] T048 [US2] Implement the deterministic writer in `tools/tokens-build/src/write.ts` (code-point
   ordering, LF, no timestamp or absolute path; canonical JSON M-02) and wire the
   `tokens-build build` pipeline that runs formatters T041 to T047

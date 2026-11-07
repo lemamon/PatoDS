@@ -50,8 +50,8 @@
     { "id": "ENG-01", "status": "met", "check": "check:layers", "story": "Foundational", "note": "layer boundaries" },
     { "id": "ENG-06", "status": "met", "check": "test:e2e", "story": "US2", "note": "each brand CSS importable alone" },
     { "id": "QA-06", "status": "met", "check": "test:types", "story": "US2", "note": "example/consumer use the tarball, not source" },
-    { "id": "QA-08", "status": "planned", "task": "T047", "story": "US2", "note": "type tests met; versioned API report is a stub (G1)" },
-    { "id": "GOV-01", "status": "planned", "task": "T047", "story": "US2", "note": "public-API drift classification needs the section-11 report" },
+    { "id": "QA-08", "status": "met", "check": "test:types", "story": "US2", "note": "type tests + the section-11 versioned API report (tokens.api.json)" },
+    { "id": "GOV-01", "status": "planned", "task": "CI-publishing-feature", "story": "US2", "note": "section-11 API report now emitted (T047); the major/minor comparator lives in the CI and publishing feature" },
     { "id": "ACE-02", "status": "met", "check": "check:traceability", "story": "Polish", "note": "same as FR-031" }
   ]
 }
