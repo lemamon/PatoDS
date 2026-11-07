@@ -365,6 +365,20 @@ function renderReport(model: Model, meta: ResolverMeta, files: { path: string; b
   }
 }
 
+/** Markdown twin of the report (build-manifests.md §4): the same data in tables, no timestamp (G-3). */
+function renderReportMd(report: any): string {
+  const lines: string[] = ['# Tokens report', '']
+  lines.push('## Totals (primitive / semantic / component)', '')
+  lines.push(`${report.totals.primitive} / ${report.totals.semantic} / ${report.totals.component}`, '')
+  lines.push('## Count per category', '', '| category | primitive | semantic | component |', '| --- | --- | --- | --- |')
+  for (const c of report.categories) lines.push(`| ${c.category} | ${c.primitive} | ${c.semantic} | ${c.component} |`)
+  lines.push('', '## Control-height scale', '', report.controlHeight.join(', ') || '(none)', '')
+  lines.push('## Permutations', '', report.permutations.join(', '), '')
+  lines.push('## Files (bytes / gzip)', '', '| path | bytes | gzip |', '| --- | --- | --- |')
+  for (const f of report.files) lines.push(`| ${f.path} | ${f.bytes} | ${f.gzipBytes} |`)
+  return lines.join('\n') + '\n'
+}
+
 // ESM export surface (esm-output.md §4/§5), each list ordered by name (code point) per §11.1.
 const ENTRY_DOT_EXPORTS = [
   { kind: 'type', name: 'Brand' },
@@ -408,9 +422,9 @@ function renderApi(model: Model, meta: ResolverMeta, layerOrder: string[]): any 
       { kind: 'css', path: './css/base.css' },
       { files: meta.brands.map((b) => `./css/brand-${b}.css`), kind: 'css', path: './css/brand-*.css' },
       {
-        // report.md is listed once the report emitter (T046) generates it; the rest are versioned JSON.
         files: [
           { path: './meta/report.json', version: 1 },
+          { path: './meta/report.md' },
           { path: './meta/sync-manifest.json', version: 1 },
           { path: './meta/tokens.manifest.json', version: 1 },
         ],
@@ -511,6 +525,8 @@ export async function runBuild(model: Model, srcDir: string): Promise<void> {
   // Manifests and report
   await writeText(join(dist, 'meta/tokens.manifest.json'), canonicalJson(manifest))
   await writeText(join(dist, 'meta/sync-manifest.json'), canonicalJson(syncManifest))
-  await writeText(join(dist, 'meta/report.json'), canonicalJson(renderReport(model, meta, files)))
+  const report = renderReport(model, meta, files)
+  await writeText(join(dist, 'meta/report.json'), canonicalJson(report))
+  await writeText(join(dist, 'meta/report.md'), renderReportMd(report))
   await writeText(join(pkgDir, 'api/tokens.api.json'), canonicalJson(api))
 }
