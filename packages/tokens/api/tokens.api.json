@@ -1,87 +1,930 @@
 {
-  "brands": [
-    "a",
-    "b"
+  "css": {
+    "layer": "patods.tokens",
+    "layerOrder": [
+      "patods.tokens"
+    ]
+  },
+  "entries": [
+    {
+      "exports": [
+        {
+          "kind": "type",
+          "name": "Brand"
+        },
+        {
+          "kind": "type",
+          "name": "Mode"
+        },
+        {
+          "kind": "type",
+          "name": "TokenName"
+        },
+        {
+          "kind": "type",
+          "name": "TokenRef"
+        },
+        {
+          "kind": "type",
+          "name": "TokenRefs"
+        },
+        {
+          "kind": "const",
+          "name": "attributes"
+        },
+        {
+          "kind": "const",
+          "name": "brands"
+        },
+        {
+          "kind": "const",
+          "name": "defaultBrand"
+        },
+        {
+          "kind": "const",
+          "name": "defaultMode"
+        },
+        {
+          "kind": "const",
+          "name": "modes"
+        },
+        {
+          "kind": "const",
+          "name": "tokens"
+        }
+      ],
+      "kind": "esm",
+      "path": "."
+    },
+    {
+      "exports": [
+        {
+          "kind": "type",
+          "name": "Brand"
+        },
+        {
+          "kind": "type",
+          "name": "Mode"
+        },
+        {
+          "kind": "type",
+          "name": "TokenName"
+        },
+        {
+          "kind": "type",
+          "name": "TokenValues"
+        },
+        {
+          "kind": "const",
+          "name": "values"
+        }
+      ],
+      "kind": "esm",
+      "path": "./values"
+    },
+    {
+      "kind": "css",
+      "path": "./css/base.css"
+    },
+    {
+      "files": [
+        "./css/brand-a.css",
+        "./css/brand-b.css"
+      ],
+      "kind": "css",
+      "path": "./css/brand-*.css"
+    },
+    {
+      "files": [
+        {
+          "path": "./meta/report.json",
+          "version": 1
+        },
+        {
+          "path": "./meta/sync-manifest.json",
+          "version": 1
+        },
+        {
+          "path": "./meta/tokens.manifest.json",
+          "version": 1
+        }
+      ],
+      "kind": "meta",
+      "path": "./meta/*"
+    }
   ],
   "format": "patods.tokens-api",
-  "modes": [
-    "dark",
-    "light"
-  ],
   "package": "@patods/tokens",
+  "theme": {
+    "attributes": {
+      "brand": "data-patods-brand",
+      "mode": "data-patods-mode"
+    },
+    "brands": [
+      "a",
+      "b"
+    ],
+    "defaultBrand": "a",
+    "defaultMode": "light",
+    "modes": [
+      "light",
+      "dark"
+    ]
+  },
   "tokens": [
-    "border.width.1",
-    "border.width.2",
-    "border.width.default",
-    "brand.color.bg.accent.dark",
-    "brand.color.bg.accent.light",
-    "brand.color.bg.surface.dark",
-    "brand.color.bg.surface.light",
-    "brand.color.border.default.dark",
-    "brand.color.border.default.light",
-    "brand.color.fg.default.dark",
-    "brand.color.fg.default.light",
-    "brand.color.fg.on-accent.dark",
-    "brand.color.fg.on-accent.light",
-    "breakpoint.md",
-    "breakpoint.page",
-    "color.bg.accent",
-    "color.bg.surface",
-    "color.black",
-    "color.blue.300",
-    "color.blue.500",
-    "color.border.default",
-    "color.border.focus",
-    "color.button.bg.default",
-    "color.button.fg.default",
-    "color.fg.default",
-    "color.fg.on-accent",
-    "color.neutral.0",
-    "color.neutral.100",
-    "color.neutral.300",
-    "color.neutral.600",
-    "color.neutral.900",
-    "color.white",
-    "motion.duration.fast",
-    "motion.duration.ui",
-    "motion.easing.standard",
-    "motion.easing.ui",
-    "opacity.60",
-    "opacity.scrim",
-    "radius.control",
-    "radius.md",
-    "radius.sm",
-    "radius.surface",
-    "shadow.overlay",
-    "shadow.surface",
-    "size.button.height.md",
-    "size.control.lg",
-    "size.control.md",
-    "size.control.sm",
-    "size.h.lg",
-    "size.h.md",
-    "size.h.sm",
-    "space.0",
-    "space.1",
-    "space.2",
-    "space.3",
-    "space.4",
-    "space.inline.sm",
-    "space.stack.md",
-    "typography.family.body",
-    "typography.family.sans",
-    "typography.letter-spacing.body",
-    "typography.letter-spacing.normal",
-    "typography.line-height.body",
-    "typography.line-height.md",
-    "typography.size.body",
-    "typography.size.md",
-    "typography.weight.body",
-    "typography.weight.bold",
-    "typography.weight.regular",
-    "typography.weight.strong",
-    "z-index.layer.overlay",
-    "z-index.overlay"
+    {
+      "axis": "invariant",
+      "category": "border",
+      "cssName": "--patods-border-width-1",
+      "deprecated": false,
+      "layer": "primitive",
+      "name": "border.width.1",
+      "placement": "base",
+      "role": "public",
+      "type": "dimension"
+    },
+    {
+      "axis": "invariant",
+      "category": "border",
+      "cssName": "--patods-border-width-2",
+      "deprecated": false,
+      "layer": "primitive",
+      "name": "border.width.2",
+      "placement": "base",
+      "role": "public",
+      "type": "dimension"
+    },
+    {
+      "axis": "invariant",
+      "category": "border",
+      "cssName": "--patods-border-width-default",
+      "deprecated": false,
+      "layer": "semantic",
+      "name": "border.width.default",
+      "placement": "base",
+      "role": "public",
+      "type": "dimension"
+    },
+    {
+      "axis": "brand",
+      "category": "color",
+      "cssName": "--patods-brand-color-bg-accent-dark",
+      "deprecated": false,
+      "layer": "semantic",
+      "name": "brand.color.bg.accent.dark",
+      "placement": "brand",
+      "role": "brand-mode-source",
+      "type": "color"
+    },
+    {
+      "axis": "brand",
+      "category": "color",
+      "cssName": "--patods-brand-color-bg-accent-light",
+      "deprecated": false,
+      "layer": "semantic",
+      "name": "brand.color.bg.accent.light",
+      "placement": "brand",
+      "role": "brand-mode-source",
+      "type": "color"
+    },
+    {
+      "axis": "brand",
+      "category": "color",
+      "cssName": "--patods-brand-color-bg-surface-dark",
+      "deprecated": false,
+      "layer": "semantic",
+      "name": "brand.color.bg.surface.dark",
+      "placement": "brand",
+      "role": "brand-mode-source",
+      "type": "color"
+    },
+    {
+      "axis": "brand",
+      "category": "color",
+      "cssName": "--patods-brand-color-bg-surface-light",
+      "deprecated": false,
+      "layer": "semantic",
+      "name": "brand.color.bg.surface.light",
+      "placement": "brand",
+      "role": "brand-mode-source",
+      "type": "color"
+    },
+    {
+      "axis": "brand",
+      "category": "color",
+      "cssName": "--patods-brand-color-border-default-dark",
+      "deprecated": false,
+      "layer": "semantic",
+      "name": "brand.color.border.default.dark",
+      "placement": "brand",
+      "role": "brand-mode-source",
+      "type": "color"
+    },
+    {
+      "axis": "brand",
+      "category": "color",
+      "cssName": "--patods-brand-color-border-default-light",
+      "deprecated": false,
+      "layer": "semantic",
+      "name": "brand.color.border.default.light",
+      "placement": "brand",
+      "role": "brand-mode-source",
+      "type": "color"
+    },
+    {
+      "axis": "brand",
+      "category": "color",
+      "cssName": "--patods-brand-color-fg-default-dark",
+      "deprecated": false,
+      "layer": "semantic",
+      "name": "brand.color.fg.default.dark",
+      "placement": "brand",
+      "role": "brand-mode-source",
+      "type": "color"
+    },
+    {
+      "axis": "brand",
+      "category": "color",
+      "cssName": "--patods-brand-color-fg-default-light",
+      "deprecated": false,
+      "layer": "semantic",
+      "name": "brand.color.fg.default.light",
+      "placement": "brand",
+      "role": "brand-mode-source",
+      "type": "color"
+    },
+    {
+      "axis": "brand",
+      "category": "color",
+      "cssName": "--patods-brand-color-fg-on-accent-dark",
+      "deprecated": false,
+      "layer": "semantic",
+      "name": "brand.color.fg.on-accent.dark",
+      "placement": "brand",
+      "role": "brand-mode-source",
+      "type": "color"
+    },
+    {
+      "axis": "brand",
+      "category": "color",
+      "cssName": "--patods-brand-color-fg-on-accent-light",
+      "deprecated": false,
+      "layer": "semantic",
+      "name": "brand.color.fg.on-accent.light",
+      "placement": "brand",
+      "role": "brand-mode-source",
+      "type": "color"
+    },
+    {
+      "axis": "invariant",
+      "category": "breakpoint",
+      "cssName": "--patods-breakpoint-md",
+      "deprecated": false,
+      "layer": "primitive",
+      "name": "breakpoint.md",
+      "placement": "base",
+      "role": "public",
+      "type": "dimension"
+    },
+    {
+      "axis": "invariant",
+      "category": "breakpoint",
+      "cssName": "--patods-breakpoint-page",
+      "deprecated": false,
+      "layer": "semantic",
+      "name": "breakpoint.page",
+      "placement": "base",
+      "role": "public",
+      "type": "dimension"
+    },
+    {
+      "axis": "mode",
+      "category": "color",
+      "cssName": "--patods-color-bg-accent",
+      "deprecated": false,
+      "layer": "semantic",
+      "name": "color.bg.accent",
+      "placement": "base",
+      "role": "public",
+      "type": "color"
+    },
+    {
+      "axis": "mode",
+      "category": "color",
+      "cssName": "--patods-color-bg-surface",
+      "deprecated": false,
+      "layer": "semantic",
+      "name": "color.bg.surface",
+      "placement": "base",
+      "role": "public",
+      "type": "color"
+    },
+    {
+      "axis": "invariant",
+      "category": "color",
+      "cssName": "--patods-color-black",
+      "deprecated": false,
+      "layer": "primitive",
+      "name": "color.black",
+      "placement": "base",
+      "role": "public",
+      "type": "color"
+    },
+    {
+      "axis": "invariant",
+      "category": "color",
+      "cssName": "--patods-color-blue-300",
+      "deprecated": false,
+      "exclusiveBrand": "a",
+      "layer": "primitive",
+      "name": "color.blue.300",
+      "placement": "brand-exclusive",
+      "role": "public",
+      "type": "color"
+    },
+    {
+      "axis": "invariant",
+      "category": "color",
+      "cssName": "--patods-color-blue-500",
+      "deprecated": false,
+      "layer": "primitive",
+      "name": "color.blue.500",
+      "placement": "base",
+      "role": "public",
+      "type": "color"
+    },
+    {
+      "axis": "mode",
+      "category": "color",
+      "cssName": "--patods-color-border-default",
+      "deprecated": false,
+      "layer": "semantic",
+      "name": "color.border.default",
+      "placement": "base",
+      "role": "public",
+      "type": "color"
+    },
+    {
+      "axis": "invariant",
+      "category": "color",
+      "cssName": "--patods-color-border-focus",
+      "deprecated": false,
+      "layer": "semantic",
+      "name": "color.border.focus",
+      "placement": "base",
+      "role": "public",
+      "type": "color"
+    },
+    {
+      "axis": "invariant",
+      "category": "color",
+      "cssName": "--patods-color-button-bg-default",
+      "deprecated": false,
+      "layer": "component",
+      "name": "color.button.bg.default",
+      "placement": "base",
+      "role": "public",
+      "type": "color"
+    },
+    {
+      "axis": "invariant",
+      "category": "color",
+      "cssName": "--patods-color-button-fg-default",
+      "deprecated": false,
+      "layer": "component",
+      "name": "color.button.fg.default",
+      "placement": "base",
+      "role": "public",
+      "type": "color"
+    },
+    {
+      "axis": "mode",
+      "category": "color",
+      "cssName": "--patods-color-fg-default",
+      "deprecated": false,
+      "layer": "semantic",
+      "name": "color.fg.default",
+      "placement": "base",
+      "role": "public",
+      "type": "color"
+    },
+    {
+      "axis": "mode",
+      "category": "color",
+      "cssName": "--patods-color-fg-on-accent",
+      "deprecated": false,
+      "layer": "semantic",
+      "name": "color.fg.on-accent",
+      "placement": "base",
+      "role": "public",
+      "type": "color"
+    },
+    {
+      "axis": "invariant",
+      "category": "color",
+      "cssName": "--patods-color-neutral-0",
+      "deprecated": false,
+      "layer": "primitive",
+      "name": "color.neutral.0",
+      "placement": "base",
+      "role": "public",
+      "type": "color"
+    },
+    {
+      "axis": "invariant",
+      "category": "color",
+      "cssName": "--patods-color-neutral-100",
+      "deprecated": false,
+      "layer": "primitive",
+      "name": "color.neutral.100",
+      "placement": "base",
+      "role": "public",
+      "type": "color"
+    },
+    {
+      "axis": "invariant",
+      "category": "color",
+      "cssName": "--patods-color-neutral-300",
+      "deprecated": false,
+      "layer": "primitive",
+      "name": "color.neutral.300",
+      "placement": "base",
+      "role": "public",
+      "type": "color"
+    },
+    {
+      "axis": "invariant",
+      "category": "color",
+      "cssName": "--patods-color-neutral-600",
+      "deprecated": false,
+      "layer": "primitive",
+      "name": "color.neutral.600",
+      "placement": "base",
+      "role": "public",
+      "type": "color"
+    },
+    {
+      "axis": "invariant",
+      "category": "color",
+      "cssName": "--patods-color-neutral-900",
+      "deprecated": false,
+      "layer": "primitive",
+      "name": "color.neutral.900",
+      "placement": "base",
+      "role": "public",
+      "type": "color"
+    },
+    {
+      "axis": "invariant",
+      "category": "color",
+      "cssName": "--patods-color-white",
+      "deprecated": false,
+      "layer": "primitive",
+      "name": "color.white",
+      "placement": "base",
+      "role": "public",
+      "type": "color"
+    },
+    {
+      "axis": "invariant",
+      "category": "motion",
+      "cssName": "--patods-motion-duration-fast",
+      "deprecated": false,
+      "layer": "primitive",
+      "name": "motion.duration.fast",
+      "placement": "base",
+      "role": "public",
+      "type": "duration"
+    },
+    {
+      "axis": "invariant",
+      "category": "motion",
+      "cssName": "--patods-motion-duration-ui",
+      "deprecated": false,
+      "layer": "semantic",
+      "name": "motion.duration.ui",
+      "placement": "base",
+      "role": "public",
+      "type": "duration"
+    },
+    {
+      "axis": "invariant",
+      "category": "motion",
+      "cssName": "--patods-motion-easing-standard",
+      "deprecated": false,
+      "layer": "primitive",
+      "name": "motion.easing.standard",
+      "placement": "base",
+      "role": "public",
+      "type": "cubicBezier"
+    },
+    {
+      "axis": "invariant",
+      "category": "motion",
+      "cssName": "--patods-motion-easing-ui",
+      "deprecated": false,
+      "layer": "semantic",
+      "name": "motion.easing.ui",
+      "placement": "base",
+      "role": "public",
+      "type": "cubicBezier"
+    },
+    {
+      "axis": "invariant",
+      "category": "opacity",
+      "cssName": "--patods-opacity-60",
+      "deprecated": false,
+      "layer": "primitive",
+      "name": "opacity.60",
+      "placement": "base",
+      "role": "public",
+      "type": "number"
+    },
+    {
+      "axis": "invariant",
+      "category": "opacity",
+      "cssName": "--patods-opacity-scrim",
+      "deprecated": false,
+      "layer": "semantic",
+      "name": "opacity.scrim",
+      "placement": "base",
+      "role": "public",
+      "type": "number"
+    },
+    {
+      "axis": "invariant",
+      "category": "radius",
+      "cssName": "--patods-radius-control",
+      "deprecated": false,
+      "layer": "semantic",
+      "name": "radius.control",
+      "placement": "base",
+      "role": "public",
+      "type": "dimension"
+    },
+    {
+      "axis": "invariant",
+      "category": "radius",
+      "cssName": "--patods-radius-md",
+      "deprecated": false,
+      "layer": "primitive",
+      "name": "radius.md",
+      "placement": "base",
+      "role": "public",
+      "type": "dimension"
+    },
+    {
+      "axis": "invariant",
+      "category": "radius",
+      "cssName": "--patods-radius-sm",
+      "deprecated": false,
+      "layer": "primitive",
+      "name": "radius.sm",
+      "placement": "base",
+      "role": "public",
+      "type": "dimension"
+    },
+    {
+      "axis": "invariant",
+      "category": "radius",
+      "cssName": "--patods-radius-surface",
+      "deprecated": false,
+      "layer": "semantic",
+      "name": "radius.surface",
+      "placement": "base",
+      "role": "public",
+      "type": "dimension"
+    },
+    {
+      "axis": "invariant",
+      "category": "shadow",
+      "cssName": "--patods-shadow-overlay",
+      "deprecated": false,
+      "layer": "primitive",
+      "name": "shadow.overlay",
+      "placement": "base",
+      "role": "public",
+      "type": "shadow"
+    },
+    {
+      "axis": "invariant",
+      "category": "shadow",
+      "cssName": "--patods-shadow-surface",
+      "deprecated": false,
+      "layer": "semantic",
+      "name": "shadow.surface",
+      "placement": "base",
+      "role": "public",
+      "type": "shadow"
+    },
+    {
+      "axis": "invariant",
+      "category": "size",
+      "cssName": "--patods-size-button-height-md",
+      "deprecated": false,
+      "layer": "component",
+      "name": "size.button.height.md",
+      "placement": "base",
+      "role": "public",
+      "type": "dimension"
+    },
+    {
+      "axis": "invariant",
+      "category": "size",
+      "cssName": "--patods-size-control-lg",
+      "deprecated": false,
+      "layer": "semantic",
+      "name": "size.control.lg",
+      "placement": "base",
+      "role": "public",
+      "type": "dimension"
+    },
+    {
+      "axis": "invariant",
+      "category": "size",
+      "cssName": "--patods-size-control-md",
+      "deprecated": false,
+      "layer": "semantic",
+      "name": "size.control.md",
+      "placement": "base",
+      "role": "public",
+      "type": "dimension"
+    },
+    {
+      "axis": "invariant",
+      "category": "size",
+      "cssName": "--patods-size-control-sm",
+      "deprecated": false,
+      "layer": "semantic",
+      "name": "size.control.sm",
+      "placement": "base",
+      "role": "public",
+      "type": "dimension"
+    },
+    {
+      "axis": "invariant",
+      "category": "size",
+      "cssName": "--patods-size-h-lg",
+      "deprecated": false,
+      "layer": "primitive",
+      "name": "size.h.lg",
+      "placement": "base",
+      "role": "public",
+      "type": "dimension"
+    },
+    {
+      "axis": "invariant",
+      "category": "size",
+      "cssName": "--patods-size-h-md",
+      "deprecated": false,
+      "layer": "primitive",
+      "name": "size.h.md",
+      "placement": "base",
+      "role": "public",
+      "type": "dimension"
+    },
+    {
+      "axis": "invariant",
+      "category": "size",
+      "cssName": "--patods-size-h-sm",
+      "deprecated": false,
+      "layer": "primitive",
+      "name": "size.h.sm",
+      "placement": "base",
+      "role": "public",
+      "type": "dimension"
+    },
+    {
+      "axis": "invariant",
+      "category": "space",
+      "cssName": "--patods-space-0",
+      "deprecated": false,
+      "layer": "primitive",
+      "name": "space.0",
+      "placement": "base",
+      "role": "public",
+      "type": "dimension"
+    },
+    {
+      "axis": "invariant",
+      "category": "space",
+      "cssName": "--patods-space-1",
+      "deprecated": false,
+      "layer": "primitive",
+      "name": "space.1",
+      "placement": "base",
+      "role": "public",
+      "type": "dimension"
+    },
+    {
+      "axis": "invariant",
+      "category": "space",
+      "cssName": "--patods-space-2",
+      "deprecated": false,
+      "layer": "primitive",
+      "name": "space.2",
+      "placement": "base",
+      "role": "public",
+      "type": "dimension"
+    },
+    {
+      "axis": "invariant",
+      "category": "space",
+      "cssName": "--patods-space-3",
+      "deprecated": false,
+      "layer": "primitive",
+      "name": "space.3",
+      "placement": "base",
+      "role": "public",
+      "type": "dimension"
+    },
+    {
+      "axis": "invariant",
+      "category": "space",
+      "cssName": "--patods-space-4",
+      "deprecated": false,
+      "layer": "primitive",
+      "name": "space.4",
+      "placement": "base",
+      "role": "public",
+      "type": "dimension"
+    },
+    {
+      "axis": "invariant",
+      "category": "space",
+      "cssName": "--patods-space-inline-sm",
+      "deprecated": false,
+      "layer": "semantic",
+      "name": "space.inline.sm",
+      "placement": "base",
+      "role": "public",
+      "type": "dimension"
+    },
+    {
+      "axis": "invariant",
+      "category": "space",
+      "cssName": "--patods-space-stack-md",
+      "deprecated": false,
+      "layer": "semantic",
+      "name": "space.stack.md",
+      "placement": "base",
+      "role": "public",
+      "type": "dimension"
+    },
+    {
+      "axis": "invariant",
+      "category": "typography",
+      "cssName": "--patods-typography-family-body",
+      "deprecated": false,
+      "layer": "semantic",
+      "name": "typography.family.body",
+      "placement": "base",
+      "role": "public",
+      "type": "fontFamily"
+    },
+    {
+      "axis": "invariant",
+      "category": "typography",
+      "cssName": "--patods-typography-family-sans",
+      "deprecated": false,
+      "layer": "primitive",
+      "name": "typography.family.sans",
+      "placement": "base",
+      "role": "public",
+      "type": "fontFamily"
+    },
+    {
+      "axis": "invariant",
+      "category": "typography",
+      "cssName": "--patods-typography-letter-spacing-body",
+      "deprecated": false,
+      "layer": "semantic",
+      "name": "typography.letter-spacing.body",
+      "placement": "base",
+      "role": "public",
+      "type": "dimension"
+    },
+    {
+      "axis": "invariant",
+      "category": "typography",
+      "cssName": "--patods-typography-letter-spacing-normal",
+      "deprecated": false,
+      "layer": "primitive",
+      "name": "typography.letter-spacing.normal",
+      "placement": "base",
+      "role": "public",
+      "type": "dimension"
+    },
+    {
+      "axis": "invariant",
+      "category": "typography",
+      "cssName": "--patods-typography-line-height-body",
+      "deprecated": false,
+      "layer": "semantic",
+      "name": "typography.line-height.body",
+      "placement": "base",
+      "role": "public",
+      "type": "dimension"
+    },
+    {
+      "axis": "invariant",
+      "category": "typography",
+      "cssName": "--patods-typography-line-height-md",
+      "deprecated": false,
+      "layer": "primitive",
+      "name": "typography.line-height.md",
+      "placement": "base",
+      "role": "public",
+      "type": "dimension"
+    },
+    {
+      "axis": "invariant",
+      "category": "typography",
+      "cssName": "--patods-typography-size-body",
+      "deprecated": false,
+      "layer": "semantic",
+      "name": "typography.size.body",
+      "placement": "base",
+      "role": "public",
+      "type": "dimension"
+    },
+    {
+      "axis": "invariant",
+      "category": "typography",
+      "cssName": "--patods-typography-size-md",
+      "deprecated": false,
+      "layer": "primitive",
+      "name": "typography.size.md",
+      "placement": "base",
+      "role": "public",
+      "type": "dimension"
+    },
+    {
+      "axis": "invariant",
+      "category": "typography",
+      "cssName": "--patods-typography-weight-body",
+      "deprecated": false,
+      "layer": "semantic",
+      "name": "typography.weight.body",
+      "placement": "base",
+      "role": "public",
+      "type": "fontWeight"
+    },
+    {
+      "axis": "invariant",
+      "category": "typography",
+      "cssName": "--patods-typography-weight-bold",
+      "deprecated": false,
+      "layer": "primitive",
+      "name": "typography.weight.bold",
+      "placement": "base",
+      "role": "public",
+      "type": "fontWeight"
+    },
+    {
+      "axis": "invariant",
+      "category": "typography",
+      "cssName": "--patods-typography-weight-regular",
+      "deprecated": false,
+      "layer": "primitive",
+      "name": "typography.weight.regular",
+      "placement": "base",
+      "role": "public",
+      "type": "fontWeight"
+    },
+    {
+      "axis": "invariant",
+      "category": "typography",
+      "cssName": "--patods-typography-weight-strong",
+      "deprecated": false,
+      "layer": "semantic",
+      "name": "typography.weight.strong",
+      "placement": "base",
+      "role": "public",
+      "type": "fontWeight"
+    },
+    {
+      "axis": "invariant",
+      "category": "z-index",
+      "cssName": "--patods-z-index-layer-overlay",
+      "deprecated": false,
+      "layer": "primitive",
+      "name": "z-index.layer.overlay",
+      "placement": "base",
+      "role": "public",
+      "type": "number"
+    },
+    {
+      "axis": "invariant",
+      "category": "z-index",
+      "cssName": "--patods-z-index-overlay",
+      "deprecated": false,
+      "layer": "semantic",
+      "name": "z-index.overlay",
+      "placement": "base",
+      "role": "public",
+      "type": "number"
+    }
   ],
   "version": 1
 }
