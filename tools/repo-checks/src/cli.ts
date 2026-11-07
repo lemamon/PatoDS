@@ -5,6 +5,7 @@ import { resolve } from 'node:path'
 import { scanRepo } from './scan.ts'
 import { checkLayers } from './layers.ts'
 import { checkDeterminism, checkDrift } from './determinism.ts'
+import { checkTraceability } from './traceability.ts'
 
 function findRoot(): string {
   // repo-checks runs in tools/repo-checks; the root has pnpm-workspace.yaml.
@@ -43,7 +44,14 @@ async function main(): Promise<number> {
     if (!findings.length) process.stdout.write('drift: no generated artifact tracked; API report up to date.\n')
     return findings.length ? 1 : 0
   }
-  process.stderr.write('usage: repo-checks <scan-tokens|layers|determinism|drift> [--json] [--root <dir>]\n')
+  if (cmd === 'traceability') {
+    const findings = checkTraceability(root)
+    if (values.json) process.stdout.write(JSON.stringify({ findings }, null, 2) + '\n')
+    else for (const f of findings) process.stderr.write(`${f.id ?? '-'}  ${f.code}  ${f.message}\n`)
+    if (!findings.length) process.stdout.write('traceability: every contracted id maps to a real check or evidence (ACE-02).\n')
+    return findings.length ? 1 : 0
+  }
+  process.stderr.write('usage: repo-checks <scan-tokens|layers|determinism|drift|traceability> [--json] [--root <dir>]\n')
   return 2
 }
 

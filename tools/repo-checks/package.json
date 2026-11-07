@@ -12,7 +12,8 @@
     "check:scan": "node ./src/cli.ts scan-tokens",
     "check:layers": "node ./src/cli.ts layers",
     "check:determinism": "node ./src/cli.ts determinism",
-    "check:drift": "node ./src/cli.ts drift"
+    "check:drift": "node ./src/cli.ts drift",
+    "check:traceability": "node ./src/cli.ts traceability"
   },
   "devDependencies": {
     "typescript": "catalog:",
