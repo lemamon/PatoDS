@@ -195,6 +195,12 @@ settings:
 
 catalogs:
   default:
+    '@csstools/css-parser-algorithms':
+      specifier: 4.0.2
+      version: 4.0.2
+    '@csstools/css-tokenizer':
+      specifier: 4.0.2
+      version: 4.0.2
     '@humanwhocodes/momoa':
       specifier: 3.3.13
       version: 3.3.13
@@ -222,6 +228,9 @@ catalogs:
     playwright:
       specifier: 1.64.1
       version: 1.64.1
+    postcss-selector-parser:
+      specifier: 7.1.0
+      version: 7.1.0
     publint:
       specifier: 0.3.25
       version: 0.3.25
@@ -249,6 +258,12 @@ importers:
 
   .:
     devDependencies:
+      '@patods/stylelint-plugin':
+        specifier: workspace:*
+        version: link:tools/stylelint-plugin
+      stylelint:
+        specifier: 'catalog:'
+        version: 17.16.0(supports-color@10.2.2)(typescript@7.0.2)
       turbo:
         specifier: 'catalog:'
         version: 2.11.10
@@ -339,7 +354,20 @@ importers:
         version: 5.0.5(@vitest/coverage-v8@5.0.5)(vite@8.3.5)
 
   tools/stylelint-plugin:
+    dependencies:
+      '@csstools/css-parser-algorithms':
+        specifier: 'catalog:'
+        version: 4.0.2(@csstools/css-tokenizer@4.0.2)
+      '@csstools/css-tokenizer':
+        specifier: 'catalog:'
+        version: 4.0.2
+      postcss-selector-parser:
+        specifier: 'catalog:'
+        version: 7.1.0
     devDependencies:
+      '@patods/tokens':
+        specifier: workspace:*
+        version: link:../../packages/tokens
       '@vitest/coverage-v8':
         specifier: 'catalog:'
         version: 5.0.5(vitest@5.0.5)
@@ -513,11 +541,11 @@ packages:
     resolution: {integrity: sha512-SeE8JPwW1xs1tHeNycjUtUBdhorRa8o4jlvjwk49R7/Z291i+4DQa7JJIgOm/TaYQZx+QrPQbVJ/9c8dMIZN8Q==}
 
   '@patods/tokens@file:apps/tokens-example/vendor/patods-tokens-0.0.0.tgz':
-    resolution: {integrity: sha512-UlQT88Pc+o+wE6f/sb7EbMhSPjzS6nRTQpBkKM+leZ8xmemvjL5aQpY/9khXOrkLs/Y6rBrko/SNRO74PEHRyg==, tarball: file:apps/tokens-example/vendor/patods-tokens-0.0.0.tgz}
+    resolution: {integrity: sha512-naUbuaaeopxT640lm7+vRhnIjSmTQziHNes7p0xwKu1Rz8wMF3esKn0zDuNu9FAZLc9XCFO/sMqDRJKt2n4FrA==, tarball: file:apps/tokens-example/vendor/patods-tokens-0.0.0.tgz}
     version: 0.0.0
 
   '@patods/tokens@file:tests/types-consumer/vendor/patods-tokens-0.0.0.tgz':
-    resolution: {integrity: sha512-UlQT88Pc+o+wE6f/sb7EbMhSPjzS6nRTQpBkKM+leZ8xmemvjL5aQpY/9khXOrkLs/Y6rBrko/SNRO74PEHRyg==, tarball: file:tests/types-consumer/vendor/patods-tokens-0.0.0.tgz}
+    resolution: {integrity: sha512-naUbuaaeopxT640lm7+vRhnIjSmTQziHNes7p0xwKu1Rz8wMF3esKn0zDuNu9FAZLc9XCFO/sMqDRJKt2n4FrA==, tarball: file:tests/types-consumer/vendor/patods-tokens-0.0.0.tgz}
     version: 0.0.0
 
   '@playwright/test@1.64.1':
@@ -1278,6 +1306,10 @@ packages:
     peerDependencies:
       postcss: ^8.4.31
 
+  postcss-selector-parser@7.1.0:
+    resolution: {integrity: sha512-8sLjZwK0R+JlxlYcTuVnyT2v+htpdrjDOKuMcOVdYjt52Lh8hWRYpxBPoKx/Zg+bcjc3wx6fmQevMmUztS/ccA==}
+    engines: {node: '>=4'}
+
   postcss-selector-parser@7.1.7:
     resolution: {integrity: sha512-wWBro/7hJ40ye6TPiXkUQoXKCw23xSsjriUvqd7Uls9Sso3oLiON1flc18cCdnjgCRXw4fBVqUJJeOdDTh3P3g==}
     engines: {node: '>=4'}
@@ -1886,6 +1918,15 @@ snapshots:
     optionalDependencies:
       typescript: 6.0.3
 
+  cosmiconfig@9.0.2(typescript@7.0.2):
+    dependencies:
+      env-paths: 2.2.1
+      import-fresh: 3.3.1
+      js-yaml: 4.3.2
+      parse-json: 5.2.0
+    optionalDependencies:
+      typescript: 7.0.2
+
   css-functions-list@3.3.3: {}
 
   css-tree@3.2.1:
@@ -2166,6 +2207,11 @@ snapshots:
     dependencies:
       postcss: 8.5.32
 
+  postcss-selector-parser@7.1.0:
+    dependencies:
+      cssesc: 3.0.0
+      util-deprecate: 1.0.2
+
   postcss-selector-parser@7.1.7:
     dependencies:
       cssesc: 3.0.0
@@ -2273,6 +2319,47 @@ snapshots:
       '@csstools/selector-specificity': 6.0.1(postcss-selector-parser@7.1.7)
       colord: 2.10.0
       cosmiconfig: 9.0.2(typescript@6.0.3)
+      css-functions-list: 3.3.3
+      css-tree: 3.2.1
+      debug: 4.4.3(supports-color@10.2.2)
+      fast-glob: 3.3.3
+      fastest-levenshtein: 1.0.16
+      file-entry-cache: 11.1.5
+      global-modules: 2.0.0
+      globby: 16.2.4
+      globjoin: 0.1.4
+      html-tags: 5.1.0
+      ignore: 7.0.14
+      import-meta-resolve: 4.2.0
+      mathml-tag-names: 4.0.0
+      meow: 14.1.0
+      micromatch: 4.0.8
+      normalize-path: 3.0.0
+      picocolors: 1.1.1
+      postcss: 8.5.32
+      postcss-safe-parser: 7.1.0(postcss@8.5.32)
+      postcss-selector-parser: 7.1.7
+      postcss-value-parser: 4.2.0
+      string-width: 8.3.0
+      supports-hyperlinks: 4.6.0
+      svg-tags: 1.0.0
+      table: 6.9.0
+      write-file-atomic: 7.0.1
+    transitivePeerDependencies:
+      - supports-color
+      - typescript
+
+  stylelint@17.16.0(supports-color@10.2.2)(typescript@7.0.2):
+    dependencies:
+      '@csstools/css-calc': 3.4.3(@csstools/css-parser-algorithms@4.0.2(@csstools/css-tokenizer@4.0.2))(@csstools/css-tokenizer@4.0.2)
+      '@csstools/css-parser-algorithms': 4.0.2(@csstools/css-tokenizer@4.0.2)
+      '@csstools/css-syntax-patches-for-csstree': 1.1.15(css-tree@3.2.1)
+      '@csstools/css-tokenizer': 4.0.2
+      '@csstools/media-query-list-parser': 5.0.2(@csstools/css-parser-algorithms@4.0.2(@csstools/css-tokenizer@4.0.2))(@csstools/css-tokenizer@4.0.2)
+      '@csstools/selector-resolve-nested': 4.0.2(postcss-selector-parser@7.1.7)
+      '@csstools/selector-specificity': 6.0.1(postcss-selector-parser@7.1.7)
+      colord: 2.10.0
+      cosmiconfig: 9.0.2(typescript@7.0.2)
       css-functions-list: 3.3.3
       css-tree: 3.2.1
       debug: 4.4.3(supports-color@10.2.2)

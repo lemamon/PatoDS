@@ -33,6 +33,8 @@
     "ci:install": "pnpm install --frozen-lockfile --filter=!@patods/tokens-example --filter=!@patods/types-consumer && pnpm pack:tokens && pnpm install --frozen-lockfile"
   },
   "devDependencies": {
+    "@patods/stylelint-plugin": "workspace:*",
+    "stylelint": "catalog:",
     "turbo": "catalog:"
   }
 }
