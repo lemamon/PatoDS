@@ -1,7 +1,10 @@
 // Layer boundaries (ENG-01, manifest check): tokens -> core -> frameworks; tools depend on the UI
 // only as a devDependency. Reads the workspace package.json files and validates production
-// dependency edges by layer.
+// dependency edges by layer. It also enforces the design-sync token-source edge (G-1 of
+// design-sync.md, FR-025): the sync tool must never import @patods/tokens outside ./meta/*, nor
+// reference packages/tokens/src — that is how a tool -> repository (source) write would start.
 import { readFile, readdir } from 'node:fs/promises'
+import { readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 export type Layer = 'tokens' | 'tools' | 'apps' | 'root'
@@ -82,5 +85,48 @@ export async function checkLayers(root: string): Promise<LayerFinding[]> {
       }
     }
   }
+  out.push(...checkTokenSourceEdge(root))
   return out
+}
+
+/**
+ * G-1 / FR-025: tools/design-sync must not reach the token source. Flags an import of @patods/tokens
+ * outside the ./meta/* subpath, or any reference to packages/tokens/src. Comments are stripped first so
+ * the package's own guarantees, documented in prose, are not mistaken for a reference.
+ */
+export function checkTokenSourceEdge(root: string): LayerFinding[] {
+  const out: LayerFinding[] = []
+  const srcDir = join(root, 'tools/design-sync/src')
+  for (const file of listTsFiles(srcDir)) {
+    const code = stripComments(readFileSync(file, 'utf8'))
+    const rel = file.slice(root.length + 1)
+    if (code.includes('packages/tokens/src')) {
+      out.push({ code: 'ENG01-TOKEN-SOURCE-REFERENCE', pkg: '@patods/design-sync', message: `${rel} references packages/tokens/src; design-sync must not reach the token source (G-1, FR-025).` })
+    }
+    for (const m of code.matchAll(/from\s+['"](@patods\/tokens[^'"]*)['"]/g)) {
+      if (!m[1]!.includes('/meta/')) {
+        out.push({ code: 'ENG01-SUBPATH-NOT-ALLOWED', pkg: '@patods/design-sync', message: `${rel} imports "${m[1]}" outside ./meta/*; design-sync may only read the manifest (G-1, FR-025).` })
+      }
+    }
+  }
+  return out
+}
+
+function listTsFiles(dir: string, acc: string[] = []): string[] {
+  let entries: ReturnType<typeof readdirSync>
+  try {
+    entries = readdirSync(dir, { withFileTypes: true })
+  } catch {
+    return acc
+  }
+  for (const e of entries) {
+    const full = join(dir, e.name)
+    if (e.isDirectory()) listTsFiles(full, acc)
+    else if (e.name.endsWith('.ts')) acc.push(full)
+  }
+  return acc
+}
+
+function stripComments(src: string): string {
+  return src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/.*$/gm, '$1')
 }

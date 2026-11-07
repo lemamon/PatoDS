@@ -3,7 +3,7 @@ import { readFileSync, mkdtempSync, mkdirSync, writeFileSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { tmpdir } from 'node:os'
 import { scanText } from '../src/scan.ts'
-import { checkLayers } from '../src/layers.ts'
+import { checkLayers, checkTokenSourceEdge } from '../src/layers.ts'
 import { checkTraceability } from '../src/traceability.ts'
 import { checkLogicTests } from '../src/logic-tests.ts'
 
@@ -45,6 +45,25 @@ describe('checkLayers (ENG-01)', () => {
     write('apps/demo/package.json', { name: '@x/demo', dependencies: { '@x/ui': '*' } })
     const findings = await checkLayers(root)
     expect(findings.map((f) => f.code)).toContain('ENG01-FORBIDDEN-EDGE')
+  })
+
+  it('forbids design-sync from reaching the token source (G-1, FR-025)', () => {
+    const root = mkdtempSync(join(tmpdir(), 'patods-g1-'))
+    const write = (rel: string, body: string) => {
+      mkdirSync(dirname(join(root, rel)), { recursive: true })
+      writeFileSync(join(root, rel), body)
+    }
+    write('tools/design-sync/src/a.ts', "import x from '@patods/tokens/src/index.ts'\nconst p = 'packages/tokens/src/color.ts'\n")
+    const codes = checkTokenSourceEdge(root).map((f) => f.code)
+    expect(codes).toContain('ENG01-SUBPATH-NOT-ALLOWED')
+    expect(codes).toContain('ENG01-TOKEN-SOURCE-REFERENCE')
+  })
+
+  it('allows design-sync to import the manifest via ./meta/* and ignores prose in comments', () => {
+    const root = mkdtempSync(join(tmpdir(), 'patods-g1-ok-'))
+    mkdirSync(join(root, 'tools/design-sync/src'), { recursive: true })
+    writeFileSync(join(root, 'tools/design-sync/src/a.ts'), "// never touch packages/tokens/src\nimport m from '@patods/tokens/meta/sync-manifest.json'\n")
+    expect(checkTokenSourceEdge(root)).toEqual([])
   })
 })
 
