@@ -8,7 +8,9 @@
     "design-sync": "./src/cli.ts"
   },
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./testing": "./src/testing.ts",
+    "./adapters/github": "./src/adapters/github/index.ts"
   },
   "scripts": {
     "test": "vitest run",

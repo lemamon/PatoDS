@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "tool": { "adapter": "memory", "target": "sandbox" },
+  "managedCollections": ["primitive", "brand", "mode", "semantic", "component"],
+  "ownerPath": "tools/design-sync/",
+  "slaDays": { "divergence": 5, "manualWrite": 3, "manualPublish": 3, "capability": 14 },
+  "credentialExpiryWarnDays": 14,
+  "retry": { "maxRetries": 5, "maxRetryAfterSeconds": 60 },
+  "maxDeleteFraction": 0.2
+}
