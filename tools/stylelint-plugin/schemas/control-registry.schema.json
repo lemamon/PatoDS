@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://patods.dev/schemas/control-registry.schema.json",
+  "title": "PatoDS control registry",
+  "description": "Which selectors size the box of each interactive control (lint-rules.md §3.7). In production it is derived from the DOM contract or the usage guidance; this schema also allows source \"fixture\" for the lint fixtures.",
+  "type": "object",
+  "required": ["schemaVersion", "source", "components"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "schemaVersion": { "const": 1 },
+    "source": { "enum": ["fixture", "dom-contract", "orientation"] },
+    "components": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/component" }
+    }
+  },
+  "$defs": {
+    "compound": {
+      "type": "string",
+      "description": "A compound selector of class and data-<prefix>-* attribute selectors only, in normalized form."
+    },
+    "component": {
+      "type": "object",
+      "required": ["id", "kind", "file", "classes"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
+        "kind": { "enum": ["control", "non-control"] },
+        "file": { "type": "string" },
+        "classes": {
+          "type": "object",
+          "required": ["root", "sizing", "other", "parts"],
+          "additionalProperties": false,
+          "properties": {
+            "root": { "type": "array", "items": { "$ref": "#/$defs/compound" } },
+            "sizing": { "type": "array", "items": { "$ref": "#/$defs/compound" } },
+            "other": { "type": "array", "items": { "$ref": "#/$defs/compound" } },
+            "parts": { "type": "array", "items": { "$ref": "#/$defs/compound" } }
+          }
+        }
+      }
+    }
+  }
+}
