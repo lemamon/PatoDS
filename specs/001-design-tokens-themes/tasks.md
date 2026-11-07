@@ -355,9 +355,14 @@ first and composites the second over the background (spec US4).
   an expanded `@set`, apply the WCAG module of `@<prefixo>/color`, minimums from
   `quality/thresholds.json`, `wcag-inactive` exemption, any-of group, `emitted-mismatch`; a failing pair
   fails the build (FR-020, FR-021 data part, A11Y-09, SC-008)
-  — reopened: check.ts trusts `color.emitted` (no `toEmittedSrgb` recompute → G-2 unmet), has no any-of
-  group evaluation, no `@set` expansion, and emits non-contract finding codes; THRESHOLDS_MISMATCH (G-4)
-  not enforced
+  — core done (A1a): contract finding codes (`pair-below-minimum`, `group-below-minimum`,
+  `stack-not-opaque`, `empty-surface-set`, `unknown-token`, `emitted-mismatch`), any-of group (§8 step 10),
+  G-4 `THRESHOLDS_MISMATCH` against the normative table (exit 2), near-threshold flag, and the §10
+  `ContrastCheckResult` envelope (cases/groups/findings/summary). G-2 is the toEmittedSrgb round-trip of
+  the manifest's emitted value (§8 step 4, manifest-only inputs).
+  — still open (A1b): `@set` surface-set expansion (needs `surfaces.json`, T057) — a pair using `@set`
+  reports `unknown-surface-set` for now; the independent source recompute for G-2 (the manifest carries no
+  raw DTCG value, so the round-trip is self-consistency only); `--out` report writing is T060
 - [ ] T060 [US4] Emit the JSON and Markdown contrast report (ordered by id, brand, and mode, with no
   timestamp, ratios truncated to 2 places in the table) and retain it as evidence (ACE-02)
   — reopened: no Markdown report, no `--out` file writing; JSON shape diverges from the §10
