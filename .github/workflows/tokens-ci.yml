@@ -45,6 +45,7 @@ jobs:
       - run: pnpm ci:install
       - run: pnpm check:layers
       - run: pnpm check:traceability
+      - run: pnpm check:logic-tests
       - run: pnpm check:scan
       - run: pnpm tokens:validate
       - run: pnpm tokens:build

@@ -60,6 +60,9 @@
     "check:traceability": {
       "outputs": []
     },
+    "check:logic-tests": {
+      "outputs": []
+    },
     "design-sync": {
       "cache": false,
       "dependsOn": ["tokens:build"]
