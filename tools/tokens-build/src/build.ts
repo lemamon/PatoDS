@@ -365,14 +365,74 @@ function renderReport(model: Model, meta: ResolverMeta, files: { path: string; b
   }
 }
 
-function renderApi(model: Model, meta: ResolverMeta): any {
+// ESM export surface (esm-output.md §4/§5), each list ordered by name (code point) per §11.1.
+const ENTRY_DOT_EXPORTS = [
+  { kind: 'type', name: 'Brand' },
+  { kind: 'type', name: 'Mode' },
+  { kind: 'type', name: 'TokenName' },
+  { kind: 'type', name: 'TokenRef' },
+  { kind: 'type', name: 'TokenRefs' },
+  { kind: 'const', name: 'attributes' },
+  { kind: 'const', name: 'brands' },
+  { kind: 'const', name: 'defaultBrand' },
+  { kind: 'const', name: 'defaultMode' },
+  { kind: 'const', name: 'modes' },
+  { kind: 'const', name: 'tokens' },
+]
+const ENTRY_VALUES_EXPORTS = [
+  { kind: 'type', name: 'Brand' },
+  { kind: 'type', name: 'Mode' },
+  { kind: 'type', name: 'TokenName' },
+  { kind: 'type', name: 'TokenValues' },
+  { kind: 'const', name: 'values' },
+]
+
+/** API report (esm-output.md §11): the public surface — css, theme, export entries and per-token
+ * metadata (no values or descriptions) — input to the GOV-01 major/minor/patch classification. */
+function renderApi(model: Model, meta: ResolverMeta, layerOrder: string[]): any {
   return {
     format: `${PREFIX}.tokens-api`,
     version: 1,
-    package: '@patods/tokens',
-    brands: meta.brands,
-    modes: meta.modes,
-    tokens: publishedTokens(model).map((t) => t.id),
+    package: `@${PREFIX}/tokens`,
+    css: { layer: LAYER, layerOrder },
+    theme: {
+      attributes: { brand: ATTR_BRAND, mode: ATTR_MODE },
+      brands: meta.brands,
+      defaultBrand: meta.defaultBrand,
+      defaultMode: meta.defaultMode,
+      modes: canonicalModes(meta),
+    },
+    entries: [
+      { exports: ENTRY_DOT_EXPORTS, kind: 'esm', path: '.' },
+      { exports: ENTRY_VALUES_EXPORTS, kind: 'esm', path: './values' },
+      { kind: 'css', path: './css/base.css' },
+      { files: meta.brands.map((b) => `./css/brand-${b}.css`), kind: 'css', path: './css/brand-*.css' },
+      {
+        // report.md is listed once the report emitter (T046) generates it; the rest are versioned JSON.
+        files: [
+          { path: './meta/report.json', version: 1 },
+          { path: './meta/sync-manifest.json', version: 1 },
+          { path: './meta/tokens.manifest.json', version: 1 },
+        ],
+        kind: 'meta',
+        path: './meta/*',
+      },
+    ],
+    tokens: publishedTokens(model).map((t) => {
+      const tok: Record<string, unknown> = {
+        axis: t.axis,
+        category: t.category,
+        cssName: t.cssName,
+        deprecated: t.deprecated,
+        layer: t.layer,
+        name: t.id,
+        placement: t.placement,
+        role: t.role,
+        type: t.type,
+      }
+      if (t.exclusiveBrand) tok.exclusiveBrand = t.exclusiveBrand
+      return tok
+    }),
   }
 }
 
@@ -407,7 +467,7 @@ export async function renderAll(model: Model, srcDir: string): Promise<RenderedB
     vals: renderValues(model, meta, applied),
     manifest: renderTokensManifest(model, meta, applied, layerOrder),
     syncManifest: renderSyncManifest(model, meta),
-    api: renderApi(model, meta),
+    api: renderApi(model, meta, layerOrder),
   }
 }
 
