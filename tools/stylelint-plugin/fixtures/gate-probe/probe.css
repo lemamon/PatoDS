@@ -1,0 +1,8 @@
+/* stylelint-disable */
+/* Deliberate violation (lint-rules.md §6): a literal that --ignore-disables must still catch, proving
+   the gate blocks and that an inline stylelint-disable cannot bypass it. This file is never in the
+   passing gate glob; the CI "gate-probe" step lints it alone and requires a non-zero exit. */
+.patods-probe {
+  color: #bada55;
+  padding: 7px;
+}

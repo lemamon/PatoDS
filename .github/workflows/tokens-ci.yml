@@ -51,6 +51,17 @@ jobs:
       - run: pnpm tokens:build
       - run: pnpm contrast:check
       - run: pnpm lint:styles
+      # Deliberate violation (constitution, "Traceability and acceptance"; lint-rules.md §6): the gate-probe
+      # starts with `/* stylelint-disable */` and contains a literal; with --ignore-disables it must still
+      # fail. A zero exit here means the gate stopped blocking.
+      - name: lint:styles gate-probe (deliberate violation must fail)
+        run: |
+          if pnpm exec stylelint "tools/stylelint-plugin/fixtures/gate-probe/probe.css" \
+            --config stylelint.config.mjs --ignore-disables --max-warnings 0; then
+            echo "gate-probe did not fail; the style gate is not blocking"; exit 1
+          else
+            echo "gate-probe correctly blocked (ignore-disables honoured)"
+          fi
       - run: pnpm test
       - run: pnpm test:types
       - run: pnpm check:drift

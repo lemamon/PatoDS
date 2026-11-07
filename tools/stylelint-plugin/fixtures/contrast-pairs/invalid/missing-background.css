@@ -1,0 +1,4 @@
+/* tools/stylelint-plugin/fixtures/contrast-pairs/invalid/missing-background.css */
+.patods-anchor {
+  color: var(--patods-color-fg-default); /* expect: missing-background@3 */
+}

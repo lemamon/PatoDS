@@ -1,0 +1,5 @@
+/* tools/stylelint-plugin/fixtures/contrast-pairs/invalid/unresolvable-color.css */
+.patods-badge2 {
+  color: color-mix(in srgb, var(--patods-color-fg-default) 80%, transparent); /* expect: unresolvable-color@3 */
+  background-color: var(--patods-color-bg-accent);
+}

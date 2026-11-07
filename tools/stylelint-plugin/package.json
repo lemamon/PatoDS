@@ -8,15 +8,22 @@
     ".": "./src/index.ts"
   },
   "scripts": {
-    "test": "vitest run"
+    "test": "vitest run",
+    "lint:styles": "cd ../.. && mkdir -p reports/lint-styles && stylelint \"tools/stylelint-plugin/fixtures/*/valid/*.css\" --config stylelint.config.mjs --ignore-disables --max-warnings 0 --formatter json --output-file reports/lint-styles/stylelint.json"
   },
   "peerDependencies": {
     "stylelint": "catalog:"
   },
+  "dependencies": {
+    "@csstools/css-parser-algorithms": "catalog:",
+    "@csstools/css-tokenizer": "catalog:",
+    "postcss-selector-parser": "catalog:"
+  },
   "devDependencies": {
+    "@patods/tokens": "workspace:*",
+    "@vitest/coverage-v8": "catalog:",
     "stylelint": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:",
-    "@vitest/coverage-v8": "catalog:"
+    "vitest": "catalog:"
   }
 }

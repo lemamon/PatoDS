@@ -1,0 +1,8 @@
+/* tools/stylelint-plugin/fixtures/design-tokens/invalid/control-height-missing.css */
+.patods-field { /* expect: control-height-missing@1 */
+  padding-block: var(--patods-space-stack-md);
+  line-height: var(--patods-typography-line-height-body);
+}
+.patods-field--lg { /* expect: control-height-missing@1 */
+  padding-block: var(--patods-space-stack-md);
+}

@@ -1,0 +1,4 @@
+/* tools/stylelint-plugin/fixtures/contrast-pairs/invalid/missing-foreground.css */
+.patods-card2 {
+  background-color: var(--patods-color-bg-surface); /* expect: missing-foreground@3 */
+}

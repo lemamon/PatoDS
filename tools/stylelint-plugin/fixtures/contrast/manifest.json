@@ -1,0 +1,35 @@
+{
+  "$schema": "../../schemas/contrast-manifest.schema.json",
+  "schemaVersion": 1,
+  "pairs": [
+    {
+      "id": "card-default-text",
+      "fg": "color.fg.default",
+      "bg": ["color.bg.surface"],
+      "state": "default",
+      "kind": "text"
+    },
+    {
+      "id": "button-default-label",
+      "fg": "color.button.fg.default",
+      "bg": ["color.button.bg.default"],
+      "state": "default",
+      "kind": "text"
+    },
+    {
+      "id": "link-on-surfaces",
+      "fg": "color.fg.default",
+      "bg": ["@surfaces"],
+      "state": "default",
+      "kind": "text"
+    },
+    {
+      "id": "switch-disabled-label",
+      "fg": "color.fg.default",
+      "bg": ["color.bg.surface"],
+      "state": "disabled",
+      "kind": "text",
+      "exempt": "wcag-inactive"
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+/* tools/stylelint-plugin/fixtures/contrast-pairs/valid/forced-colors.css */
+@media (forced-colors: active) {
+  .patods-chrome {
+    color: CanvasText;
+    background-color: Canvas;
+  }
+}

@@ -1,0 +1,10 @@
+/* tools/stylelint-plugin/fixtures/design-tokens/invalid/control-height.css */
+.patods-stepper {
+  block-size: var(--patods-size-control-md);
+}
+.patods-stepper:hover {
+  block-size: var(--patods-color-fg-default); /* expect: control-height@15 */
+}
+.patods-stepper:focus-visible {
+  min-block-size: auto; /* expect: control-height@19 */
+}

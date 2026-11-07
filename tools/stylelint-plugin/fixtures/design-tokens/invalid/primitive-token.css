@@ -1,0 +1,5 @@
+/* tools/stylelint-plugin/fixtures/design-tokens/invalid/primitive-token.css */
+.patods-badge {
+  background-color: var(--patods-color-blue-500); /* expect: primitive-token@21 */
+  padding: var(--patods-space-2); /* expect: primitive-token@12 */
+}

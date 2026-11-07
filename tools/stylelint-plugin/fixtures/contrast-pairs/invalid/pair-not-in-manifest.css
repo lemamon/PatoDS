@@ -1,0 +1,5 @@
+/* tools/stylelint-plugin/fixtures/contrast-pairs/invalid/pair-not-in-manifest.css */
+.patods-tag {
+  color: var(--patods-color-fg-default); /* expect: pair-not-in-manifest@3 */
+  background-color: var(--patods-color-bg-accent);
+}

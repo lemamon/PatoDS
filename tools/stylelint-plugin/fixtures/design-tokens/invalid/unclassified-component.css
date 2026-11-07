@@ -1,0 +1,7 @@
+/* tools/stylelint-plugin/fixtures/design-tokens/invalid/unclassified-component.css */
+.patods-widget__spinner { /* expect: unclassified-component@1 */
+  color: var(--patods-color-fg-default);
+}
+.patods-wa, .patods-wb { /* expect: unclassified-component@1, unclassified-component@13 */
+  color: var(--patods-color-fg-default);
+}

@@ -1,0 +1,4 @@
+/* tools/stylelint-plugin/fixtures/design-tokens/invalid/brand-mode-source-token.css */
+.patods-surface {
+  background-color: var(--patods-brand-color-bg-surface-light); /* expect: brand-mode-source-token@21 */
+}

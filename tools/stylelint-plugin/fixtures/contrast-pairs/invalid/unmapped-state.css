@@ -1,0 +1,5 @@
+/* tools/stylelint-plugin/fixtures/contrast-pairs/invalid/unmapped-state.css */
+.patods-link3:visited { /* expect: unmapped-state@1 */
+  color: var(--patods-color-fg-default);
+  background-color: var(--patods-color-bg-surface);
+}
