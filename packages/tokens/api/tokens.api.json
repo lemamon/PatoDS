@@ -101,6 +101,9 @@
           "version": 1
         },
         {
+          "path": "./meta/report.md"
+        },
+        {
           "path": "./meta/sync-manifest.json",
           "version": 1
         },
