@@ -53,8 +53,8 @@ export interface LintInput {
       color?: { emitted?: Record<string, string>; subRefs?: Record<string, string[]> | null } | null
     }[]
   }
-  /** The in-memory API report object for dist-parity. */
-  api: { tokens: string[] }
+  /** The in-memory API report object for dist-parity (esm-output.md §11: tokens carry metadata). */
+  api: { tokens: { name: string }[] }
 }
 
 interface Decl {
@@ -433,7 +433,7 @@ function checkDistParity(files: ParsedCss[], input: LintInput, out: Finding[]): 
   const esmIds = new Set([...input.esm.js.matchAll(/^ {2}"(.+?)": "var\(/gm)].map((m) => m[1]!))
   const dtsIds = new Set([...input.esm.dts.matchAll(/^ {2}readonly "(.+?)":/gm)].map((m) => m[1]!))
   const manifestIds = new Set(input.manifest.tokens.filter(isPublished).map((t) => t.path))
-  const apiIds = new Set(input.api.tokens)
+  const apiIds = new Set(input.api.tokens.map((t) => t.name))
 
   const surfaces: [string, Set<string>][] = [
     ['CSS', cssIds],
