@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PatoDS: contrast pairs manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "schemaVersion", "pairs"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "schemaVersion": { "const": 1 },
+    "pairs": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/pair" } }
+  },
+  "$defs": {
+    "segment": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
+    "tokenPath": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*(\\.[a-z0-9]+(-[a-z0-9]+)*)+$" },
+    "setRef": { "type": "string", "pattern": "^@[a-z][a-z0-9]*(-[a-z0-9]+)*$" },
+    "state": {
+      "enum": ["default", "hover", "active", "focus-visible", "selected", "invalid", "disabled", "inactive"]
+    },
+    "bg": {
+      "oneOf": [
+        { "$ref": "#/$defs/setRef" },
+        {
+          "type": "array",
+          "minItems": 1,
+          "prefixItems": [{ "anyOf": [{ "$ref": "#/$defs/tokenPath" }, { "$ref": "#/$defs/setRef" }] }],
+          "items": { "$ref": "#/$defs/tokenPath" }
+        }
+      ]
+    },
+    "pair": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "fg", "bg", "state", "kind"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*(\\.[a-z0-9]+(-[a-z0-9]+)*)*$" },
+        "fg": { "$ref": "#/$defs/tokenPath" },
+        "bg": { "$ref": "#/$defs/bg" },
+        "state": { "$ref": "#/$defs/state" },
+        "kind": { "enum": ["text", "non-text"] },
+        "group": { "$ref": "#/$defs/segment" },
+        "exempt": { "const": "wcag-inactive" },
+        "description": { "type": "string", "maxLength": 200 }
+      },
+      "allOf": [
+        {
+          "if": { "required": ["exempt"] },
+          "then": { "properties": { "state": { "enum": ["disabled", "inactive"] } }, "not": { "required": ["group"] } }
+        },
+        {
+          "if": { "required": ["group"] },
+          "then": { "properties": { "state": { "const": "focus-visible" }, "kind": { "const": "non-text" } } }
+        }
+      ]
+    }
+  }
+}
