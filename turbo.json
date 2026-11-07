@@ -28,7 +28,7 @@
       "outputs": ["reports/**"]
     },
     "lint:styles": {
-      "dependsOn": ["^build"],
+      "dependsOn": ["@patods/tokens#tokens:build"],
       "outputs": []
     },
     "test": {

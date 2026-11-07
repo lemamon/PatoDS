@@ -12,3 +12,6 @@ playwright-report/
 test-results/
 vendor/
 *.tgz
+
+# Style-lint gate report (lint-rules.md §6: CI artifact, outside version control)
+reports/
