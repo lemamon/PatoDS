@@ -39,8 +39,8 @@ specified and planned — see [the feature spec](specs/001-design-tokens-themes/
   outside the primitive layer).
 - **`@patods/design-sync`** — ports-and-adapters design-tool synchronization, with no runtime
   dependencies and no tool-to-repository writes.
-- **`@patods/repo-checks`** — repository guards: literal-value scan, layer-boundary checks, and
-  build determinism/drift verification.
+- **`@patods/repo-checks`** — repository guards: literal-value scan, layer-boundary checks, build
+  determinism/drift, the ACE-02 traceability matrix, and QA-02 logic-test coverage.
 
 ## Requirements
 
@@ -51,10 +51,13 @@ specified and planned — see [the feature spec](specs/001-design-tokens-themes/
 
 ```bash
 corepack enable
-pnpm install --frozen-lockfile
-pnpm tokens:build
+pnpm ci:install   # frozen install; builds and vendors the @patods/tokens tarball for the example apps
 pnpm test
 ```
+
+> A plain `pnpm install --frozen-lockfile` cannot resolve the example apps' `file:` dependency on the
+> vendored `@patods/tokens` tarball (it is git-ignored and produced by the build). Use `pnpm ci:install`,
+> which installs the buildable packages first, runs `pnpm pack:tokens`, then installs the rest.
 
 ## Commands
 
@@ -72,6 +75,8 @@ Every command runs through [Turborepo](https://turbo.build/):
 | `pnpm check:layers`         | Enforce the package layer boundaries.                     |
 | `pnpm check:determinism`    | Verify the build is byte-for-byte deterministic.          |
 | `pnpm check:drift`          | Verify generated artifacts match the committed source.    |
+| `pnpm check:traceability`   | Verify every contracted ID maps to a CI check (ACE-02).   |
+| `pnpm check:logic-tests`    | Verify every tooling module has a unit test (QA-02).      |
 | `pnpm design-sync`          | Run the design-tool synchronization.                      |
 
 ## Supply chain
