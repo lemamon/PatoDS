@@ -334,6 +334,15 @@ export function validateModel(m: Model): Finding[] {
   coverage(m, out)
   controlScale(m, out)
   parity(m, out)
+  // T017: every token-scoped finding carries the token's source position (id -> file:line:column).
+  for (const f of out) {
+    if (!f.id || f.line !== undefined) continue
+    const t = m.byId.get(f.id)
+    if (!t) continue
+    f.file ??= t.file
+    f.line = t.sourceLine
+    f.column = t.sourceColumn
+  }
   return out
 }
 
