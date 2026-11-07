@@ -455,13 +455,13 @@ no routine imports variables into the repository (spec US6).
 
 ### Tests (US6)
 
-- [ ] T069 [P] [US6] Implement `InMemoryDesignTool` in `tools/design-sync/src/adapters/memory.ts`
+- [x] T069 [P] [US6] Implement `InMemoryDesignTool` in `tools/design-sync/src/adapters/memory.ts`
   with configurable capabilities and fault injection (fail after N operations, 429 with Retry-After,
   403, expired credential) and the helpers `simulateManualEdit`, `simulateRename`,
   `simulateExtraVariable`, `faults.failAfterOperations` (design-sync.md)
   — reopened: memory.ts exists but is a reduced prototype — omits capability fields and returns toy
   types vs the §4 port shapes (follows T072)
-- [ ] T070 [P] [US6] Implement `describeDesignToolPortContract` in
+- [x] T070 [P] [US6] Implement `describeDesignToolPortContract` in
   `tools/design-sync/test/port-contract.test.ts` (cases C-01 to C-18) and run it against the fake on every
   PR (QA-02); `InMemoryTracker`, `InMemoryAlert`, and `FakeClock`; synthetic brands A/B (QA-15)
   — reopened: port-contract.test.ts and the C-01..C-18 suite + InMemoryTracker/InMemoryAlert/FakeClock
@@ -473,13 +473,13 @@ no routine imports variables into the repository (spec US6).
   runtime dependencies**; only `fetch`, `crypto`, `fs`, `util.parseArgs`) with `bin` `design-sync`
   (`plan`, `apply`, `detect`, `check-access`, `--adapter memory|<tool>`); codes 0–5 (4 access, 5
   verify)
-- [ ] T072 [US6] Define the ports in `tools/design-sync/src/ports.ts`: `DesignToolPort`
+- [x] T072 [US6] Define the ports in `tools/design-sync/src/ports.ts`: `DesignToolPort`
   (`capabilities`, `checkAccess`, `readSnapshot`, `apply(plan,{dryRun})`, `requestPublish`),
   `TrackerPort`, `AlertPort`, **with no tool → repository operation** (guarantees FR-025 and US6 scenario
   6)
   — reopened: G-1 (no tool→repo op) holds, but signatures diverge from §4 — `apply`→`void` not
   `ApplyResult`, `readSnapshot`→`ToolVariable[]` not `ToolSnapshot`; capability set reduced
-- [ ] T073 [US6] Implement the pure core in `tools/design-sync/src/core/`: desired state from the
+- [x] T073 [US6] Implement the pure core in `tools/design-sync/src/core/`: desired state from the
   `sync-manifest.json`, topology per axis, diff and plan (rename by key, recreate on a type
   change, deletes last only in managed collections), divergence classification against the previous
   and current version, canonical JSON log with a separate envelope, divergence fingerprint
@@ -487,15 +487,15 @@ no routine imports variables into the repository (spec US6).
   — reopened: core.ts (not src/core/) has an idempotent plan + a fingerprint, but no §6 divergence
   classification, no §7/§8 canonical log/envelope, collapses token values to `${type}:${axis}`, and the
   fingerprint formula diverges from §8
-- [ ] T074 [P] [US6] Implement the GitHub tracker and alert adapters in
+- [x] T074 [P] [US6] Implement the GitHub tracker and alert adapters in
   `tools/design-sync/src/adapters/github/`: a short-lived GitHub App token (Issues:write, org
   Members:read), an item with an owner (CODEOWNERS role) and due date (detection + SLA from
   `design-sync.config.json`), an alert to the owner on failure (DSN-02, FR-026); tests against recorded
   snapshots
-- [ ] T075 [US6] Create `.github/workflows/design-sync.yml`: triggers post-promotion to the main tag,
+- [x] T075 [US6] Create `.github/workflows/design-sync.yml`: triggers post-promotion to the main tag,
   weekly cron, and `workflow_dispatch`, in a concurrency group; environments `design-sync-read` and
   `design-sync-write`; actions pinned by SHA; no secret in a fork PR (ENG-14)
-- [ ] T076 [US6] Add an architecture test (`tools/design-sync/test/no-repo-write.test.ts`) and an
+- [x] T076 [US6] Add an architecture test (`tools/design-sync/test/no-repo-write.test.ts`) and an
   edge in the layer file that forbid `design-sync` from writing to the token source (ENG-01,
   FR-025)
 
