@@ -82,6 +82,10 @@ marker.
   "category": "color",
   "color": {
     "emitted": { "a/dark": "#16181d", "a/light": "#ffffff" },
+    "value": {
+      "a/dark": { "colorSpace": "srgb", "components": [0.086, 0.094, 0.114] },
+      "a/light": { "colorSpace": "srgb", "components": [1, 1, 1] }
+    },
     "subRefs": null
   },
   "cssName": "--<prefixo>-color-bg-surface",
@@ -123,6 +127,12 @@ marker.
   `./values` map (`#rrggbb` for opaque; `rgb(r g b / a)` with three decimal places in the alpha),
   produced by `toEmittedSrgb()` ([css-output.md](css-output.md), §11; ADR-15). The contrast checker
   composes from that string (`emitted-mismatch` if it diverges from the measured value).
+- `color.value`: for a plain `color`, per permutation, the resolved DTCG color value
+  (`{ colorSpace, components, alpha? }`) that the generator serialized — the source of truth. `null`
+  for a composite (`shadow`, `border`), whose colors are reached through `subRefs`. The contrast
+  checker passes this value through the same `toEmittedSrgb()` and asserts the result equals
+  `color.emitted` of the same permutation, which is the independent G-2 recompute
+  ([contrast-manifest.md](contrast-manifest.md), §8 step 4 and §13).
 - `color.subRefs`: for `shadow` and `border`, per permutation, the ordered list (order of the shadow
   layers) of the paths of the color tokens referenced by the subvalues; `null` for `color`.
 - Composite `typography` and `strokeStyle` in object form are not publishable
@@ -134,7 +144,8 @@ marker.
 - **M-06** Every token in `tokens[]` with `role: public` has a `cssName` declared in the CSS indicated
   by `placement`, and every public `cssName` of the generated CSS appears in the manifest
   (`dist-parity` in the build).
-- **M-07** The keys of `aliasChains` and `color.emitted` are exactly `permutations`.
+- **M-07** The keys of `aliasChains`, `color.emitted` and (for a plain `color`) `color.value` are
+  exactly `permutations`.
 - **M-08** No token has `placement: brand-exclusive` without `exclusiveBrand`, nor the reverse.
 
 ## 3. `sync-manifest.json`

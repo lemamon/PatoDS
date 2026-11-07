@@ -278,16 +278,25 @@ function aliasChainsOf(t: ModelToken, permIds: string[], applied: Map<string, Re
   return out
 }
 
-/** `color` block (§2.3): `emitted` per permutation (the string as emitted in CSS/`./values`), plus
- * `subRefs` — the color-token paths aliased by a shadow/border composite's subvalues (per permutation,
- * in subvalue order), or `null` for a plain `color`. Null for non-color, non-composite types. */
-function colorOf(t: ModelToken, permIds: string[], applied: Map<string, Record<string, any>>, byId: Map<string, ModelToken>): { emitted: Record<string, string>; subRefs: Record<string, string[]> | null } | null {
+/** `color` block (§2.3): `emitted` per permutation (the string as emitted in CSS/`./values`); `value`
+ * — the resolved DTCG color value per permutation (the generator's source of truth, a plain `color`
+ * only; `null` for a composite), which the contrast checker passes through `toEmittedSrgb()` to verify
+ * G-2 independently (`emitted-mismatch`); and `subRefs` — the color-token paths aliased by a
+ * shadow/border composite's subvalues (per permutation, in subvalue order), or `null` for a plain
+ * `color`. Null for non-color, non-composite types. */
+function colorOf(t: ModelToken, permIds: string[], applied: Map<string, Record<string, any>>, byId: Map<string, ModelToken>): { emitted: Record<string, string>; value: Record<string, any> | null; subRefs: Record<string, string[]> | null } | null {
   const composite = t.type === 'shadow' || t.type === 'border'
   if (t.type !== 'color' && !composite) return null
   const emitted: Record<string, string> = {}
+  let value: Record<string, any> | null = composite ? null : {}
   for (const pid of permIds) {
     const v = applied.get(pid)?.[t.id]?.$value
-    if (v !== undefined) emitted[pid] = emitValue(t.type, v, t.id)
+    if (v !== undefined) {
+      emitted[pid] = emitValue(t.type, v, t.id)
+      // For a plain color, the resolved DTCG value (colorSpace + components + alpha) is the generator's
+      // source of truth; the checker recomputes toEmittedSrgb() on it to prove measured = emitted (G-2).
+      if (value) value[pid] = v
+    }
   }
   let subRefs: Record<string, string[]> | null = null
   if (composite) {
@@ -296,7 +305,7 @@ function colorOf(t: ModelToken, permIds: string[], applied: Map<string, Record<s
     subRefs = {}
     for (const pid of permIds) subRefs[pid] = colorPaths
   }
-  return { emitted, subRefs }
+  return { emitted, value, subRefs }
 }
 
 function renderTokensManifest(model: Model, meta: ResolverMeta, applied: Map<string, Record<string, any>>, layerOrder: string[]): any {
