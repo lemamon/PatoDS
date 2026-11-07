@@ -1,6 +1,7 @@
 // Determinism (FR-015, SC-002) and drift (QA-08) of the token build.
 import { execFileSync } from 'node:child_process'
-import { readFileSync, readdirSync, statSync } from 'node:fs'
+import { readFileSync, readdirSync, statSync, mkdtempSync, cpSync } from 'node:fs'
+import { tmpdir } from 'node:os'
 import { createHash } from 'node:crypto'
 import { join } from 'node:path'
 
@@ -28,12 +29,23 @@ function hashTree(root: string, rels: string[]): string[] {
     })
 }
 
-function buildOnce(root: string, env: Record<string, string>): void {
-  execFileSync('node', [join(root, 'tools/tokens-build/src/cli.ts'), 'build'], {
+function buildAt(root: string, srcDir: string, env: Record<string, string>): void {
+  execFileSync('node', [join(root, 'tools/tokens-build/src/cli.ts'), 'build', '--src', srcDir], {
     cwd: join(root, 'packages/tokens'),
     env: { ...process.env, ...env },
     stdio: 'pipe',
   })
+}
+
+function buildOnce(root: string, env: Record<string, string>): void {
+  buildAt(root, join(root, 'packages/tokens/src'), env)
+}
+
+function collectFrom(pkgDir: string): string[] {
+  const rels: string[] = []
+  walk(join(pkgDir, 'dist'), pkgDir, rels)
+  if (safeExists(join(pkgDir, 'api/tokens.api.json'))) rels.push('api/tokens.api.json')
+  return hashTree(pkgDir, rels)
 }
 
 function safeExists(p: string): boolean {
@@ -52,20 +64,24 @@ export interface CheckFinding {
 
 export function checkDeterminism(root: string): CheckFinding[] {
   const pkg = join(root, 'packages/tokens')
-  const collect = () => {
-    const rels: string[] = []
-    walk(join(pkg, 'dist'), pkg, rels)
-    if (safeExists(join(pkg, 'api/tokens.api.json'))) rels.push('api/tokens.api.json')
-    return hashTree(pkg, rels)
-  }
+  const out: CheckFinding[] = []
+
+  // Run 1: default path and environment.
   buildOnce(root, {})
-  const h1 = collect()
+  const h1 = collectFrom(pkg)
+  // Run 2: same path, divergent time zone and locale.
   buildOnce(root, { TZ: 'Asia/Tokyo', LANG: 'ja_JP.UTF-8', LC_ALL: 'ja_JP.UTF-8' })
-  const h2 = collect()
-  if (h1.join('\n') !== h2.join('\n')) {
-    return [{ code: 'DETERMINISM-MISMATCH', message: 'Non-deterministic build: outputs differ across runs.' }]
-  }
-  return []
+  const h2 = collectFrom(pkg)
+  // Run 3: a divergent filesystem path (fresh copy of the source), divergent time zone and C locale.
+  const tmp = mkdtempSync(join(tmpdir(), 'patods-det-'))
+  cpSync(join(pkg, 'src'), join(tmp, 'src'), { recursive: true })
+  cpSync(join(pkg, 'schemas'), join(tmp, 'schemas'), { recursive: true })
+  buildAt(root, join(tmp, 'src'), { TZ: 'America/Sao_Paulo', LANG: 'C', LC_ALL: 'C' })
+  const h3 = collectFrom(tmp)
+
+  if (h1.join('\n') !== h2.join('\n')) out.push({ code: 'DETERMINISM-MISMATCH', message: 'Non-deterministic build: outputs differ across time zone/locale.' })
+  if (h1.join('\n') !== h3.join('\n')) out.push({ code: 'DETERMINISM-PATH', message: 'Non-deterministic build: outputs differ when built from a divergent filesystem path (SC-002, path independence).' })
+  return out
 }
 
 export function checkDrift(root: string): CheckFinding[] {
