@@ -1,0 +1,141 @@
+# design-sync (design-sync.md §10/§11). Repository → design-tool sync. All actions are pinned by SHA
+# digest (ENG-18); the SHAs below are placeholders pinned for real by the CI and governance feature.
+#
+# Triggers: after promotion to the main tag (ENG-26), a weekly schedule (FR-030) and manual dispatch.
+# Pull requests prove behavior with the in-memory fake only — no environment, no secret (ENG-14): a fork
+# PR receives a read-only GITHUB_TOKEN and never the tool credential. Runs that touch the same target
+# share one concurrency group and queue (an apply is never cancelled by another trigger).
+#
+# Until the requester chooses a design tool (ADR-14) the real adapter does not exist, so the adapter
+# input defaults to `memory`; the sync/detect jobs are wired for the real adapter and run inert on memory.
+name: design-sync
+
+on:
+  push:
+    tags: ["v*.*.*"]
+  schedule:
+    # Weekly divergence detection (FR-030, SC-011). GitHub cron runs on the default branch and may lag.
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+    inputs:
+      command:
+        description: "plan | apply | detect"
+        default: "detect"
+      version:
+        description: "manifest source.version (apply)"
+        required: false
+      adapter:
+        description: "memory | <tool> (real adapter arrives with ADR-14)"
+        default: "memory"
+  pull_request:
+    paths:
+      - "tools/design-sync/**"
+      - ".github/workflows/design-sync.yml"
+
+# Least privilege by default; the sync job elevates to contents: write only to attach the log.
+permissions:
+  contents: read
+
+# One queue per target: an apply in progress is never cancelled by another trigger (design-sync.md §10).
+concurrency:
+  group: design-sync-${{ vars.DESIGN_SYNC_TARGET || 'sandbox' }}
+  cancel-in-progress: false
+
+env:
+  TURBO_TELEMETRY_DISABLED: "1"
+  DO_NOT_TRACK: "1"
+
+jobs:
+  # ENG-14: PR proof with the fake. No environment, no secret; works on a fork.
+  pr-fake:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@<sha> # actions/checkout@v5
+      - uses: actions/setup-node@<sha> # actions/setup-node@v4
+        with:
+          node-version: "24"
+      - run: corepack enable
+      - run: pnpm ci:install
+      - run: pnpm tokens:build
+      - run: pnpm test --filter @patods/design-sync
+      - name: plan / apply (dry-run) / detect against the fake
+        run: |
+          node tools/design-sync/src/cli.ts plan   --adapter memory --manifest packages/tokens/dist/meta/sync-manifest.json --config tools/design-sync/design-sync.config.json --root .
+          node tools/design-sync/src/cli.ts apply  --adapter memory --manifest packages/tokens/dist/meta/sync-manifest.json --config tools/design-sync/design-sync.config.json --root . --dry-run
+          node tools/design-sync/src/cli.ts detect  --adapter memory --manifest packages/tokens/dist/meta/sync-manifest.json --config tools/design-sync/design-sync.config.json --root . --no-tracker
+
+  # After promotion to the main tag (ENG-26) or a manual apply dispatch: write the tool, verify, attach
+  # the log to the version, then detect. Environment design-sync-write holds the tool credential.
+  sync:
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.command == 'apply')
+    runs-on: ubuntu-latest
+    environment: design-sync-write
+    permissions:
+      contents: write # attach the sync log to the version
+    env:
+      # Credentials arrive only through environment variables registered in the ENG-13 inventory.
+      DESIGN_SYNC_TOKEN: ${{ secrets.DESIGN_SYNC_TOKEN }}
+      DESIGN_SYNC_APP_ID: ${{ secrets.DESIGN_SYNC_APP_ID }}
+      DESIGN_SYNC_APP_PRIVATE_KEY: ${{ secrets.DESIGN_SYNC_APP_PRIVATE_KEY }}
+      DESIGN_SYNC_INSTALLATION_ID: ${{ secrets.DESIGN_SYNC_INSTALLATION_ID }}
+    steps:
+      - uses: actions/checkout@<sha> # actions/checkout@v5
+      - uses: actions/setup-node@<sha> # actions/setup-node@v4
+        with:
+          node-version: "24"
+      - run: corepack enable
+      - run: pnpm ci:install
+      - run: pnpm tokens:build
+      - name: check-access
+        run: node tools/design-sync/src/cli.ts check-access --adapter ${{ inputs.adapter || 'memory' }} --config tools/design-sync/design-sync.config.json --root .
+      - name: apply and verify
+        run: >
+          node tools/design-sync/src/cli.ts apply
+          --adapter ${{ inputs.adapter || 'memory' }}
+          --manifest packages/tokens/dist/meta/sync-manifest.json
+          --config tools/design-sync/design-sync.config.json
+          --tracker github --alert github
+          --trigger ${{ github.event_name == 'push' && 'release' || 'manual' }}
+          --run-url ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          --out sync-out --root .
+      - name: attach the log to the version
+        uses: actions/upload-artifact@<sha> # actions/upload-artifact@v4
+        with:
+          name: sync-log
+          path: sync-out/
+      - name: post-sync detect (FR-030)
+        run: >
+          node tools/design-sync/src/cli.ts detect
+          --adapter ${{ inputs.adapter || 'memory' }}
+          --manifest packages/tokens/dist/meta/sync-manifest.json
+          --config tools/design-sync/design-sync.config.json
+          --tracker github --alert github --root .
+
+  # Weekly and on manual detect dispatch: read-only divergence detection. Environment design-sync-read.
+  detect:
+    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.command != 'apply')
+    runs-on: ubuntu-latest
+    environment: design-sync-read
+    env:
+      DESIGN_SYNC_TOKEN: ${{ secrets.DESIGN_SYNC_TOKEN }}
+      DESIGN_SYNC_APP_ID: ${{ secrets.DESIGN_SYNC_APP_ID }}
+      DESIGN_SYNC_APP_PRIVATE_KEY: ${{ secrets.DESIGN_SYNC_APP_PRIVATE_KEY }}
+      DESIGN_SYNC_INSTALLATION_ID: ${{ secrets.DESIGN_SYNC_INSTALLATION_ID }}
+    steps:
+      - uses: actions/checkout@<sha> # actions/checkout@v5
+      - uses: actions/setup-node@<sha> # actions/setup-node@v4
+        with:
+          node-version: "24"
+      - run: corepack enable
+      - run: pnpm ci:install
+      - run: pnpm tokens:build
+      - name: check-access
+        run: node tools/design-sync/src/cli.ts check-access --adapter ${{ inputs.adapter || 'memory' }} --config tools/design-sync/design-sync.config.json --root .
+      - name: detect
+        run: >
+          node tools/design-sync/src/cli.ts detect
+          --adapter ${{ inputs.adapter || 'memory' }}
+          --manifest packages/tokens/dist/meta/sync-manifest.json
+          --config tools/design-sync/design-sync.config.json
+          --tracker github --alert github --root .
