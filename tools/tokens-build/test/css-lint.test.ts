@@ -268,6 +268,8 @@ describe('build exit codes (CLI, QA-02/SC-009)', () => {
   function tmpSrc(): string {
     const dir = mkdtempSync(join(tmpdir(), 'patods-csslint-'))
     cpSync(SRC, join(dir, 'src'), { recursive: true })
+    // The CLI build runs V-01 schema validation, which resolves ../schemas relative to src.
+    cpSync(join(SRC, '../schemas'), join(dir, 'schemas'), { recursive: true })
     return join(dir, 'src')
   }
 
