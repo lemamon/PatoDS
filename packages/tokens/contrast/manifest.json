@@ -1,18 +1,19 @@
 {
   "$schema": "./manifest.schema.json",
-  "version": 1,
+  "schemaVersion": 1,
   "pairs": [
+    {
+      "id": "text-default-on-any-surface",
+      "fg": "color.fg.default",
+      "bg": "@surfaces",
+      "state": "default",
+      "kind": "text",
+      "description": "Default text over any opaque surface in the @surfaces set (worst case by enumeration)."
+    },
     {
       "id": "text-default-on-surface",
       "fg": "color.fg.default",
       "bg": ["color.bg.surface"],
-      "state": "default",
-      "kind": "text"
-    },
-    {
-      "id": "text-on-accent",
-      "fg": "color.fg.on-accent",
-      "bg": ["color.bg.accent"],
       "state": "default",
       "kind": "text"
     },
@@ -23,6 +24,13 @@
       "state": "disabled",
       "kind": "text",
       "exempt": "wcag-inactive"
+    },
+    {
+      "id": "text-on-accent",
+      "fg": "color.fg.on-accent",
+      "bg": ["color.bg.accent"],
+      "state": "default",
+      "kind": "text"
     }
   ]
 }

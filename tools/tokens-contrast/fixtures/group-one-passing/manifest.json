@@ -1,0 +1,26 @@
+{
+  "$schema": "./manifest.schema.json",
+  "schemaVersion": 1,
+  "pairs": [
+    {
+      "id": "focus.inner",
+      "fg": "color.ring",
+      "bg": [
+        "color.grey"
+      ],
+      "state": "focus-visible",
+      "kind": "non-text",
+      "group": "focus-ring"
+    },
+    {
+      "id": "focus.outer",
+      "fg": "color.ring",
+      "bg": [
+        "color.white"
+      ],
+      "state": "focus-visible",
+      "kind": "non-text",
+      "group": "focus-ring"
+    }
+  ]
+}

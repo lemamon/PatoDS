@@ -1,0 +1,13 @@
+{
+  "$schema": "./manifest.schema.json",
+  "schemaVersion": 1,
+  "pairs": [
+    {
+      "id": "ring.any",
+      "fg": "color.white",
+      "bg": "@surfaces",
+      "state": "focus-visible",
+      "kind": "non-text"
+    }
+  ]
+}

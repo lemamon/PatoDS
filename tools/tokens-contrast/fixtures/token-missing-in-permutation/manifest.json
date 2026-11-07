@@ -1,0 +1,15 @@
+{
+  "$schema": "./manifest.schema.json",
+  "schemaVersion": 1,
+  "pairs": [
+    {
+      "id": "text.gap",
+      "fg": "color.fg",
+      "bg": [
+        "color.bg"
+      ],
+      "state": "default",
+      "kind": "text"
+    }
+  ]
+}

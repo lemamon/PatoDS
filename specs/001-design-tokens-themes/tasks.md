@@ -339,28 +339,39 @@ first and composites the second over the background (spec US4).
 
 ### Tests (US4)
 
-- [ ] T055 [P] [US4] Manifest fixtures in `tools/tokens-contrast/fixtures/`: failing pair, translucent
+- [x] T055 [P] [US4] Manifest fixtures in `tools/tokens-contrast/fixtures/`: failing pair, translucent
   composited pair, stack without an opaque base (V-16), empty surface set in a mode, a token
   missing in a permutation (V-14), exempt `wcag-inactive` pair below the minimum (reported, does not fail),
   "any-of" group with one passing side and another with no passing side, incoherent thresholds (code 2),
   `emitted-mismatch`
-  — reopened: no on-disk `tools/tokens-contrast/fixtures/` dir exists
-- [ ] T056 [P] [US4] Unit tests in `tools/tokens-contrast/test/check.test.ts` of the compositing
+  — done (A1b): 18 on-disk fixtures under `tools/tokens-contrast/fixtures/<name>/` (manifest.json,
+  tokens.json, optional surfaces.json, expect.json, README.md). Beyond the §12 list they also isolate
+  `forbidden-reference`, `unknown-state`, `manifest-schema`, `duplicate-id`, `unsorted-manifest`,
+  `unknown-surface-set`, `duplicate-pair`, `invalid-group`, `exempt-invalid-state`, so the matrix covers
+  every finding code.
+- [x] T056 [P] [US4] Unit tests in `tools/tokens-contrast/test/check.test.ts` of the compositing
   (float and 8-bit per blend, the smaller of the two), exemption, any-of group, and report
   truncation/order (FR-020, SC-002, QA-02)
-  — reopened: check.test.ts builds inline temp fixtures (mkdtemp/writeFile), not the on-disk matrix;
-  covers only a subset (no any-of group / emitted-mismatch)
+  — done (A1b): the multiset harness loads every on-disk fixture, asserts each one's expected codes +
+  exit, and proves the union covers all 15 finding codes. Plus the required WCAG vectors (#767676/#fff
+  = 4.54 pass, #777777/#fff = 4.47 fail, black/white = 21.00, white/0.5-black-scrim/white = 3.94),
+  compositing, exemption, any-of and Markdown-report determinism (LF, no timestamp, 2-dp truncation).
 
 ### Implementation (US4)
 
-- [ ] T057 [P] [US4] Create `packages/tokens/contrast/manifest.json`, `surfaces.json`, and their schemas
+- [x] T057 [P] [US4] Create `packages/tokens/contrast/manifest.json`, `surfaces.json`, and their schemas
   (`manifest.schema.json`, `surfaces.schema.json`) per contrast-manifest.md: `pairs[]` with `id`,
   `fg`, `bg` (stack or `@set`), `state` from the versioned vocabulary, `kind`, `group`, `exempt`;
   references only to public semantic or component tokens (FR-019); the a11y owner in CODEOWNERS
+  — done (A1b): both JSON Schema 2020-12 files added (§3/§4 sketches, `schemaVersion` const 1); the
+  manifest renamed `version` → `schemaVersion`, sorted by id, and gained a `@set` pair
+  (`text-default-on-any-surface` over `@surfaces`) that exercises expansion green on the real tokens.
+  `surfaces.json` defines `@surfaces` = `color.bg.surface` per mode. CODEOWNERS already routes
+  `/packages/tokens/contrast/` to `@patods/accessibility`.
 - [x] T058 [US4] Create `tools/tokens-contrast` (`@<prefixo>/tokens-contrast`, devDependency of
   `@<prefixo>/color` and the manifests of `@<prefixo>/tokens`): `bin` `tokens-contrast check`, exit
   codes 0–3
-- [ ] T059 [US4] Implement the checker in `tools/tokens-contrast/src/check.ts`: for each pair and
+- [x] T059 [US4] Implement the checker in `tools/tokens-contrast/src/check.ts`: for each pair and
   permutation, resolve via `tokens.manifest.json` (`color.emitted`), composite alpha over an opaque stack or
   an expanded `@set`, apply the WCAG module of `@<prefixo>/color`, minimums from
   `quality/thresholds.json`, `wcag-inactive` exemption, any-of group, `emitted-mismatch`; a failing pair
@@ -370,13 +381,39 @@ first and composites the second over the background (spec US4).
   G-4 `THRESHOLDS_MISMATCH` against the normative table (exit 2), near-threshold flag, and the §10
   `ContrastCheckResult` envelope (cases/groups/findings/summary). G-2 is the toEmittedSrgb round-trip of
   the manifest's emitted value (§8 step 4, manifest-only inputs).
-  — still open (A1b): `@set` surface-set expansion (needs `surfaces.json`, T057) — a pair using `@set`
-  reports `unknown-surface-set` for now; the independent source recompute for G-2 (the manifest carries no
-  raw DTCG value, so the round-trip is self-consistency only); `--out` report writing is T060
-- [ ] T060 [US4] Emit the JSON and Markdown contrast report (ordered by id, brand, and mode, with no
+  — done (A1b): CM-01..CM-08 enforced with the contract codes (`manifest-schema` via Ajv 2020-12 against
+  the two schemas, `unsorted-manifest`/`duplicate-id`, `forbidden-reference` resolved by token layer/role
+  from `tokens.manifest.json`, `unknown-surface-set`, `duplicate-pair`, `invalid-group`,
+  `exempt-invalid-state`, `unknown-state`); `@set` surface-set expansion (§8 step 2) over `surfaces.json`
+  with V-16 `empty-surface-set`; findings carry `severity`/`token`/`context`/`data` and a
+  `file:line:column` from momoa; `pair-below-minimum` fires only on a measured low-ratio case so it never
+  double-reports with a resolution error.
+  — G-2 DECISION (option a): `build.ts renderTokensManifest` now also emits the resolved per-permutation
+  DTCG value in `color.value` (contrast-manifest §13 already required it; build-manifests §2.3/M-07
+  updated to match). The checker runs the build's own `toEmittedSrgb()` on that value and asserts it
+  equals `color.emitted`, which is a real independent recompute rather than a self-consistency round-trip.
+  Option (b) (re-running `tokens-build` resolution inside the checker) was rejected: it duplicates the
+  resolution pipeline and is heavier, while G-2 is specifically about generator↔checker `toEmittedSrgb()`
+  agreement. Composition still reads the integer channels back from the emitted string (§8 step 4), so the
+  measured value stays the emitted value. Determinism preserved (G-3).
+  — AGENT-EVALS (acceptance gate): a judge/evaluator workflow (judges per §6/§8/§10/determinism +
+  evaluators that recompute WCAG independently in Python) ran adversarially over three rounds, each
+  high/medium finding verified by refuters. Evaluators found 0 math mismatches (the 16 real cases + the
+  four §8 vectors agree to 1e-4). Four eval-driven fixes landed: (1) replaced `localeCompare` in the final
+  sorts with a code-point comparator (§1.7, locale-independent — now byte-identical under C/sv_SE/lt_LT);
+  (2) applied CM-03 to `surfaces.json` set members (a primitive/brand-mode-source surface now fails and
+  blocks its pairs); (3) findings sort key is file,line,column,code,token (§1.5); (4) fixed
+  `@<prefixo>/color` `parseEmitted` to read emitted `rgb()` channels on the 0..255 scale (a near-black
+  translucent color no longer collapses to white). Round 3 verdict: PASS, no high-severity finding
+  survived. Resolution is also memoized per (pair, permutation) so a token shared across a `@set`'s
+  surfaces reports once.
+- [x] T060 [US4] Emit the JSON and Markdown contrast report (ordered by id, brand, and mode, with no
   timestamp, ratios truncated to 2 places in the table) and retain it as evidence (ACE-02)
-  — reopened: no Markdown report, no `--out` file writing; JSON shape diverges from the §10
-  ContrastCheckResult envelope
+  — done (A1b): `--out <dir>` writes `contrast-report.json` (canonical JSON, keys code-point sorted,
+  ratios truncated to 4 places) and `contrast-report.md` (one row per case ordered by pair/brand/mode/
+  surface, ratios truncated to 2 places with trailing zeros, LF, no timestamp or absolute path). The root
+  `contrast:check` script passes `--out reports` (turbo caches `reports/**`, which is git-ignored as a CI
+  artifact). Byte-for-byte identical across `TZ`/`LC_ALL` (G-3, SC-002).
 - [ ] T061 [P] [US4] Real-browser samples in `apps/tokens-example/tests/contrast.spec.ts`:
   render one swatch per pair and permutation from the tarball, paint the opaque stack on real ancestors,
   assert `getComputedStyle` equals the emitted sRGB and run axe (Principle VII, QA-01; axe/@axe-core

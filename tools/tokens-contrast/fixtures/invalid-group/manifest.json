@@ -1,0 +1,16 @@
+{
+  "$schema": "./manifest.schema.json",
+  "schemaVersion": 1,
+  "pairs": [
+    {
+      "id": "focus.solo",
+      "fg": "color.ring",
+      "bg": [
+        "color.white"
+      ],
+      "state": "focus-visible",
+      "kind": "non-text",
+      "group": "lonely"
+    }
+  ]
+}
