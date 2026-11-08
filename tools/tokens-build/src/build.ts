@@ -353,7 +353,28 @@ function renderSyncManifest(model: Model, meta: ResolverMeta): any {
   }
 }
 
-function renderReport(model: Model, meta: ResolverMeta, files: { path: string; bytes: number; gzipBytes: number }[]): any {
+/** Control-height scale resolved per permutation (build-manifests.md §4): for each permutation, the
+ * scale members with their emitted CSS value, ordered by ascending value (FR-008, TOK-13). Keys are
+ * the permutations (M-04). */
+function controlHeightByPermutation(
+  model: Model,
+  applied: Map<string, Record<string, any>>,
+): Record<string, { path: string; value: string }[]> {
+  const members = model.tokens.filter((t) => t.scale === 'control-height')
+  const out: Record<string, { path: string; value: string }[]> = {}
+  for (const pid of [...applied.keys()].sort()) {
+    const set = applied.get(pid)!
+    out[pid] = members
+      .flatMap((t) => {
+        const v = set[t.id]?.$value
+        return v === undefined ? [] : [{ path: t.id, value: emitValue(t.type, v, t.id) }]
+      })
+      .sort((a, b) => parseFloat(a.value) - parseFloat(b.value) || (a.path < b.path ? -1 : a.path > b.path ? 1 : 0))
+  }
+  return out
+}
+
+function renderReport(model: Model, meta: ResolverMeta, files: { path: string; bytes: number; gzipBytes: number }[], applied: Map<string, Record<string, any>>): any {
   const categories: Record<string, any> = {}
   for (const t of model.tokens) {
     const c = (categories[t.category] ??= { category: t.category, primitive: 0, semantic: 0, component: 0 })
@@ -363,9 +384,9 @@ function renderReport(model: Model, meta: ResolverMeta, files: { path: string; b
     format: `${PREFIX}.tokens-report`,
     version: 1,
     categories: Object.values(categories),
-    controlHeight: model.tokens.filter((t) => t.scale === 'control-height').map((t) => t.id).sort(),
+    controlHeight: controlHeightByPermutation(model, applied),
     files,
-    permutations: [...appliedMap(model).keys()].sort(),
+    permutations: [...applied.keys()].sort(),
     totals: {
       primitive: model.tokens.filter((t) => t.layer === 'primitive').length,
       semantic: model.tokens.filter((t) => t.layer === 'semantic').length,
@@ -381,7 +402,10 @@ function renderReportMd(report: any): string {
   lines.push(`${report.totals.primitive} / ${report.totals.semantic} / ${report.totals.component}`, '')
   lines.push('## Count per category', '', '| category | primitive | semantic | component |', '| --- | --- | --- | --- |')
   for (const c of report.categories) lines.push(`| ${c.category} | ${c.primitive} | ${c.semantic} | ${c.component} |`)
-  lines.push('', '## Control-height scale', '', report.controlHeight.join(', ') || '(none)', '')
+  const controlHeightIds = [
+    ...new Set(Object.values(report.controlHeight).flatMap((arr: any) => arr.map((e: any) => e.path))),
+  ].sort()
+  lines.push('', '## Control-height scale', '', controlHeightIds.join(', ') || '(none)', '')
   lines.push('## Permutations', '', report.permutations.join(', '), '')
   lines.push('## Files (bytes / gzip)', '', '| path | bytes | gzip |', '| --- | --- | --- |')
   for (const f of report.files) lines.push(`| ${f.path} | ${f.bytes} | ${f.gzipBytes} |`)
@@ -534,7 +558,7 @@ export async function runBuild(model: Model, srcDir: string): Promise<void> {
   // Manifests and report
   await writeText(join(dist, 'meta/tokens.manifest.json'), canonicalJson(manifest))
   await writeText(join(dist, 'meta/sync-manifest.json'), canonicalJson(syncManifest))
-  const report = renderReport(model, meta, files)
+  const report = renderReport(model, meta, files, appliedMap(model))
   await writeText(join(dist, 'meta/report.json'), canonicalJson(report))
   await writeText(join(dist, 'meta/report.md'), renderReportMd(report))
   await writeText(join(pkgDir, 'api/tokens.api.json'), canonicalJson(api))

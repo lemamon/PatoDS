@@ -47,6 +47,22 @@ describe('runBuild (US2)', () => {
     expect(m.scales['control-height']).toContain('size.control.md')
   })
 
+  it('report.json controlHeight is per-permutation {path,value} ascending by value (§4, FR-008)', () => {
+    const r = JSON.parse(read('meta/report.json'))
+    expect(Object.keys(r.controlHeight).sort()).toEqual(['a/dark', 'a/light', 'b/dark', 'b/light'])
+    for (const pid of Object.keys(r.controlHeight)) {
+      const scale = r.controlHeight[pid]
+      expect(scale.map((e: any) => e.path)).toEqual(['size.control.sm', 'size.control.md', 'size.control.lg'])
+      const nums = scale.map((e: any) => parseFloat(e.value))
+      expect(nums).toEqual([...nums].sort((a, b) => a - b)) // ascending by value
+      expect(scale).toEqual([
+        { path: 'size.control.sm', value: '1.75rem' },
+        { path: 'size.control.md', value: '2.25rem' },
+        { path: 'size.control.lg', value: '2.75rem' },
+      ])
+    }
+  })
+
   it('the manifest root carries package and brands[].file (build-manifests §2.1)', () => {
     const m = JSON.parse(read('meta/tokens.manifest.json'))
     expect(m.package).toBe('@patods/tokens')
