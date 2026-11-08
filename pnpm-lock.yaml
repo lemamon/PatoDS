@@ -195,6 +195,9 @@ settings:
 
 catalogs:
   default:
+    '@axe-core/playwright':
+      specifier: 4.14.0
+      version: 4.14.0
     '@csstools/css-parser-algorithms':
       specifier: 4.0.2
       version: 4.0.2
@@ -270,6 +273,9 @@ importers:
 
   apps/tokens-example:
     devDependencies:
+      '@axe-core/playwright':
+        specifier: 'catalog:'
+        version: 4.14.0(playwright-core@1.64.1)
       '@patods/tokens':
         specifier: file:./vendor/patods-tokens-0.0.0.tgz
         version: file:apps/tokens-example/vendor/patods-tokens-0.0.0.tgz
@@ -433,6 +439,12 @@ importers:
 
 packages:
 
+  '@axe-core/playwright@4.14.0':
+    resolution: {integrity: sha512-SGUhG5PIHd2eMdpgBF2PyQLOhX+qyDR2PT4cmoS4Qk2ak+jX/rrSvst9l0PGv5WTHolKpUMvVmoHpr4cZgf1RQ==}
+    engines: {node: '>=22.12.0'}
+    peerDependencies:
+      playwright-core: '>= 1.0.0'
+
   '@babel/code-frame@7.29.7':
     resolution: {integrity: sha512-Aup7aUOfpbAUg2ROOJN6Iw5f9DMBlzu0mIkm/malLQFN/YQgO48wCj0Kxa3sEHJvPVFg7siR+qRInwXd2qhQKw==}
     engines: {node: '>=6.9.0'}
@@ -547,11 +559,11 @@ packages:
     resolution: {integrity: sha512-SeE8JPwW1xs1tHeNycjUtUBdhorRa8o4jlvjwk49R7/Z291i+4DQa7JJIgOm/TaYQZx+QrPQbVJ/9c8dMIZN8Q==}
 
   '@patods/tokens@file:apps/tokens-example/vendor/patods-tokens-0.0.0.tgz':
-    resolution: {integrity: sha512-UeivIeOZj+LTQTdvM65F5vWFCtGY7oj3Sl9C1v4cZwmHoL4lwNY/UirhnUGs07Q87A3YlrBH8jHNrmxhUPMZgA==, tarball: file:apps/tokens-example/vendor/patods-tokens-0.0.0.tgz}
+    resolution: {integrity: sha512-hfuvCsGsMM+WZerzgwHHjMddo93+MjCy5amvUqP9rPMRNcQ27YXAYNeX9p9y1gK6d6sqQxrmibo9QNsayXrijg==, tarball: file:apps/tokens-example/vendor/patods-tokens-0.0.0.tgz}
     version: 0.0.0
 
   '@patods/tokens@file:tests/types-consumer/vendor/patods-tokens-0.0.0.tgz':
-    resolution: {integrity: sha512-UeivIeOZj+LTQTdvM65F5vWFCtGY7oj3Sl9C1v4cZwmHoL4lwNY/UirhnUGs07Q87A3YlrBH8jHNrmxhUPMZgA==, tarball: file:tests/types-consumer/vendor/patods-tokens-0.0.0.tgz}
+    resolution: {integrity: sha512-hfuvCsGsMM+WZerzgwHHjMddo93+MjCy5amvUqP9rPMRNcQ27YXAYNeX9p9y1gK6d6sqQxrmibo9QNsayXrijg==, tarball: file:tests/types-consumer/vendor/patods-tokens-0.0.0.tgz}
     version: 0.0.0
 
   '@playwright/test@1.64.1':
@@ -910,6 +922,10 @@ packages:
   astral-regex@2.0.0:
     resolution: {integrity: sha512-Z7tMw1ytTXt5jqMcOP+OQteU1VuNK9Y02uuJtKQ1Sv69jXQKKg5cibLwGJow8yzZP+eAc18EmLGPal0bp36rvQ==}
     engines: {node: '>=8'}
+
+  axe-core@4.14.0:
+    resolution: {integrity: sha512-9WTZxEjsZ7b13TH8JPmbV2z8CHbl80/2hm3XPEG4JgNdQLK81IBRXmSxHfMAOkSqQeRxT/0dwNDz2GOm3zzpcQ==}
+    engines: {node: '>=4'}
 
   braces@3.0.3:
     resolution: {integrity: sha512-yQbXgO/OSZVD2IsiLlro+7Hf6Q18EJrKSEsdoMzKePKXct3gvD8oLcOQdIzGupr5Fj+EDe8gO/lxc1BzfMpxvA==}
@@ -1564,6 +1580,11 @@ packages:
 
 snapshots:
 
+  '@axe-core/playwright@4.14.0(playwright-core@1.64.1)':
+    dependencies:
+      axe-core: 4.14.0
+      playwright-core: 1.64.1
+
   '@babel/code-frame@7.29.7':
     dependencies:
       '@babel/helper-validator-identifier': 7.29.7
@@ -1888,6 +1909,8 @@ snapshots:
       js-tokens: 10.0.0
 
   astral-regex@2.0.0: {}
+
+  axe-core@4.14.0: {}
 
   braces@3.0.3:
     dependencies:
