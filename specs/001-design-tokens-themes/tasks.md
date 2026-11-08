@@ -499,13 +499,9 @@ no routine imports variables into the repository (spec US6).
   with configurable capabilities and fault injection (fail after N operations, 429 with Retry-After,
   403, expired credential) and the helpers `simulateManualEdit`, `simulateRename`,
   `simulateExtraVariable`, `faults.failAfterOperations` (design-sync.md)
-  — reopened: memory.ts exists but is a reduced prototype — omits capability fields and returns toy
-  types vs the §4 port shapes (follows T072)
 - [x] T070 [P] [US6] Implement `describeDesignToolPortContract` in
   `tools/design-sync/test/port-contract.test.ts` (cases C-01 to C-18) and run it against the fake on every
   PR (QA-02); `InMemoryTracker`, `InMemoryAlert`, and `FakeClock`; synthetic brands A/B (QA-15)
-  — reopened: port-contract.test.ts and the C-01..C-18 suite + InMemoryTracker/InMemoryAlert/FakeClock
-  do not exist (only an inline sync.test.ts)
 
 ### Implementation (US6)
 
@@ -517,16 +513,11 @@ no routine imports variables into the repository (spec US6).
   (`capabilities`, `checkAccess`, `readSnapshot`, `apply(plan,{dryRun})`, `requestPublish`),
   `TrackerPort`, `AlertPort`, **with no tool → repository operation** (guarantees FR-025 and US6 scenario
   6)
-  — reopened: G-1 (no tool→repo op) holds, but signatures diverge from §4 — `apply`→`void` not
-  `ApplyResult`, `readSnapshot`→`ToolVariable[]` not `ToolSnapshot`; capability set reduced
 - [x] T073 [US6] Implement the pure core in `tools/design-sync/src/core/`: desired state from the
   `sync-manifest.json`, topology per axis, diff and plan (rename by key, recreate on a type
   change, deletes last only in managed collections), divergence classification against the previous
   and current version, canonical JSON log with a separate envelope, divergence fingerprint
   (DSN-01 to DSN-05, DSN-11, FR-025 to FR-030); states `planned|dry-run|verified|failed`
-  — reopened: core.ts (not src/core/) has an idempotent plan + a fingerprint, but no §6 divergence
-  classification, no §7/§8 canonical log/envelope, collapses token values to `${type}:${axis}`, and the
-  fingerprint formula diverges from §8
 - [x] T074 [P] [US6] Implement the GitHub tracker and alert adapters in
   `tools/design-sync/src/adapters/github/`: a short-lived GitHub App token (Issues:write, org
   Members:read), an item with an owner (CODEOWNERS role) and due date (detection + SLA from
