@@ -182,6 +182,12 @@ default, and `b`) with synthetic values; they are not published to the registry.
 questions for the requester. Each topic was researched on the web and re-verified by a skeptical reviewer; raw
 reports in [research/](research/).
 
+A companion document, [`../../docs/research/foundations.md`](../../docs/research/foundations.md), gathers
+the cited scientific and standards foundations behind these decisions (W3C specs, DTCG 2025.10 CG reports,
+peer-reviewed papers, ISO/IEC standards, original author works), each source verified in a live browser,
+with a final "where the evidence is contested" section. It lives under the project-wide gitignored `docs/`
+tree (force-added), the same convention as the ADRs; it is reference material, not a Spec Kit artifact.
+
 ## Phase 1: Design & Contracts (completed)
 
 - [data-model.md](data-model.md): spec entities, fields, rules V-01 to V-16, states of the

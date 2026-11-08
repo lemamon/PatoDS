@@ -428,3 +428,7 @@ Decisions only the requester can make. Until the answer, the indicated premises 
 
 Complete reports of each topic, with all sources and the skeptical reviewer's re-verification:
 [research/](research/) (one file per topic).
+
+Deeper scientific and standards backing, with primary-source citations per decision (and a
+contested-evidence section covering, e.g., WCAG2 contrast vs APCA and the `0.04045`/`0.03928`
+threshold): [../../docs/research/foundations.md](../../docs/research/foundations.md).

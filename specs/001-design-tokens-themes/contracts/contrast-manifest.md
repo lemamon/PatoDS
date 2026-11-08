@@ -367,6 +367,15 @@ All iterations follow code-point order, and all functions are pure.
    `c ≤ 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055)^2.4`; `L = 0.2126 R + 0.7152 G + 0.0722 B`;
    ratio `(L_higher + 0.05) / (L_lower + 0.05)`, with no rounding. The case's ratio is the smaller of
    the two variants.
+
+   > **Why `0.04045`, not `0.03928` — do not "fix" this.** `0.04045` is the IEC 61966-2-1 (sRGB)
+   > piecewise threshold. The WCAG 2.x spec *text* prints `0.03928`, which the WCAG Working Group's own
+   > errata records as incorrect: "the correct threshold for the piecewise equation is 0.04045 and not
+   > the 0.03928 … Nevertheless for 8 bit color values the difference is not significant." This checker
+   > deliberately uses the IEC-correct `0.04045`; it is *more* correct than the literal WCAG 2.x text, so
+   > a reviewer MUST NOT revert it to `0.03928`. The `min(float, 8-bit)` of step 7 further guarantees the
+   > checker never over-reports versus an axe build that still uses `0.03928`. Derivation, the errata
+   > source, and the WCAG2-vs-APCA debate: `docs/research/foundations.md` §2.1 and §7.
 9. **Per-case decision.** Minimum `m = thresholds.text` for `kind` `text` and `thresholds.nonText` for
    `non-text`. The case passes when `ratio ≥ m`, without rounding (4.499 fails 4.5). Case result:
    `exempt` when the pair has `exempt` (measured and reported, never fails); otherwise `pass` or
