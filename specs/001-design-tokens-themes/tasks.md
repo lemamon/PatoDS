@@ -265,14 +265,15 @@ token; two byte-for-byte identical builds (spec US2).
 - [x] T045 [P] [US2] Implement the `dist/meta/sync-manifest.json` emitter in
   `tools/tokens-build/src/format/sync-manifest.ts` (build-manifests.md §3, format in
   [contracts/design-sync.md](contracts/design-sync.md)), from the same resolved model
-- [ ] T046 [P] [US2] Implement the `dist/meta/report.json` and `report.md` emitter in
+- [x] T046 [P] [US2] Implement the `dist/meta/report.json` and `report.md` emitter in
   `tools/tokens-build/src/format/report.ts`: count by category and layer, height scale per
   permutation, out-of-gamut colors mapped, raw and gzip size of each file (build-manifests.md
   §4, FR-006, FR-008, QA-07)
-  — report.md done: `renderReportMd` emits `dist/meta/report.md` (totals, per-category counts,
-  control-height scale, permutations, file bytes/gzip — the report.json data in tables, no timestamp,
-  G-3) and it is listed under `./meta/*` in the API report. Remaining: report.json `controlHeight` is a
-  flat id list, not the §4 per-permutation `{path,value}` shape; QA-07 budget wiring is T081
+  — done: `report.json` `controlHeight` is now the §4 per-permutation shape — one `{path,value}` list
+  per permutation (keys = permutations), ordered ascending by resolved value (FR-008, TOK-13), via
+  `controlHeightByPermutation(model, applied)` in build.ts. `report.md` is byte-unchanged (its
+  control-height line is derived from the new object). Covered by build.test.ts "report.json
+  controlHeight is per-permutation {path,value}". QA-07 budget wiring stays T081
 - [x] T047 [P] [US2] Implement the API-report emitter in
   `tools/tokens-build/src/format/api-report.ts` → `packages/tokens/api/tokens.api.json` (versioned),
   per esm-output.md §11 (public surface, GOV-01 major/minor/patch classification)
@@ -286,14 +287,18 @@ token; two byte-for-byte identical builds (spec US2).
 - [x] T048 [US2] Implement the deterministic writer in `tools/tokens-build/src/write.ts` (code-point
   ordering, LF, no timestamp or absolute path; canonical JSON M-02) and wire the
   `tokens-build build` pipeline that runs formatters T041 to T047
-- [ ] T049 [US2] Implement the `tools/repo-checks` `determinism` subcommand: two builds from
+- [x] T049 [US2] Implement the `tools/repo-checks` `determinism` subcommand: two builds from
   two clean `git worktree`s, in different paths, `TZ`, and `LC_ALL`, with task cache
   off, packing with `pnpm pack`; compare sha256 per file and of the tarballs; variant between
   floor and latest Node (FR-015, SC-002, ENG-08)
-  — strengthened: determinism.ts now builds a third time from a divergent filesystem path (a fresh
-  copy of the source at a temp path, built with a different TZ and the C locale) and compares the dist +
-  API hashes, so path independence is tested (code `DETERMINISM-PATH`), not only TZ/locale. Remaining: a
-  literal two-`git worktree` run and the `pnpm pack` tarball sha256 comparison (floor vs latest Node)
+  — done: `checkPackDeterminism` adds two literal `git worktree --detach HEAD`s at divergent
+  filesystem paths (different prefixes/depths), builds each with THIS checkout's tooling (no install →
+  offline, QA-01) under divergent `TZ`/`LC_ALL`, `pnpm pack`s both, then compares the extracted
+  per-file sha256 (`DETERMINISM-PACK-FILE`) and the whole-tarball sha256 (`DETERMINISM-PACK`); the
+  worktrees are pruned in a `finally`. Floor vs latest Node: the CI nightly-determinism matrix runs the
+  check under node 22 and 24; a single run can also cross two binaries via `PATODS_NODE_FLOOR`/
+  `PATODS_NODE_LATEST` (verified node 23.8<->24.22 identical). The temp-path copy leg
+  (`DETERMINISM-PATH`) is kept. Exercised by `pnpm check:determinism` (CI-gated, QA-02 exempt)
 - [x] T050 [US2] Implement the `tools/repo-checks` `drift` subcommand: `dist/` in `.gitignore`; fail
   if `git ls-files` lists a generated file; regenerate `api/tokens.api.json` and require
   `git diff --exit-code` (QA-08)
@@ -414,10 +419,20 @@ first and composites the second over the background (spec US4).
   surface, ratios truncated to 2 places with trailing zeros, LF, no timestamp or absolute path). The root
   `contrast:check` script passes `--out reports` (turbo caches `reports/**`, which is git-ignored as a CI
   artifact). Byte-for-byte identical across `TZ`/`LC_ALL` (G-3, SC-002).
-- [ ] T061 [P] [US4] Real-browser samples in `apps/tokens-example/tests/contrast.spec.ts`:
+- [x] T061 [P] [US4] Real-browser samples in `apps/tokens-example/tests/contrast.spec.ts`:
   render one swatch per pair and permutation from the tarball, paint the opaque stack on real ancestors,
   assert `getComputedStyle` equals the emitted sRGB and run axe (Principle VII, QA-01; axe/@axe-core
   in `license-policy.json` as MPL-2.0 dev)
+  — done: `contrast.spec.ts` reads the checker's own `contrast-report.json` cases (env `CONTRAST_REPORT`,
+  else the `pnpm contrast:check` `--out` default; `test:e2e` dependsOn `contrast:check` in turbo), and
+  for each case paints the expanded `bg` stack on nested real ancestors — outermost `<section>` carries
+  the permutation's `data-patods-brand`/`-mode` and the opaque base, each layer a child, the fg sample
+  innermost, no `opacity`/`filter`/`transform`. Assertion 1: every layer/fg `getComputedStyle` equals
+  the tarball `./values` entry (rgb exact, alpha within 1/510). Assertion 2: axe `color-contrast` over
+  the non-exempt text samples (`#axe-root`) — zero violations/incomplete, and a vacuous-pass guard that
+  axe actually measured them; non-text and exempt kept out of axe. `@axe-core/playwright` 4.14.0 added
+  as a `catalog:` devDep of `@patods/tokens-example` (axe-core 4.14.0 bundled → offline); both MPL-2.0,
+  already permitted by `license-policy.json` `allowedDevOnly`. Green in `pnpm test:e2e` (Chromium)
 - [x] T062 [US4] Wire `contrast:check` into `tokens-ci.yml` over the real manifest on every PR and include
   the report in the determinism variant between floor and latest Node
 
