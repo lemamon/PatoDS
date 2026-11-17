@@ -580,7 +580,7 @@ the requester's decision.
   `quality/license-policy.json` (ENG-21) into `tokens-ci.yml`, including the `tools/*` packages
 - [ ] T081 [P] Wire the bundle-budget measurement (QA-07) from `report.json` (`files`)
   against `quality/thresholds.json` (budget value pending with the requester)
-- [ ] T082 Run the end-to-end validation of [quickstart.md](quickstart.md) and record the result
+- [x] T082 Run the end-to-end validation of [quickstart.md](quickstart.md) and record the result
 - [ ] T083 Constitution conformance review (the 14 questions of the plan's Constitution Check)
   and attach it to the phase acceptance package (ACE-01); obtain owner approval of ADR-11 to ADR-16
   (GOV-07, GOV-09)
