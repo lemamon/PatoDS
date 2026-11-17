@@ -14,7 +14,8 @@
     "check:determinism": "node ./src/cli.ts determinism",
     "check:drift": "node ./src/cli.ts drift",
     "check:traceability": "node ./src/cli.ts traceability",
-    "check:logic-tests": "node ./src/cli.ts logic-tests"
+    "check:logic-tests": "node ./src/cli.ts logic-tests",
+    "check:naming-doc": "node ./src/cli.ts naming-doc"
   },
   "devDependencies": {
     "typescript": "catalog:",

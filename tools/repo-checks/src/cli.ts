@@ -7,6 +7,7 @@ import { checkLayers } from './layers.ts'
 import { checkDeterminism, checkDrift } from './determinism.ts'
 import { checkTraceability } from './traceability.ts'
 import { checkLogicTests } from './logic-tests.ts'
+import { checkNamingDoc } from './naming-doc.ts'
 
 function findRoot(): string {
   // repo-checks runs in tools/repo-checks; the root has pnpm-workspace.yaml.
@@ -59,7 +60,14 @@ async function main(): Promise<number> {
     if (!findings.length) process.stdout.write('logic-tests: every runtime module has a test (QA-02).\n')
     return findings.length ? 1 : 0
   }
-  process.stderr.write('usage: repo-checks <scan-tokens|layers|determinism|drift|traceability|logic-tests> [--json] [--root <dir>]\n')
+  if (cmd === 'naming-doc') {
+    const findings = await checkNamingDoc(root)
+    if (values.json) process.stdout.write(JSON.stringify({ findings }, null, 2) + '\n')
+    else for (const f of findings) process.stderr.write(`${f.block ?? '-'}  ${f.code}  ${f.message}\n`)
+    if (!findings.length) process.stdout.write('naming-doc: convention document matches the validator vocabularies (TOK-04).\n')
+    return findings.length ? 1 : 0
+  }
+  process.stderr.write('usage: repo-checks <scan-tokens|layers|determinism|drift|traceability|logic-tests|naming-doc> [--json] [--root <dir>]\n')
   return 2
 }
 

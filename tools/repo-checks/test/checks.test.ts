@@ -6,6 +6,7 @@ import { scanText } from '../src/scan.ts'
 import { checkLayers, checkTokenSourceEdge } from '../src/layers.ts'
 import { checkTraceability } from '../src/traceability.ts'
 import { checkLogicTests } from '../src/logic-tests.ts'
+import { checkNamingDoc, compareVocabularies, parseDoc, DOC_PATH } from '../src/naming-doc.ts'
 
 const fx = (n: string) => readFileSync(join(import.meta.dirname, '../fixtures', n), 'utf8')
 
@@ -134,5 +135,47 @@ describe('checkLogicTests (QA-02)', () => {
 
   it('passes when a test imports the module', () => {
     expect(checkLogicTests(synth(true))).toEqual([])
+  })
+})
+
+describe('checkNamingDoc (TOK-04)', () => {
+  const root = join(import.meta.dirname, '../../..')
+  const docText = () => readFileSync(join(root, DOC_PATH), 'utf8')
+  const load = async () => (await import('../../tokens-build/src/vocabulary.ts')) as unknown as Parameters<typeof compareVocabularies>[1]
+
+  it('the real document matches the validator vocabularies exactly', async () => {
+    expect(await checkNamingDoc(root)).toEqual([])
+  })
+
+  it('parses flat and keyed blocks', () => {
+    const { blocks } = parseDoc('<!-- vocab:a -->\n`x`, `y`\n<!-- /vocab:a -->\n<!-- vocab:b -->\n| K | V |\n| --- | --- |\n| `k` | `p`, `q` |\n<!-- /vocab:b -->')
+    expect(blocks.get('a')).toEqual(['x', 'y'])
+    expect(blocks.get('b')).toEqual({ k: ['p', 'q'] })
+  })
+
+  it('flags a word documented but absent from the validator', async () => {
+    const text = docText().replace('`default`, `hover`, `active`', '`default`, `hover`, `bogus`, `active`')
+    const codes = compareVocabularies(text, await load()).map((f) => f.code)
+    expect(codes).toContain('TOK04-NOT-IN-VALIDATOR')
+  })
+
+  it('flags a validator word missing from the document', async () => {
+    const text = docText().replace('`full`, `none`', '`full`')
+    const f = compareVocabularies(text, await load())
+    expect(f.map((x) => x.code)).toContain('TOK04-NOT-DOCUMENTED')
+  })
+
+  it('flags a wrong SZ order and a missing role', async () => {
+    const sz = docText().replace('`xs` < `sm`', '`sm` < `xs`')
+    expect(compareVocabularies(sz, await load()).map((f) => f.code)).toContain('TOK04-ORDER')
+    const roles = docText().replace('`scrim`, `backdrop`', '`scrim`')
+    expect(compareVocabularies(roles, await load()).map((f) => f.code)).toContain('TOK04-NOT-DOCUMENTED')
+  })
+
+  it('flags a removed block and an absent document', async () => {
+    const text = docText().replace(/<!-- vocab:states -->[\s\S]*?<!-- \/vocab:states -->/, '')
+    expect(compareVocabularies(text, await load()).map((f) => f.code)).toContain('TOK04-BLOCK-MISSING')
+    const empty = mkdtempSync(join(tmpdir(), 'patods-naming-'))
+    expect((await checkNamingDoc(empty)).map((f) => f.code)).toEqual(['TOK04-DOC-ABSENT'])
   })
 })

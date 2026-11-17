@@ -77,6 +77,7 @@ Every command runs through [Turborepo](https://turbo.build/):
 | `pnpm check:drift`          | Verify generated artifacts match the committed source.    |
 | `pnpm check:traceability`   | Verify every contracted ID maps to a CI check (ACE-02).   |
 | `pnpm check:logic-tests`    | Verify every tooling module has a unit test (QA-02).      |
+| `pnpm check:naming-doc`     | Verify the naming doc matches the validator vocabularies (TOK-04). |
 | `pnpm design-sync`          | Run the design-tool synchronization.                      |
 
 ## Supply chain

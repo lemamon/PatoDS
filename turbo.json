@@ -63,6 +63,9 @@
     "check:logic-tests": {
       "outputs": []
     },
+    "check:naming-doc": {
+      "outputs": []
+    },
     "design-sync": {
       "cache": false,
       "dependsOn": ["tokens:build"]

@@ -2,6 +2,7 @@
 // V-01 (DTCG schema) and V-03 (alias/cycle) are enforced by the parser in the adapter, which fails
 // before reaching here.
 import { CATEGORIES, type Model, type ModelToken } from './model.ts'
+import { MODE_IDS as MODE_ID_LIST, SEGMENT_PATTERN_SOURCE } from './vocabulary.ts'
 
 export interface Finding {
   code: string
@@ -15,8 +16,9 @@ export interface Finding {
   message: string
 }
 
-const SEG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
-const MODE_IDS = new Set(['light', 'dark'])
+// Single source: the enforced segment regex is derived from the documented pattern (T078, TOK-04).
+const SEG = new RegExp(SEGMENT_PATTERN_SOURCE)
+const MODE_IDS = new Set<string>(MODE_ID_LIST)
 
 function toHex8(components: number[]): string {
   const h = (n: number) =>
