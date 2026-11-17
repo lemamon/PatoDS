@@ -15,7 +15,9 @@
     "check:drift": "node ./src/cli.ts drift",
     "check:traceability": "node ./src/cli.ts traceability",
     "check:logic-tests": "node ./src/cli.ts logic-tests",
-    "check:naming-doc": "node ./src/cli.ts naming-doc"
+    "check:naming-doc": "node ./src/cli.ts naming-doc",
+    "check:licenses": "node ./src/cli.ts licenses",
+    "sbom:generate": "node ./src/cli.ts sbom"
   },
   "devDependencies": {
     "typescript": "catalog:",

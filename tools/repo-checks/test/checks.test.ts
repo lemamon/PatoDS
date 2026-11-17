@@ -6,6 +6,9 @@ import { scanText } from '../src/scan.ts'
 import { checkLayers, checkTokenSourceEdge } from '../src/layers.ts'
 import { checkTraceability } from '../src/traceability.ts'
 import { checkLogicTests } from '../src/logic-tests.ts'
+import { evaluateLicenses, evalLicenseExpr, type LicensePolicy } from '../src/licenses.ts'
+import { runPnpm } from '../src/pnpm.ts'
+import { normalizeBom, sbomFileName, parseSplit } from '../src/sbom.ts'
 import { checkNamingDoc, compareVocabularies, parseDoc, DOC_PATH } from '../src/naming-doc.ts'
 
 const fx = (n: string) => readFileSync(join(import.meta.dirname, '../fixtures', n), 'utf8')
@@ -177,5 +180,98 @@ describe('checkNamingDoc (TOK-04)', () => {
     expect(compareVocabularies(text, await load()).map((f) => f.code)).toContain('TOK04-BLOCK-MISSING')
     const empty = mkdtempSync(join(tmpdir(), 'patods-naming-'))
     expect((await checkNamingDoc(empty)).map((f) => f.code)).toEqual(['TOK04-DOC-ABSENT'])
+  })
+})
+
+describe('evaluateLicenses (ENG-21)', () => {
+  const policy: LicensePolicy = {
+    allowed: ['MIT', 'Apache-2.0'],
+    allowedDevOnly: ['MPL-2.0'],
+    aliases: { 'MIT License': 'MIT' },
+    overrides: { legacy: { license: 'MIT', reason: 'reviewed' } },
+  }
+  const pkg = (name: string) => ({ name, versions: ['1.0.0'] })
+
+  it('accepts allowed licenses, aliases and overrides', () => {
+    const report = { MIT: [pkg('a')], 'MIT License': [pkg('b')], 'GPL-3.0': [pkg('legacy')] }
+    expect(evaluateLicenses(report, report, policy)).toEqual([])
+  })
+
+  it('flags a license outside the allowlist with a per-package message', () => {
+    const f = evaluateLicenses({ 'GPL-3.0': [pkg('bad')] }, { 'GPL-3.0': [pkg('bad')] }, policy)
+    expect(f).toHaveLength(1)
+    expect(f[0]).toMatchObject({ code: 'ENG21-NOT-ALLOWED', pkg: 'bad@1.0.0' })
+    expect(f[0]!.message).toContain('GPL-3.0')
+  })
+
+  it('flags an unknown license', () => {
+    expect(evaluateLicenses({ Unknown: [pkg('x')] }, {}, policy).map((f) => f.code)).toEqual(['ENG21-UNKNOWN'])
+  })
+
+  it('allows a dev-only license for a dev package but not for a production one', () => {
+    const report = { 'MPL-2.0': [pkg('axe')] }
+    expect(evaluateLicenses(report, {}, policy)).toEqual([])
+    expect(evaluateLicenses(report, report, policy).map((f) => f.code)).toEqual(['ENG21-DEV-ONLY-IN-PROD'])
+  })
+
+  it('handles SPDX OR and AND expressions', () => {
+    const r = { '(MIT OR GPL-3.0)': [pkg('or')], '(MIT AND GPL-3.0)': [pkg('and')] }
+    expect(evaluateLicenses(r, r, policy).map((f) => f.pkg)).toEqual(['and@1.0.0'])
+  })
+
+  it('flags a forbidden license behind a parenthesised OR (AND binds tighter than OR)', () => {
+    const r = { '(MIT OR GPL-3.0) AND LicenseRef-Proprietary': [pkg('sneaky')] }
+    const f = evaluateLicenses(r, r, policy)
+    expect(f.map((x) => x.code)).toEqual(['ENG21-NOT-ALLOWED'])
+    expect(f[0]!.pkg).toBe('sneaky@1.0.0')
+  })
+
+  it('respects precedence and grouping in evalLicenseExpr', () => {
+    const ok = (a: string) => a === 'MIT' || a === 'ISC'
+    expect(evalLicenseExpr('MIT OR GPL AND GPL', ok)).toBe(true) // MIT OR (GPL AND GPL)
+    expect(evalLicenseExpr('GPL AND GPL OR ISC', ok)).toBe(true)
+    expect(evalLicenseExpr('(MIT OR GPL) AND GPL', ok)).toBe(false)
+    expect(evalLicenseExpr('(MIT OR GPL) AND (ISC OR X)', ok)).toBe(true)
+    expect(evalLicenseExpr('MIT AND (GPL OR (ISC AND GPL))', ok)).toBe(false)
+    expect(evalLicenseExpr('MIT License', (a) => a === 'MIT License')).toBe(true)
+  })
+
+  it('never accepts a malformed expression', () => {
+    expect(evalLicenseExpr('(MIT', () => true)).toBe(false)
+    expect(evalLicenseExpr('MIT AND', () => true)).toBe(false)
+    expect(evalLicenseExpr('', () => true)).toBe(false)
+    expect(evalLicenseExpr('MIT) OR MIT', () => true)).toBe(false)
+  })
+})
+
+describe('SBOM normalisation (ENG-19)', () => {
+  const bom = {
+    serialNumber: 'urn:uuid:1',
+    metadata: { timestamp: 'now', component: { name: 'repo-checks', group: '@patods' } },
+    components: [{ 'bom-ref': 'b' }, { 'bom-ref': 'a' }],
+    dependencies: [{ ref: 'b', dependsOn: ['z', 'y'] }, { ref: 'a' }],
+  }
+
+  it('drops per-run fields and sorts so two runs are byte-identical', () => {
+    const other = { ...bom, serialNumber: 'urn:uuid:2', metadata: { ...bom.metadata, timestamp: 'later' }, components: [...bom.components].reverse() }
+    const a = JSON.stringify(normalizeBom(bom))
+    expect(a).toBe(JSON.stringify(normalizeBom(other)))
+    expect(a).not.toContain('serialNumber')
+    expect(a).not.toContain('timestamp')
+    expect((normalizeBom(bom).components as { 'bom-ref': string }[]).map((c) => c['bom-ref'])).toEqual(['a', 'b'])
+    expect((normalizeBom(bom).dependencies as { ref: string }[])[1]).toEqual({ ref: 'b', dependsOn: ['y', 'z'] })
+  })
+
+  it('derives a stable file name and parses NDJSON', () => {
+    expect(sbomFileName(bom)).toBe('patods-repo-checks.cdx.json')
+    expect(sbomFileName({})).toBeUndefined()
+    expect(parseSplit('{"a":1}\n\n{"b":2}\n')).toEqual([{ a: 1 }, { b: 2 }])
+  })
+})
+
+describe('runPnpm', () => {
+  it('runs the workspace package manager and returns its stdout', () => {
+    const root = join(import.meta.dirname, '../../..')
+    expect(runPnpm(root, ['--version']).trim()).toMatch(/^\d+\.\d+\.\d+/)
   })
 })

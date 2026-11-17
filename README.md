@@ -78,6 +78,8 @@ Every command runs through [Turborepo](https://turbo.build/):
 | `pnpm check:traceability`   | Verify every contracted ID maps to a CI check (ACE-02).   |
 | `pnpm check:logic-tests`    | Verify every tooling module has a unit test (QA-02).      |
 | `pnpm check:naming-doc`     | Verify the naming doc matches the validator vocabularies (TOK-04). |
+| `pnpm check:licenses`       | Verify every workspace dependency license against `quality/license-policy.json` (ENG-21). |
+| `pnpm sbom:generate`        | Write a deterministic CycloneDX SBOM per workspace package to `reports/sbom/` (ENG-19). |
 | `pnpm design-sync`          | Run the design-tool synchronization.                      |
 
 ## Supply chain
@@ -85,6 +87,15 @@ Every command runs through [Turborepo](https://turbo.build/):
 Dependencies are installed with a frozen lockfile and a strict single-version catalog. Install
 scripts run only via an allowlist, packages must meet a minimum release age, and downgrades are
 blocked (see `pnpm-workspace.yaml`).
+
+- **License policy (ENG-21).** `pnpm check:licenses` lists the licenses of every workspace dependency
+  (`pnpm licenses list --json -r`) and fails with a per-package message when one is not allowed by
+  `quality/license-policy.json` (allowlist, dev-only allowances, aliases and reviewed overrides; SPDX
+  expressions are evaluated with AND binding tighter than OR).
+- **SBOM (ENG-19).** `pnpm sbom:generate` writes one deterministic CycloneDX document per workspace
+  package to `reports/sbom/` from the lockfile (native `pnpm sbom`; run-specific fields removed, entries
+  sorted). CI uploads the directory as an artifact. The script is not named `sbom` because
+  `pnpm sbom` would invoke the built-in command instead.
 
 ## Documentation
 

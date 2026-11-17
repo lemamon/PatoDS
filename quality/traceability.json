@@ -55,6 +55,8 @@
     { "id": "GOV-01", "status": "planned", "task": "CI-publishing-feature", "story": "US2", "note": "section-11 API report now emitted (T047); the major/minor comparator lives in the CI and publishing feature" },
     { "id": "ACE-02", "status": "met", "check": "check:traceability", "story": "Polish", "note": "same as FR-031" },
     { "id": "TOK-04", "status": "met", "check": "check:naming-doc", "story": "Polish", "note": "naming-convention doc (docs/tokens/convencao-de-nomes.md) kept in sync with the validator vocabularies (tokens-build/src/vocabulary.ts) by the bidirectional TOK-04 check (T078)" },
-    { "id": "DOC-08", "status": "met", "check": "check:naming-doc", "story": "Polish", "note": "token naming convention documented and machine-synced to the single code source (T078)" }
+    { "id": "DOC-08", "status": "met", "check": "check:naming-doc", "story": "Polish", "note": "token naming convention documented and machine-synced to the single code source (T078)" },
+    { "id": "ENG-21", "status": "met", "check": "check:licenses", "story": "Foundational", "note": "every workspace dependency license (apps, tests, tools, packages) validated against quality/license-policy.json (allowlist, dev-only allowance, overrides, SPDX expressions); wired into tokens-ci checks job (T080)" },
+    { "id": "ENG-19", "status": "met", "check": "sbom:generate", "story": "Foundational", "note": "deterministic CycloneDX SBOM per workspace package from the native pnpm sbom (lockfile-only, per-run fields dropped, sorted) written to reports/sbom and uploaded as a CI artifact (T080)" }
   ]
 }

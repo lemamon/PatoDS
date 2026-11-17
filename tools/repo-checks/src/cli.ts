@@ -8,6 +8,8 @@ import { checkDeterminism, checkDrift } from './determinism.ts'
 import { checkTraceability } from './traceability.ts'
 import { checkLogicTests } from './logic-tests.ts'
 import { checkNamingDoc } from './naming-doc.ts'
+import { checkLicenses } from './licenses.ts'
+import { generateSbom, SBOM_DIR } from './sbom.ts'
 
 function findRoot(): string {
   // repo-checks runs in tools/repo-checks; the root has pnpm-workspace.yaml.
@@ -67,7 +69,20 @@ async function main(): Promise<number> {
     if (!findings.length) process.stdout.write('naming-doc: convention document matches the validator vocabularies (TOK-04).\n')
     return findings.length ? 1 : 0
   }
-  process.stderr.write('usage: repo-checks <scan-tokens|layers|determinism|drift|traceability|logic-tests|naming-doc> [--json] [--root <dir>]\n')
+  if (cmd === 'licenses') {
+    const findings = checkLicenses(root)
+    if (values.json) process.stdout.write(JSON.stringify({ findings }, null, 2) + '\n')
+    else for (const f of findings) process.stderr.write(`${f.pkg}  ${f.code}  ${f.message}\n`)
+    if (!findings.length) process.stdout.write('licenses: every workspace dependency license is allowed by quality/license-policy.json (ENG-21).\n')
+    return findings.length ? 1 : 0
+  }
+  if (cmd === 'sbom') {
+    const { files, findings } = generateSbom(root)
+    for (const f of findings) process.stderr.write(`${f.code}  ${f.message}\n`)
+    if (!findings.length) process.stdout.write(`sbom: ${files.length} CycloneDX documents written to ${SBOM_DIR} (ENG-19).\n`)
+    return findings.length ? 1 : 0
+  }
+  process.stderr.write('usage: repo-checks <scan-tokens|layers|determinism|drift|traceability|logic-tests|naming-doc|licenses|sbom> [--json] [--root <dir>]\n')
   return 2
 }
 

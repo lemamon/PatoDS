@@ -47,6 +47,13 @@ jobs:
       - run: pnpm check:traceability
       - run: pnpm check:logic-tests
       - run: pnpm check:naming-doc
+      - run: pnpm check:licenses
+      - run: pnpm sbom:generate
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: sbom-node-${{ matrix.node }}
+          path: reports/sbom/
+          if-no-files-found: error
       - run: pnpm check:scan
       - run: pnpm tokens:validate
       - run: pnpm tokens:build
