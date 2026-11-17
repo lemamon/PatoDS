@@ -323,7 +323,7 @@ changed; the key check passes; the app switches to `c` at runtime (spec US3).
   source to a temporary worktree, add the `c` context and `semantic/brand/c.tokens.json`,
   run `tokens-build build`, and assert that `git diff --name-only` touches only `packages/tokens/src/**`
   and `packages/tokens/api/tokens.api.json` (FR-009, SC-005)
-- [ ] T053 [P] [US3] Real-browser test in `apps/tokens-example/tests/add-brand.spec.ts`: with the
+- [x] T053 [P] [US3] Real-browser test in `apps/tokens-example/tests/add-brand.spec.ts`: with the
   `c` brand in the worktree, the app switches to `c` at runtime; values change without reloading and without a
   change to component code (US3 scenario 3)
 - [x] T054 [US3] Confirm that the key parity (T031) and the diff accept brand `c`: a fixture where
@@ -565,7 +565,7 @@ the requester's decision.
 
 - [x] T077 [P] Write `packages/tokens/README.md` with purpose, installation, minimal usage, and a link to
   the full documentation (DOC-08)
-- [ ] T078 [P] Generate/write `docs/tokens/convencao-de-nomes.md` from the
+- [x] T078 [P] Generate/write `docs/tokens/convencao-de-nomes.md` from the
   [token-source.md](contracts/token-source.md) contract and wire the check that compares the document's
   vocabularies with the validator's (TOK-04)
 - [x] T079 Create the versioned traceability matrix (`specs/001-design-tokens-themes/traceability.md`
@@ -576,7 +576,7 @@ the requester's decision.
   gating check or owning task) + `repo-checks traceability` subcommand (fails a `met` id whose check is
   not a real root script, or has no check/evidence, or a duplicate/bad envelope) + `check:traceability`
   wired into `tokens-ci.yml` before check:scan; negative tests in checks.test.ts
-- [ ] T080 [P] Wire `pnpm sbom` (ENG-19) and `pnpm licenses list --json` against
+- [x] T080 [P] Wire `pnpm sbom` (ENG-19) and `pnpm licenses list --json` against
   `quality/license-policy.json` (ENG-21) into `tokens-ci.yml`, including the `tools/*` packages
 - [ ] T081 [P] Wire the bundle-budget measurement (QA-07) from `report.json` (`files`)
   against `quality/thresholds.json` (budget value pending with the requester)
