@@ -1,7 +1,5 @@
 node_modules/
 .ori/
-docs/*
-!docs/tokens/
 **/dist/
 **/reports/
 .turbo/
