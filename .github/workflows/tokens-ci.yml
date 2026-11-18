@@ -1,5 +1,4 @@
-# Tokens CI (skeleton). All actions are pinned by SHA digest (ENG-18).
-# The SHAs below are placeholders; the CI and governance feature pins the real digests.
+# Tokens CI. All actions and the Playwright container are pinned by real SHA digests (ENG-18).
 #
 # Install uses `pnpm ci:install`: a frozen install of the buildable packages, then `pack:tokens`
 # to generate the published tarball, then a full frozen install so the apps/tests consume the
