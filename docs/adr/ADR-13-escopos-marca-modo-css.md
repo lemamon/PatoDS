@@ -1,6 +1,6 @@
 # ADR-13: Escopos de marca e modo em CSS
 
-**Status**: Proposto | **Data**: 2026-10-21 | **Feature**: 001-design-tokens-themes | **Relaciona**: ADR-02, ADR-03
+**Status**: Aceito | **Data**: 2026-10-21 | **Feature**: 001-design-tokens-themes | **Relaciona**: ADR-02, ADR-03
 
 ## Contexto
 

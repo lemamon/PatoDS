@@ -1,6 +1,6 @@
 # ADR-14: Sincronização com a ferramenta de design
 
-**Status**: Proposto | **Data**: 2026-10-21 | **Feature**: 001-design-tokens-themes | **Relaciona**: ADR-02, ADR-07 (espírito somente leitura); premissa "Ferramenta de design e direção da sincronização de tokens"
+**Status**: Aceito | **Data**: 2026-10-21 | **Feature**: 001-design-tokens-themes | **Relaciona**: ADR-02, ADR-07 (espírito somente leitura); premissa "Ferramenta de design e direção da sincronização de tokens"
 
 ## Contexto
 

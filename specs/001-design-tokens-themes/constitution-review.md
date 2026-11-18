@@ -3,7 +3,7 @@
 **Feature**: 001-design-tokens-themes | **Task**: T083 | **Date**: 2026-11-17
 **Basis**: built and committed state at HEAD `108e560` (not design intent). Checklist: plan.md "Constitution Check" (14 questions, Constitution "Spec Kit Workflow").
 **Evidence base**: [quickstart-results.md](quickstart-results.md) (ACE-01, 17 of 17 gates exit 0, US1 to US6 accepted, commit `af9c703`), repository files, `.github/workflows/`, `quality/`.
-**Status of this document**: PREPARED RECOMMENDATION. It does not approve anything. See "OWNER SIGN-OFF REQUIRED".
+**Status of this document**: SIGNED OFF by the owner on 2026-11-18 — see "SIGN-OFF RECORD" at the end. (Originally a prepared recommendation; the sign-off actions have since been applied.)
 
 Verdict scale: PASS = satisfied by built and committed state within feature scope (or not applicable because no component exists yet, stated explicitly). CONCERN = partially satisfied or resting on deferred work; the missing item is named.
 
@@ -38,11 +38,11 @@ Totals: 7 PASS, 7 CONCERN.
 | License | `Apache-2.0`, listed in `allowed` of `quality/license-policy.json`; installed `package.json` reports `"license": "Apache-2.0"` | `quality/license-policy.json`; `check:licenses` exit 0 (quickstart-results.md row 38) |
 | Enforcement | `check:licenses` (ENG-21) runs in `tokens-ci.yml` | `.github/workflows/tokens-ci.yml` |
 | Shipped to consumers | No; build-time dependency of private tool packages. `@patods/tokens` has no `dependencies` | `policy notes` in `quality/license-policy.json`; quickstart CC-6 |
-| Approval | Not yet recorded. `license-policy.json` states that owner approval is the PR/CODEOWNERS gate. This needs owner acknowledgement. | see sign-off (b) |
+| Approval | Acknowledged by the owner on 2026-11-18 (ENG-25). | see SIGN-OFF RECORD |
 
 ## OWNER SIGN-OFF REQUIRED
 
-These are owner actions. They are NOT performed in this document. No ADR status was changed by this review, and nothing here records an approval.
+These were owner actions. They have now been applied — see "SIGN-OFF RECORD" below. (When this review was written, no ADR status had been changed and nothing recorded an approval.)
 
 To accept feature 001, the owner must:
 
@@ -62,3 +62,12 @@ To accept feature 001, the owner must:
 Out of scope for 001 acceptance: ADR-17 (Storybook, feature 002) is referenced only; its status is not part of this sign-off.
 
 Recommended owner follow-ups, not blockers by themselves (they are the CONCERN items above): confirm the `wcag-inactive` exemption path versus A11Y-11 (Q5); confirm that Chromium-only evidence and the unrun remote CI are acceptable for accepting the feature (Q7); decide the provisional values listed in Q14.
+
+## SIGN-OFF RECORD
+
+**2026-11-18 — Owner (Deyvid) signed off in chat.**
+
+- (a) ADR-11 through ADR-16 moved Proposto → Aceito, in each ADR file (the `**Status**` line) and the `docs/adr/README.md` status table.
+- (b) The new direct dependency `@humanwhocodes/momoa` 3.3.13 (Apache-2.0, exact pin, build-time only) is acknowledged (ENG-25).
+
+Feature 001 is accepted with the 7 CONCERN items recorded above as either deferred to later features (Q2, Q10, Q12) or provisional pending owner decisions (Q5, Q7, Q14). The session applied the ADR/table status changes as the mechanical execution of the owner's chat sign-off; the decision is the owner's.

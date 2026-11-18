@@ -29,9 +29,9 @@ São decisões tomadas pelo requerente; mudar qualquer uma exige pedido de mudan
 
 | ID | Título | Status | Data | Feature |
 | --- | --- | --- | --- | --- |
-| [ADR-11](ADR-11-pipeline-build-tokens.md) | Pipeline de build de tokens | Proposto | 2026-10-21 | 001 |
-| [ADR-12](ADR-12-monorepo-toolchain.md) | Monorepo: gerenciador de pacotes, orquestrador e toolchain | Proposto | 2026-10-21 | 001 |
-| [ADR-13](ADR-13-escopos-marca-modo-css.md) | Escopos de marca e modo em CSS | Proposto | 2026-10-21 | 001 |
-| [ADR-14](ADR-14-sincronizacao-ferramenta-design.md) | Sincronização com a ferramenta de design | Proposto | 2026-10-21 | 001 |
-| [ADR-15](ADR-15-cor-e-contraste.md) | Motor de cor e checagem de contraste | Proposto | 2026-10-21 | 001 |
-| [ADR-16](ADR-16-lint-tokens-e-testes.md) | Lint de tokens e pilha de testes | Proposto | 2026-10-21 | 001 |
+| [ADR-11](ADR-11-pipeline-build-tokens.md) | Pipeline de build de tokens | Aceito | 2026-10-21 | 001 |
+| [ADR-12](ADR-12-monorepo-toolchain.md) | Monorepo: gerenciador de pacotes, orquestrador e toolchain | Aceito | 2026-10-21 | 001 |
+| [ADR-13](ADR-13-escopos-marca-modo-css.md) | Escopos de marca e modo em CSS | Aceito | 2026-10-21 | 001 |
+| [ADR-14](ADR-14-sincronizacao-ferramenta-design.md) | Sincronização com a ferramenta de design | Aceito | 2026-10-21 | 001 |
+| [ADR-15](ADR-15-cor-e-contraste.md) | Motor de cor e checagem de contraste | Aceito | 2026-10-21 | 001 |
+| [ADR-16](ADR-16-lint-tokens-e-testes.md) | Lint de tokens e pilha de testes | Aceito | 2026-10-21 | 001 |

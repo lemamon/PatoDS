@@ -1,6 +1,6 @@
 # ADR-11: Pipeline de build de tokens
 
-**Status**: Proposto | **Data**: 2026-10-21 | **Feature**: 001-design-tokens-themes | **Relaciona**: ADR-02, ADR-05, ADR-06, ADR-09
+**Status**: Aceito | **Data**: 2026-10-21 | **Feature**: 001-design-tokens-themes | **Relaciona**: ADR-02, ADR-05, ADR-06, ADR-09
 
 ## Contexto
 

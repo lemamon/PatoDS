@@ -1,6 +1,6 @@
 # ADR-15: Motor de cor e checagem de contraste
 
-**Status**: Proposto | **Data**: 2026-10-21 | **Feature**: 001-design-tokens-themes | **Relaciona**: A11Y-01, A11Y-09 (nenhum ADR do contrato alterado)
+**Status**: Aceito | **Data**: 2026-10-21 | **Feature**: 001-design-tokens-themes | **Relaciona**: A11Y-01, A11Y-09 (nenhum ADR do contrato alterado)
 
 ## Contexto
 

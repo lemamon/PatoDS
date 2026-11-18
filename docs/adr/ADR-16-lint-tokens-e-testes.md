@@ -1,6 +1,6 @@
 # ADR-16: Lint de tokens e pilha de testes
 
-**Status**: Proposto | **Data**: 2026-10-21 | **Feature**: 001-design-tokens-themes | **Relaciona**: ADR-08, ADR-09
+**Status**: Aceito | **Data**: 2026-10-21 | **Feature**: 001-design-tokens-themes | **Relaciona**: ADR-08, ADR-09
 
 ## Contexto
 

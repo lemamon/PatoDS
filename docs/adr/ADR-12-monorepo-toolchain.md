@@ -1,6 +1,6 @@
 # ADR-12: Monorepo: gerenciador de pacotes, orquestrador e toolchain
 
-**Status**: Proposto | **Data**: 2026-10-21 | **Feature**: 001-design-tokens-themes | **Relaciona**: ADR-09
+**Status**: Aceito | **Data**: 2026-10-21 | **Feature**: 001-design-tokens-themes | **Relaciona**: ADR-09
 
 ## Contexto
 
